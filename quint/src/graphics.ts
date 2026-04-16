@@ -27,7 +27,7 @@ import {
   textify,
 } from './prettierimp'
 
-import { QuintDeclaration, QuintEx, isAnnotatedDef } from './ir/quintIr'
+import { QuintDeclaration, QuintEx, isAnnotatedDef, isDeclarationOnly } from './ir/quintIr'
 import { ExecutionFrame } from './runtime/trace'
 import { zerog } from './idGenerator'
 import { ConcreteRow, QuintType, Row, isUnitType } from './ir/quintTypes'
@@ -153,7 +153,7 @@ export function prettyQuintDeclaration(decl: QuintDeclaration, includeBody: bool
         richtext(chalk.blue, decl.name),
         ...typeAnnotation,
       ])
-      return includeBody ? group([header, text(' = '), prettyQuintEx(decl.expr)]) : header
+      return includeBody && !isDeclarationOnly(decl) ? group([header, text(' = '), prettyQuintEx(decl.expr)]) : header
     }
     case 'typedef': {
       const header = group([text('type '), richtext(chalk.blue, decl.name)])

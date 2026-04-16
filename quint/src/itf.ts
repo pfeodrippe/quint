@@ -56,6 +56,68 @@ type ItfRecord = { [index: string]: ItfValue }
 type ItfVariant = { tag: ItfValue; value: ItfValue }
 type ItfUnitVariant = { tag: ItfValue }
 
+export function toItfValue(ex: QuintEx): Either<string, ItfValue> {
+  switch (ex.kind) {
+    case 'int':
+      return right({ '#bigint': `${ex.value}` })
+
+    case 'str':
+    case 'bool':
+      return right(ex.value)
+
+    case 'app':
+      switch (ex.opcode) {
+        case 'List':
+          return merge(ex.args.map(toItfValue))
+
+        case 'Set':
+          return merge(ex.args.map(toItfValue)).mapRight(es => {
+            return { '#set': es }
+          })
+
+        case 'Tup':
+          return merge(ex.args.map(toItfValue)).mapRight(es => {
+            return { '#tup': es }
+          })
+
+        case 'Rec': {
+          if (ex.args.length % 2 !== 0) {
+            return left('record: expected an even number of arguments, found:' + ex.args.length)
+          }
+          return merge(ex.args.map(toItfValue)).mapRight(kvs => {
+            let obj: ItfRecord = {}
+            chunk(kvs, 2).forEach(([k, v]) => {
+              if (typeof k === 'string') {
+                obj[k] = v
+              } else {
+                left(`Invalid record field: ${ex}`)
+              }
+            })
+            return obj
+          })
+        }
+
+        case 'Map':
+          return merge(ex.args.map(toItfValue)).chain(pairs =>
+            merge(pairs.map(p => (isTup(p) ? right(p['#tup']) : left(`Invalid value in quint Map ${p}`)))).map(
+              entries => ({
+                '#map': entries,
+              })
+            )
+          )
+
+        case 'variant':
+          return merge(ex.args.map(toItfValue)).map(([label, value]) => ({ tag: label, value: value }))
+
+        default:
+          return left(`Unexpected operator type: ${ex.opcode}`)
+      }
+
+    default:
+      return left(`Unexpected expression kind: ${ex.kind}`)
+  }
+}
+
 // Type predicates to help with type narrowing
 function isBigint(v: ItfValue): v is ItfBigint {
   return (v as ItfBigint)['#bigint'] !== undefined
@@ -108,80 +170,9 @@ function isUnserializable(v: ItfValue): v is ItfUnserializable {
  * @returns an object that represent the trace in the ITF format
  */
 export function toItf(vars: string[], states: QuintEx[], mbtMetadata: boolean = false): Either<string, ItfTrace> {
-  const exprToItf = (ex: QuintEx): Either<string, ItfValue> => {
-    switch (ex.kind) {
-      case 'int':
-        // convert to a special structure, when saving to JSON
-        return right({ '#bigint': `${ex.value}` })
-
-      case 'str':
-      case 'bool':
-        return right(ex.value)
-
-      case 'app':
-        switch (ex.opcode) {
-          case 'List':
-            return merge(ex.args.map(exprToItf))
-
-          case 'Set':
-            return merge(ex.args.map(exprToItf)).mapRight(es => {
-              return { '#set': es }
-            })
-
-          case 'Tup':
-            return merge(ex.args.map(exprToItf)).mapRight(es => {
-              return { '#tup': es }
-            })
-
-          case 'Rec': {
-            if (ex.args.length % 2 !== 0) {
-              return left('record: expected an even number of arguments, found:' + ex.args.length)
-            }
-            return merge(ex.args.map(exprToItf)).mapRight(kvs => {
-              let obj: ItfRecord = {}
-              chunk(kvs, 2).forEach(([k, v]) => {
-                if (typeof k === 'string') {
-                  obj[k] = v
-                } else {
-                  left(`Invalid record field: ${ex}`)
-                }
-              })
-              return obj
-            })
-          }
-
-          case 'Map':
-            return merge(
-              // Convert all the entries of the map
-              ex.args.map(exprToItf)
-            ).chain(pairs =>
-              merge(
-                // Quint represents map entries as tuples, but in ITF they are 2 element arrays,
-                // so we unpack all the ITF tuples into arrays
-                pairs.map(p => (isTup(p) ? right(p['#tup']) : left(`Invalid value in quint Map ${p}`)))
-              ).map(entries =>
-                // Finally, we can form the ITF representation of a map
-                ({
-                  '#map': entries,
-                })
-              )
-            )
-
-          case 'variant':
-            return merge(ex.args.map(exprToItf)).map(([label, value]) => ({ tag: label, value: value }))
-
-          default:
-            return left(`Unexpected operator type: ${ex.opcode}`)
-        }
-
-      default:
-        return left(`Unexpected expression kind: ${ex.kind}`)
-    }
-  }
-
   return merge(
     states.map((e, i) =>
-      exprToItf(e).chain(obj =>
+      toItfValue(e).chain(obj =>
         typeof obj === 'object'
           ? right({ '#meta': { index: i }, ...obj } as ItfState)
           : left(`Expected a valid ITF state, but found ${obj}`)

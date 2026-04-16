@@ -372,7 +372,9 @@ export function walkDefinition(visitor: IRVisitor, def: ir.QuintDef): void {
       if (visitor.enterOpDef) {
         visitor.enterOpDef(def)
       }
-      walkExpression(visitor, def.expr)
+      if (!ir.isDeclarationOnly(def)) {
+        walkExpression(visitor, def.expr)
+      }
 
       if (visitor.exitOpDef) {
         visitor.exitOpDef(def)

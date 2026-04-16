@@ -12,7 +12,15 @@
  * @module
  */
 
-import { OpQualifier, QuintDeclaration, QuintDef, QuintEx, QuintModule, isAnnotatedDef } from './quintIr'
+import {
+  OpQualifier,
+  QuintDeclaration,
+  QuintDef,
+  QuintEx,
+  QuintModule,
+  isAnnotatedDef,
+  isDeclarationOnly,
+} from './quintIr'
 import { ConcreteRow, QuintSumType, QuintType, Row, RowField, isUnitType } from './quintTypes'
 import { TypeScheme } from '../types/base'
 import { typeSchemeToString } from '../types/printing'
@@ -111,7 +119,7 @@ export function definitionToString(def: QuintDef, includeBody: boolean = true, t
   switch (def.kind) {
     case 'def': {
       const header = `${qualifierToString(def.qualifier)} ${def.name}${typeAnnotation}`
-      return includeBody ? `${header} = ${expressionToString(def.expr)}` : header
+      return includeBody && !isDeclarationOnly(def) ? `${header} = ${expressionToString(def.expr)}` : header
     }
     case 'var':
       return `var ${def.name}${typeAnnotation}`

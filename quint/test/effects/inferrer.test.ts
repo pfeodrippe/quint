@@ -41,6 +41,15 @@ describe('inferEffects', () => {
     assert.deepEqual(effectForDef(defs, effects, 'a'), expectedEffect)
   })
 
+  it('infers declaration-only operator effects from the operator arity', () => {
+    const defs = ['pure def external(x: int): int', 'pure def local(x: int): int = x + 1']
+
+    const [errors, effects] = inferEffectsForDefs(defs)
+
+    assert.isEmpty(errors, `Should find no errors, found: ${[...errors.values()].map(errorTreeToString)}`)
+    assert.deepEqual(effectForDef(defs, effects, 'external'), effectForDef(defs, effects, 'local'))
+  })
+
   it('infers application of multiple arity opertors', () => {
     const defs = ['def a(p) = and(p, x)', 'def b(p) = and(p, 1, 2)']
 

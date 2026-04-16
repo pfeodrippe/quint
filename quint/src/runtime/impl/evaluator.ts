@@ -31,6 +31,7 @@ import { Presets, SingleBar } from 'cli-progress'
 import { Outcome, SimulationTrace, getTraceStatistics } from '../../simulation'
 import assert from 'assert'
 import { TraceHook } from '../../cliReporting'
+import { ForeignBindingRegistry } from '../foreign'
 
 /**
  * An evaluator for Quint in Node TS runtime.
@@ -49,10 +50,16 @@ export class Evaluator {
    * @param rng - The random number generator to use for evaluation.
    * @param storeMetadata - Optional, whether to store `actionTaken` and `nondetPicks`. Default is false.
    */
-  constructor(table: LookupTable, recorder: TraceRecorder, rng: Rng, storeMetadata: boolean = false) {
+  constructor(
+    table: LookupTable,
+    recorder: TraceRecorder,
+    rng: Rng,
+    storeMetadata: boolean = false,
+    foreignBindings: ForeignBindingRegistry = new Map()
+  ) {
     this.recorder = recorder
     this.rng = rng
-    this.builder = new Builder(table, storeMetadata)
+    this.builder = new Builder(table, storeMetadata, foreignBindings)
     this.ctx = new Context(recorder, rng.next, this.builder.varStorage)
   }
 
@@ -70,6 +77,10 @@ export class Evaluator {
    */
   updateTable(table: LookupTable) {
     this.builder.table = table
+  }
+
+  updateForeignBindings(foreignBindings: ForeignBindingRegistry) {
+    this.builder.foreignBindings = foreignBindings
   }
 
   updateState(state: QuintEx) {

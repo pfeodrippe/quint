@@ -67,6 +67,7 @@ import { deriveVerbosity, getInvariants, guessMainModule, isMatchingTest, mkErro
 import { fail } from 'assert'
 import { newRng } from './rng'
 import { TestOptions, TestResult } from './runtime/testing'
+import { loadForeignBindings } from './runtime/foreign'
 
 export type stage =
   | 'loading'
@@ -158,6 +159,10 @@ export interface ErrorData extends ProcedureStage {
 }
 
 export type ErrResult = { msg: string; stage: ErrorData }
+
+function getForeignBindingsPath(args: any): string | undefined {
+  return args.foreignBindings ?? args['foreign-bindings']
+}
 
 export type CLIProcedure<Stage> = Either<ErrResult, Stage>
 
@@ -256,6 +261,13 @@ export async function typecheck(parsed: ParsedStage): Promise<CLIProcedure<Typec
  * @param argv parameters as provided by yargs
  */
 export async function runRepl(argv: any) {
+  const foreignBindings = getForeignBindingsPath(argv)
+  if (argv.backend === 'rust' && foreignBindings) {
+    console.error('Foreign bindings are only supported by the Bun-powered TypeScript backend.')
+    process.exitCode = 1
+    return
+  }
+
   let filename: string | undefined = undefined
   let moduleName: string | undefined = undefined
   if (argv.require) {
@@ -272,6 +284,7 @@ export async function runRepl(argv: any) {
     verbosity: argv.quiet ? 0 : argv.verbosity,
     seed: argv.seed,
     backend: argv.backend,
+    foreignBindings,
   }
   quintRepl(process.stdin, process.stdout, options)
 }
@@ -289,9 +302,30 @@ export async function runTests(prev: TypecheckedStage): Promise<CLIProcedure<Tes
   const verbosityLevel = deriveVerbosity(prev.args)
   const mainName = guessMainModule(prev)
   const main = findMainModule(prev, mainName)
+  const foreignBindingsPath = getForeignBindingsPath(prev.args)
 
   if (!main) {
     return handleMainModuleError(prev, mainName)
+  }
+
+  if (prev.args.backend === 'rust' && foreignBindingsPath) {
+    return cliErr('Argument error', {
+      ...testing,
+      errors: [
+        mkErrorMessage(prev.sourceMap)({
+          code: 'QNT526',
+          message: 'Foreign bindings are only supported by the Bun-powered TypeScript backend',
+        }),
+      ],
+    })
+  }
+
+  const foreignBindings = await loadForeignBindings(foreignBindingsPath, prev.resolver)
+  if (foreignBindings.isLeft()) {
+    return cliErr('Argument error', {
+      ...testing,
+      errors: [mkErrorMessage(prev.sourceMap)(foreignBindings.value)],
+    })
   }
 
   const options: TestOptions = {
@@ -329,7 +363,13 @@ export async function runTests(prev: TypecheckedStage): Promise<CLIProcedure<Tes
       results.push(result)
     }
   } else {
-    const evaluator = new Evaluator(prev.table, newTraceRecorder(verbosityLevel, options.rng, 1), options.rng)
+    const evaluator = new Evaluator(
+      prev.table,
+      newTraceRecorder(verbosityLevel, options.rng, 1),
+      options.rng,
+      false,
+      foreignBindings.value
+    )
     results = testDefs.map((def, index) => evaluator.test(def, options.maxSamples, index, options.onTrace))
   }
 
@@ -369,8 +409,29 @@ export async function runSimulator(prev: TypecheckedStage): Promise<CLIProcedure
   const verbosityLevel = deriveVerbosity(prev.args)
   const mainName = guessMainModule(prev)
   const main = prev.modules.find(m => m.name === mainName)
+  const foreignBindingsPath = getForeignBindingsPath(prev.args)
   if (!main) {
     return handleMainModuleError(prev, mainName)
+  }
+
+  if (prev.args.backend === 'rust' && foreignBindingsPath) {
+    return cliErr('Argument error', {
+      ...simulator,
+      errors: [
+        mkErrorMessage(prev.sourceMap)({
+          code: 'QNT526',
+          message: 'Foreign bindings are only supported by the Bun-powered TypeScript backend',
+        }),
+      ],
+    })
+  }
+
+  const foreignBindings = await loadForeignBindings(foreignBindingsPath, prev.resolver)
+  if (foreignBindings.isLeft()) {
+    return cliErr('Argument error', {
+      ...simulator,
+      errors: [mkErrorMessage(prev.sourceMap)(foreignBindings.value)],
+    })
   }
 
   const rng = newRng(prev.args.seed)
@@ -444,7 +505,13 @@ export async function runSimulator(prev: TypecheckedStage): Promise<CLIProcedure
     )
   } else {
     // Use the typescript simulator
-    const evaluator = new Evaluator(prev.resolver.table, recorder, options.rng, options.storeMetadata)
+    const evaluator = new Evaluator(
+      prev.resolver.table,
+      recorder,
+      options.rng,
+      options.storeMetadata,
+      foreignBindings.value
+    )
     outcome = evaluator.simulate(
       init,
       step,

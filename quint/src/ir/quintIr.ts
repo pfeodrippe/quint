@@ -265,6 +265,8 @@ export interface QuintOpDef extends WithId, WithOptionalTypeAnnotation, WithOpti
   name: string
   /** definition qualifier: 'val', 'def', 'action', 'temporal' */
   qualifier: OpQualifier
+  /** true when this definition is only a typed declaration header */
+  declarationOnly?: boolean
   /** expression to be associated with the definition */
   expr: QuintEx
 }
@@ -400,6 +402,10 @@ export type QuintDef = (QuintOpDef | QuintConst | QuintVar | QuintAssume | Quint
  */
 export function isAnnotatedDef(def: any): def is WithTypeAnnotation {
   return def.typeAnnotation !== undefined
+}
+
+export function isDeclarationOnly(def: QuintOpDef): boolean {
+  return def.declarationOnly === true
 }
 
 /**

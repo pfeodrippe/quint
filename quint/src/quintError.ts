@@ -129,6 +129,24 @@ export type ErrorCode =
   | 'QNT516'
   /* QNT517: Rust evaluator killed by signal */
   | 'QNT517'
+  /* QNT518: Foreign bindings require the Bun runtime */
+  | 'QNT518'
+  /* QNT519: Invalid foreign bindings configuration */
+  | 'QNT519'
+  /* QNT520: Foreign binding target or export not found */
+  | 'QNT520'
+  /* QNT521: Foreign binding attached to an unsupported definition */
+  | 'QNT521'
+  /* QNT522: Foreign binding invocation failed */
+  | 'QNT522'
+  /* QNT523: Foreign binding returned an invalid value */
+  | 'QNT523'
+  /* QNT524: Missing foreign binding for declaration-only operator */
+  | 'QNT524'
+  /* QNT525: Foreign binding must be synchronous */
+  | 'QNT525'
+  /* QNT526: Rust backend does not support foreign bindings */
+  | 'QNT526'
   /* QNT600: Integer literal is outside the supported range for the Rust evaluator */
   | 'QNT600'
   /* QNT601: Integer overflow in the rust evaluator */

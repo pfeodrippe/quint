@@ -137,6 +137,20 @@ describe('parsing', () => {
     const result = parsePhase1fromText(gen, readQuint('_1090recordDestructuring'), defaultSourceName)
     assert.isEmpty(result.errors, 'expected no parse errors')
   })
+
+  it('parses declaration-only operators without fabricating a body in the IR surface', () => {
+    const result = parsePhase1fromText(
+      newIdGenerator(),
+      'module foreign { pure def hash(x: int): int }',
+      defaultSourceName
+    )
+    assert.isEmpty(result.errors, 'expected no parse errors')
+    const [decl] = result.modules[0].declarations
+    assert.equal(decl.kind, 'def')
+    if (decl.kind === 'def') {
+      assert.equal(decl.declarationOnly, true)
+    }
+  })
 })
 
 // instead of testing how errors are produced in json,

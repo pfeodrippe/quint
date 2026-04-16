@@ -1,0 +1,16 @@
+{
+  "bindings": [
+    {
+      "kind": "module",
+      "module": "foreignModule",
+      "name": "add1",
+      "path": "./module-impl.cjs"
+    },
+    {
+      "kind": "module",
+      "module": "foreignModule",
+      "name": "answer",
+      "path": "./module-impl.cjs"
+    }
+  ]
+}

@@ -29,6 +29,7 @@ import {
   QuintStr,
   QuintVar,
   isAnnotatedDef,
+  isDeclarationOnly,
 } from '../ir/quintIr'
 import { QuintType, QuintVarType, rowNames, typeNames } from '../ir/quintTypes'
 import { expressionToString, rowToString, typeToString } from '../ir/IRprinting'
@@ -309,13 +310,30 @@ export class ConstraintGeneratorVisitor implements IRVisitor {
       return
     }
 
+    const tvs_before = this.tvs.get(def.id)!
+
+    if (isDeclarationOnly(def)) {
+      if (!def.typeAnnotation) {
+        this.errors.set(
+          def.id,
+          buildErrorLeaf(
+            `Checking declaration-only operator ${def.name}`,
+            'Declaration-only operators must have a type annotation'
+          )
+        )
+        return
+      }
+
+      const toQuantify = variablesDifference(typeNames(def.typeAnnotation), tvs_before)
+      this.addToResults(def.id, right(quantify(toQuantify, def.typeAnnotation)))
+      return
+    }
+
     this.fetchResult(def.expr.id).map(t => {
       if (def.typeAnnotation) {
         this.constraints.push({ kind: 'eq', types: [t.type, def.typeAnnotation], sourceId: def.id })
       }
     })
-
-    const tvs_before = this.tvs.get(def.id)!
 
     if (this.constraints.length > 0) {
       this.solveConstraints().map(subs => {

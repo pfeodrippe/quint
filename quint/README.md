@@ -60,6 +60,16 @@ Install [node/npm](https://nodejs.org/en/download/package-manager) if you don't 
 
 For alternative installation methods or advanced setup, see the full [Getting Started](https://quint-lang.org/docs/getting-started) guide.
 
+### Foreign bindings
+
+Quint also has an experimental **Bun-only** foreign binding path for declaration-only `pure def` / `pure val` operators. It lets the TypeScript evaluator call:
+
+1. in-process JS/TS modules
+2. native shared libraries through `Bun.ffi`
+3. Bun-loaded Wasm exports
+
+See [Foreign bindings](https://quint-lang.org/docs/foreign-bindings) for the binding format, CLI usage, and ABI details.
+
 ### Example code in Quint
 
 Here is a small specification for a bank:

@@ -1,0 +1,16 @@
+{
+  "bindings": [
+    {
+      "kind": "module",
+      "module": "Math",
+      "name": "add1",
+      "path": "./math.cjs"
+    },
+    {
+      "kind": "module",
+      "module": "Math",
+      "name": "answer",
+      "path": "./math.cjs"
+    }
+  ]
+}

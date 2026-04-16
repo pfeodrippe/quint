@@ -34,10 +34,15 @@ import { version } from './version'
 import { DEFAULT_APALACHE_VERSION_TAG, parseServerEndpoint } from './apalache'
 
 const defaultOpts = (yargs: any) =>
-  yargs.option('out', {
-    desc: 'output file (suppresses all console output)',
-    type: 'string',
-  })
+  yargs
+    .option('out', {
+      desc: 'output file (suppresses all console output)',
+      type: 'string',
+    })
+    .option('foreign-bindings', {
+      desc: 'path to a JSON file mapping declaration-only operators to Bun-backed implementations',
+      type: 'string',
+    })
 
 // Arguments used by routines that pass thru the `compile` stage
 const compileOpts = (yargs: any) =>
@@ -179,6 +184,10 @@ const replCmd = {
         type: 'string',
         choices: ['typescript', 'rust'],
         default: 'rust',
+      })
+      .option('foreign-bindings', {
+        desc: 'path to a JSON file mapping declaration-only operators to Bun-backed implementations',
+        type: 'string',
       }),
   handler: runRepl,
 }

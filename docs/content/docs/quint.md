@@ -31,6 +31,42 @@ In the following, we give details about the above commands.
 npm i @informalsystems/quint -g
 ```
 
+## Foreign bindings
+
+Quint supports **foreign bindings** for declaration-only operators on the **TypeScript backend under Bun**.
+
+At the Quint call site, these operators behave like ordinary definitions:
+
+```quint
+module foreignModule {
+  pure def add1(x: int): int
+  pure val answer: int
+}
+```
+
+You then bind them at runtime with `--foreign-bindings` on:
+
+1. `quint run`
+2. `quint test`
+3. `quint repl`
+
+Example:
+
+```sh
+bun ./dist/src/cli.js run \
+  --backend=typescript \
+  --foreign-bindings ./bindings.json \
+  ./spec.qnt
+```
+
+Current limits:
+
+1. only declaration-only `pure def` and `pure val` targets are supported
+2. host implementations must be synchronous
+3. the Rust backend does not support foreign bindings
+
+See [foreign-bindings](./foreign-bindings.md) for the binding file format and adapter contracts.
+
 ## Command `repl`
 
 This is the default operation if no other subcommand is given:

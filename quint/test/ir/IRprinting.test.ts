@@ -104,6 +104,12 @@ describe('definitionToString', () => {
     assert.deepEqual(definitionToString(def), expectedDef)
   })
 
+  it('pretty prints declaration-only operator definitions without a placeholder body', () => {
+    const def = buildDef('pure def hash(x: int): int')
+    const expectedDef = 'pure def hash: (int) => int'
+    assert.deepEqual(definitionToString(def), expectedDef)
+  })
+
   it('pretty prints var definitions', () => {
     const def = buildDef('var x: int')
     const expectedDef = 'var x: int'

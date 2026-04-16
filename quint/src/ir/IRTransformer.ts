@@ -407,7 +407,9 @@ export function transformDefinition(transformer: IRTransformer, def: ir.QuintDef
       if (transformer.enterOpDef) {
         newDef = transformer.enterOpDef(newDef)
       }
-      newDef.expr = transformExpression(transformer, newDef.expr)
+      if (!ir.isDeclarationOnly(newDef)) {
+        newDef.expr = transformExpression(transformer, newDef.expr)
+      }
 
       if (transformer.exitOpDef) {
         newDef = transformer.exitOpDef(newDef)

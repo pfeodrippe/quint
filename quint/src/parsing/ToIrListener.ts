@@ -230,10 +230,11 @@ export class ToIrListener implements QuintListener {
     params: QuintLambdaParameter[],
     typeAnnotation: Maybe<QuintType>
   ) {
+    const declarationOnly = !ctx.expr()
     const expr: QuintEx = ctx.expr()
       ? this.exprStack.pop() ?? this.undefinedExpr(ctx)()
-      : // This is only a definition header, use a default body since the IR
-        // does not have a representation for this at the moment
+      : // Keep a placeholder body for the existing IR shape, but mark the
+        // definition as declaration-only so later passes do not treat it as executable.
         { id: this.getId(ctx), kind: 'bool', value: true }
 
     // The grammar should guarantee we only parse valid OpQualifiers here
@@ -251,6 +252,9 @@ export class ToIrListener implements QuintListener {
       name,
       qualifier,
       expr: body,
+    }
+    if (declarationOnly) {
+      def.declarationOnly = true
     }
     if (typeAnnotation.isJust()) {
       def.typeAnnotation = typeAnnotation.value

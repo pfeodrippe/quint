@@ -30,6 +30,7 @@ import {
   QuintOpDef,
   QuintStr,
   QuintVar,
+  isDeclarationOnly,
 } from '../ir/quintIr'
 import { Effect, EffectScheme, Signature, effectNames, entityNames, toScheme, unify } from './base'
 import { Substitutions, applySubstitution, compose } from './substitutions'
@@ -226,6 +227,20 @@ export class EffectInferrer implements IRVisitor {
   exitOpDef(def: QuintOpDef): void {
     if (this.errors.size > 0) {
       // Don't try to infer let if there are errors with the defined expression
+      return
+    }
+
+    if (isDeclarationOnly(def)) {
+      if (def.typeAnnotation?.kind === 'oper') {
+        this.addToResults(def.id, right(standardPropagation(def.typeAnnotation.args.length)))
+      } else if (def.typeAnnotation) {
+        this.addToResults(def.id, right(toScheme({ kind: 'concrete', components: [] })))
+      }
+
+      // When exiting top-level definitions, clear the substitutions
+      if (this.definitionDepth === 0) {
+        this.substitutions = []
+      }
       return
     }
 

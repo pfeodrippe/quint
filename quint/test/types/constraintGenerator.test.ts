@@ -67,6 +67,21 @@ describe('ConstraintGeneratorVisitor', () => {
     )
   })
 
+  it('collects types for declaration-only operators from their annotations', () => {
+    const { modules, table } = parseMockedModule('module wrapper { pure def hash(x: int): int }')
+    const visitor = new ConstraintGeneratorVisitor((_: LookupTable, _c: Constraint) => right([]), table)
+    walkModule(visitor, modules[0])
+
+    const [errors, types] = visitor.getResult()
+    const def = modules[0].declarations[0]
+
+    assert.isEmpty(errors)
+    assert.equal(def.kind, 'def')
+    if (def.kind === 'def') {
+      assert.deepEqual(types.get(def.id)?.type, def.typeAnnotation)
+    }
+  })
+
   it('collects solving errors', () => {
     const defs = ['def a = 1 + true']
 

@@ -36,6 +36,7 @@ import { walkDeclaration, walkExpression } from './ir/IRVisitor'
 import { AnalysisOutput, analyzeInc, analyzeModules } from './quintAnalyzer'
 import { NameResolver } from './names/resolver'
 import { diffRuntimeValueDoc } from './runtime/impl/runtimeValueDiff'
+import { loadForeignBindings } from './runtime/foreign'
 
 // tunable settings
 export const settings = {
@@ -211,6 +212,7 @@ export interface ReplOptions {
   verbosity: number
   seed?: bigint
   backend?: 'typescript' | 'rust'
+  foreignBindings?: string
 }
 
 // the entry point to the REPL
@@ -290,7 +292,7 @@ export function quintRepl(
         rl.setPrompt(prompt(settings.continuePrompt))
       } else {
         if (line.trim() !== '') {
-          await tryEvalAndClearRecorder(out, state, line + '\n')
+          await tryEvalAndClearRecorder(out, state, line + '\n', options)
         }
       }
     } else {
@@ -303,7 +305,7 @@ export function quintRepl(
         // End the multiline mode.
         // If recycle own output, then the current line is, most likely,
         // older input. Ignore it.
-        await tryEvalAndClearRecorder(out, state, multilineText)
+        await tryEvalAndClearRecorder(out, state, multilineText, options)
         multilineText = ''
         recyclingOwnOutput = false
         rl.setPrompt(prompt(settings.prompt))
@@ -336,7 +338,7 @@ export function quintRepl(
       newState.addReplModule()
     }
 
-    if (await tryEvalModule(out, newState, moduleNameToLoad ?? '__repl__')) {
+    if (await tryEvalModule(out, newState, moduleNameToLoad ?? '__repl__', options)) {
       state.lastLoadedFileAndModule[1] = moduleNameToLoad
     } else {
       out(chalk.yellow('Pick the right module name and import it (the file has been loaded)\n'))
@@ -347,7 +349,7 @@ export function quintRepl(
       const exprHist = newState.exprHist
       newState.exprHist = []
       if (exprHist.length > 0) {
-        await replayExprHistory(newState, filename, exprHist)
+        await replayExprHistory(newState, filename, exprHist, options)
       }
     }
 
@@ -358,7 +360,7 @@ export function quintRepl(
     state.nameResolver = newState.nameResolver
   }
 
-  async function replayExprHistory(state: ReplState, filename: string, exprHist: string[]) {
+  async function replayExprHistory(state: ReplState, filename: string, exprHist: string[], options: ReplOptions) {
     if (verbosity.hasReplBanners(options.verbosity)) {
       out(chalk.gray(`Evaluating expression history in ${filename}\n`))
     }
@@ -368,7 +370,7 @@ export function quintRepl(
         out(expr.replaceAll('\n', `\n${settings.continuePrompt}`))
         out('\n')
       }
-      await tryEvalAndClearRecorder(out, state, expr)
+      await tryEvalAndClearRecorder(out, state, expr, options)
     }
   }
 
@@ -656,7 +658,22 @@ function loadFromFile(out: writer, state: ReplState, filename: string): ReplStat
   }
 }
 
-async function tryEvalModule(out: writer, state: ReplState, mainName: string): Promise<boolean> {
+async function refreshForeignBindings(out: writer, state: ReplState, options: ReplOptions): Promise<boolean> {
+  if (!options.foreignBindings || state.evaluator instanceof ReplServerWrapper) {
+    return true
+  }
+
+  const registry = await loadForeignBindings(options.foreignBindings, state.nameResolver)
+  if (registry.isLeft()) {
+    out(chalk.red(`${registry.value.message}\n`))
+    return false
+  }
+
+  state.evaluator.updateForeignBindings(registry.value)
+  return true
+}
+
+async function tryEvalModule(out: writer, state: ReplState, mainName: string, options: ReplOptions): Promise<boolean> {
   const modulesText = state.moduleHist
   const mainPath = fileSourceResolver(state.compilationState.sourceCode).lookupPath(cwd(), 'repl.ts')
   state.compilationState.sourceCode.set(mainPath.toSourceName(), modulesText)
@@ -686,25 +703,33 @@ async function tryEvalModule(out: writer, state: ReplState, mainName: string): P
   state.nameResolver = resolver
 
   await state.evaluator.updateTable(table)
+  if (!(await refreshForeignBindings(out, state, options))) {
+    return false
+  }
 
   return true
 }
 
 // Try to evaluate the expression in a string and print it, if successful.
 // After that, clear the recorded stack.
-async function tryEvalAndClearRecorder(out: writer, state: ReplState, newInput: string): Promise<boolean> {
-  const result = await tryEval(out, state, newInput)
+async function tryEvalAndClearRecorder(
+  out: writer,
+  state: ReplState,
+  newInput: string,
+  options: ReplOptions
+): Promise<boolean> {
+  const result = await tryEval(out, state, newInput, options)
   state.recorder.clear()
   return result
 }
 
 // try to evaluate the expression in a string and print it, if successful
-async function tryEval(out: writer, state: ReplState, newInput: string): Promise<boolean> {
+async function tryEval(out: writer, state: ReplState, newInput: string, options: ReplOptions): Promise<boolean> {
   const columns = terminalWidth()
 
   if (state.compilationState.modules.length === 0) {
     state.addReplModule()
-    await tryEvalModule(out, state, '__repl__')
+    await tryEvalModule(out, state, '__repl__', options)
   }
 
   // Generate a unique source name for this input to avoid line number conflicts in the source map
@@ -737,6 +762,9 @@ async function tryEval(out: writer, state: ReplState, newInput: string): Promise
     }
 
     await state.evaluator.updateTable(state.nameResolver.table)
+    if (!(await refreshForeignBindings(out, state, options))) {
+      return false
+    }
 
     const [analysisErrors, _analysisOutput] = analyzeInc(
       state.compilationState.analysisOutput,
@@ -841,6 +869,9 @@ async function tryEval(out: writer, state: ReplState, newInput: string): Promise
     state.moduleHist = state.moduleHist.slice(0, state.moduleHist.length - 1) + newInput + '\n}' // update the history
 
     await state.evaluator.updateTable(state.nameResolver.table)
+    if (!(await refreshForeignBindings(out, state, options))) {
+      return false
+    }
 
     out('\n')
   }

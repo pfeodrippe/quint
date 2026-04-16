@@ -23,11 +23,12 @@ import { QuintError } from '../../quintError'
 import { RuntimeValue, rv } from './runtimeValue'
 import { builtinLambda, builtinValue, lazyBuiltinLambda, lazyOps } from './builtins'
 import { CachedValue, Context, Register } from './Context'
-import { QuintApp, QuintEx, QuintVar } from '../../ir/quintIr'
+import { QuintApp, QuintEx, QuintVar, isDeclarationOnly } from '../../ir/quintIr'
 import { LookupDefinition, LookupTable } from '../../names/base'
 import { NamedRegister, VarStorage, initialRegisterValue } from './VarStorage'
 import { List } from 'immutable'
 import { evalNondet } from './nondet'
+import { ForeignBindingRegistry } from '../foreign'
 
 /**
  * The type returned by the builder in its methods, which can be called to get the
@@ -43,6 +44,7 @@ export type EvalFunction = (ctx: Context) => Either<QuintError, RuntimeValue>
  */
 export class Builder {
   table: LookupTable
+  foreignBindings: ForeignBindingRegistry
   paramRegistry: Map<bigint, Register> = new Map()
   constRegistry: Map<bigint, Register> = new Map()
   scopedCachedValues: Map<bigint, CachedValue> = new Map()
@@ -58,8 +60,9 @@ export class Builder {
    * @param table - The lookup table containing definitions.
    * @param storeMetadata - A flag indicating whether to store metadata (`actionTaken` and `nondetPicks`).
    */
-  constructor(table: LookupTable, storeMetadata: boolean) {
+  constructor(table: LookupTable, storeMetadata: boolean, foreignBindings: ForeignBindingRegistry = new Map()) {
     this.table = table
+    this.foreignBindings = foreignBindings
     this.varStorage = new VarStorage(storeMetadata, this.initialNondetPicks)
   }
 
@@ -296,6 +299,42 @@ function buildDefCore(builder: Builder, def: LookupDefinition): EvalFunction {
           }
           return result
         }
+      }
+
+      if (isDeclarationOnly(def)) {
+        const binding = builder.foreignBindings.get(def.id)
+        if (!binding) {
+          return _ctx =>
+            left({
+              code: 'QNT524',
+              message: `Declaration-only operator ${def.name} requires a foreign binding`,
+            })
+        }
+
+        if (def.expr.kind === 'lambda') {
+          const params = def.expr.params
+          const body: EvalFunction = _ctx => {
+            const args: RuntimeValue[] = []
+            for (const param of params) {
+              const register = builder.paramRegistry.get(param.id)
+              if (!register) {
+                return left({
+                  code: 'QNT522',
+                  message: `Parameter ${param.name} is unavailable while invoking foreign binding ${def.name}`,
+                })
+              }
+              if (register.value.isLeft()) {
+                return register.value
+              }
+              args.push(register.value.value)
+            }
+            return binding.invoke(args)
+          }
+
+          return _ctx => right(rv.mkLambda(params, body, builder.paramRegistry))
+        }
+
+        return _ctx => binding.invoke([])
       }
 
       if (def.expr.kind === 'lambda' || def.depth === undefined || def.depth === 0) {
