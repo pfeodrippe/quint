@@ -34,6 +34,7 @@ struct RectCommand {
 struct HostState {
     window_open: bool,
     closed_by_user: bool,
+    batching: bool,
     counter: i64,
     circles: Vec<CircleCommand>,
     rects: Vec<RectCommand>,
@@ -47,6 +48,7 @@ impl Default for HostState {
         Self {
             window_open: false,
             closed_by_user: false,
+            batching: false,
             counter: 0,
             circles: Vec::new(),
             rects: Vec::new(),
@@ -162,6 +164,12 @@ fn render_scene(state: &mut HostState) {
     }
 }
 
+fn maybe_render(state: &mut HostState) {
+    if !state.batching {
+        render_scene(state);
+    }
+}
+
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn show_hello_window_host(frames: i64) -> i64 {
     let total_frames = frames.max(1).min(i64::from(i32::MAX)) as i32;
@@ -206,7 +214,7 @@ pub unsafe extern "C" fn show_hello_window_host(frames: i64) -> i64 {
 pub unsafe extern "C" fn rl_set_counter_host(value: i64) -> i64 {
     let mut state = host_state().lock().unwrap();
     state.counter = value;
-    render_scene(&mut state);
+    maybe_render(&mut state);
     0
 }
 
@@ -214,7 +222,23 @@ pub unsafe extern "C" fn rl_set_counter_host(value: i64) -> i64 {
 pub unsafe extern "C" fn rl_clear_scene_host() -> i64 {
     let mut state = host_state().lock().unwrap();
     clear_scene(&mut state);
+    maybe_render(&mut state);
+    0
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rl_begin_frame_host() -> i64 {
+    let mut state = host_state().lock().unwrap();
+    ensure_window(&mut state);
+    state.batching = true;
+    0
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rl_end_frame_host() -> i64 {
+    let mut state = host_state().lock().unwrap();
     render_scene(&mut state);
+    state.batching = false;
     0
 }
 
@@ -243,7 +267,7 @@ pub unsafe extern "C" fn rl_draw_text_host(
         font_size: font_size.max(1).min(i64::from(i32::MAX)) as i32,
         color: rgb(r, g, b),
     });
-    render_scene(&mut state);
+    maybe_render(&mut state);
     0
 }
 
@@ -273,7 +297,7 @@ pub unsafe extern "C" fn rl_draw_text_int_host(
         font_size: font_size.max(1).min(i64::from(i32::MAX)) as i32,
         color: rgb(r, g, b),
     });
-    render_scene(&mut state);
+    maybe_render(&mut state);
     0
 }
 
@@ -293,7 +317,7 @@ pub unsafe extern "C" fn rl_draw_circle_host(
         radius: radius.max(0) as f32,
         color: rgb(r, g, b),
     });
-    render_scene(&mut state);
+    maybe_render(&mut state);
     0
 }
 
@@ -315,7 +339,7 @@ pub unsafe extern "C" fn rl_draw_rect_host(
         height: height.max(0).min(i64::from(i32::MAX)) as i32,
         color: rgb(r, g, b),
     });
-    render_scene(&mut state);
+    maybe_render(&mut state);
     0
 }
 
@@ -330,6 +354,16 @@ pub unsafe extern "C" fn rl_window_should_close_host() -> bool {
     let mut state = host_state().lock().unwrap();
     sync_window_state(&mut state);
     state.closed_by_user
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rl_is_key_pressed_host(key: i64) -> bool {
+    let mut state = host_state().lock().unwrap();
+    sync_window_state(&mut state);
+    if !state.window_open {
+        return false;
+    }
+    unsafe { ffi::IsKeyPressed(key as i32) }
 }
 
 #[unsafe(no_mangle)]

@@ -15,6 +15,9 @@ It includes:
 7. `run-two-phase-commit-live-debug.sh`: a Rust-backend `quint run` launcher for that dashboard
 8. `bank-live-debug.qnt`: a live dashboard wrapped around the existing Cosmos bank spec
 9. `run-bank-live-debug.sh`: a Bun + TypeScript `quint run` launcher for that dashboard
+10. `trace-debugger.ts`: a post-run raylib trace viewer with trace selection and state stepping
+11. `run-bank-trace-debugger.sh`: fast trace capture + viewer for the bank spec
+12. `run-two-phase-commit-trace-debugger.sh`: fast trace capture + viewer for the two-phase commit spec
 
 ## What this demonstrates
 
@@ -24,6 +27,7 @@ It includes:
 4. Quint does **not** need to initialize or present the window directly; the shim owns that
 5. a live visual debugger can be driven from a normal `quint run`, not just from the REPL
 6. specs that rely on large integers can use the Bun-backed TypeScript evaluator while still using the same foreign-binding API
+7. traces can be captured first and inspected afterwards, so simulation is not slowed down by rendering
 
 ## Important caveat
 
@@ -171,4 +175,52 @@ If Bun is not on your `PATH`, point the script at it explicitly:
 
 ```sh
 BUN_BIN=/path/to/bun bash ./examples/foreign/raylib/run-bank-live-debug.sh
+```
+
+## Trace debugger: capture fast, inspect later
+
+The live dashboards above render during execution. If you want a **real trace debugger**
+without slowing the simulator down, use the post-run debugger scripts instead.
+
+These scripts:
+
+1. run Quint normally with `--out-itf` and `--n-traces`
+2. capture several completed traces as ITF files
+3. open a raylib viewer afterwards
+
+The viewer lets you:
+
+1. switch between traces with **Up/Down**
+2. step through states with **Left/Right**
+3. jump faster with **PgUp/PgDn**
+4. jump to the ends with **Home/End**
+
+### Bank trace debugger
+
+```sh
+bash ./examples/foreign/raylib/run-bank-trace-debugger.sh
+```
+
+Optional arguments:
+
+```sh
+bash ./examples/foreign/raylib/run-bank-trace-debugger.sh <trace-count> <max-samples> <max-steps> <seed>
+```
+
+Example:
+
+```sh
+bash ./examples/foreign/raylib/run-bank-trace-debugger.sh 16 100 30 7
+```
+
+### Two-phase commit trace debugger
+
+```sh
+bash ./examples/foreign/raylib/run-two-phase-commit-trace-debugger.sh
+```
+
+Optional arguments:
+
+```sh
+bash ./examples/foreign/raylib/run-two-phase-commit-trace-debugger.sh <trace-count> <max-samples> <max-steps> <seed>
 ```
