@@ -131,6 +131,7 @@ const otherOperators = [
   { name: 'fail', type: '(bool) => bool' },
   { name: 'assert', type: '(bool) => bool' },
   { name: 'q::debug', type: '(str, a) => a' },
+  { name: 'q::tap', type: '(str, a) => a' },
   { name: 'q::lastTrace', type: 'List[a]' },
   { name: 'q::test', type: '(int, int, int, bool, bool, bool) => bool' },
   { name: 'q::testOnce', type: '(int, int, bool, bool, bool) => bool' },

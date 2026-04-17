@@ -149,6 +149,8 @@ export type ErrorCode =
   | 'QNT526'
   /* QNT527: Foreign FFI signature or value is not supported by the native ABI */
   | 'QNT527'
+  /* QNT528: Invalid tap listener configuration */
+  | 'QNT528'
   /* QNT600: Integer literal is outside the supported range for the Rust evaluator */
   | 'QNT600'
   /* QNT601: Integer overflow in the rust evaluator */

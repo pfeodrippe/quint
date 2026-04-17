@@ -28,6 +28,8 @@ enum ReplCommand {
         seed: Option<u64>,
         #[serde(default)]
         verbosity: Verbosity,
+        #[serde(default)]
+        tap: bool,
     },
     /// Update the lookup table with new definitions
     UpdateTable {
@@ -103,6 +105,7 @@ pub struct ReplEvaluator {
     env: Option<Env>,
     trace_states: Vec<Value>,
     verbosity: Verbosity,
+    tap: bool,
 }
 
 impl ReplEvaluator {
@@ -116,8 +119,10 @@ impl ReplEvaluator {
         foreign_bindings: Vec<ForeignBindingSpec>,
         seed: Option<u64>,
         verbosity: Verbosity,
+        tap: bool,
     ) -> ReplResponse {
         self.verbosity = verbosity;
+        self.tap = tap;
 
         // Create the interpreter with the table
         let interpreter = match Interpreter::with_var_storage_and_bindings(
@@ -136,9 +141,9 @@ impl ReplEvaluator {
 
         self.interpreter = Some(interpreter);
         self.env = Some(if let Some(seed) = seed {
-            Env::with_rand_state(storage, seed, verbosity)
+            Env::with_rand_state_and_tap(storage, seed, verbosity, tap)
         } else {
-            Env::new(storage, verbosity)
+            Env::new_with_tap(storage, verbosity, tap)
         });
 
         self.trace_states = Vec::new();
@@ -288,9 +293,14 @@ impl ReplEvaluator {
         // Create a fresh env, preserving seed and verbosity
         if let Some(old_env) = &self.env {
             let seed = old_env.rand.get_state();
-            self.env = Some(Env::with_rand_state(storage, seed, self.verbosity));
+            self.env = Some(Env::with_rand_state_and_tap(
+                storage,
+                seed,
+                self.verbosity,
+                self.tap,
+            ));
         } else {
-            self.env = Some(Env::new(storage, self.verbosity));
+            self.env = Some(Env::new_with_tap(storage, self.verbosity, self.tap));
         }
 
         self.trace_states.clear();
@@ -335,7 +345,8 @@ impl ReplEvaluator {
                 foreign_bindings,
                 seed,
                 verbosity,
-            } => self.initialize(table, foreign_bindings, seed, verbosity),
+                tap,
+            } => self.initialize(table, foreign_bindings, seed, verbosity, tap),
             ReplCommand::UpdateTable {
                 table,
                 foreign_bindings,

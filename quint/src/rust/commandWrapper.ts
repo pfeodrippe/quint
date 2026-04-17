@@ -31,6 +31,7 @@ import { Either, left, right } from '@sweet-monads/either'
 import { RustForeignBindingSpec } from '../runtime/foreign'
 import { getRustEvaluatorPath } from './binaryManager'
 import { bigintCheckerReplacer } from './helpers'
+import { TapManager } from '../tap'
 
 export type ParsedQuint = {
   modules: QuintModule[]
@@ -82,7 +83,8 @@ export class CommandWrapper {
     nthreads: number,
     seed?: bigint,
     mbt?: boolean,
-    onTrace?: TraceHook
+    onTrace?: TraceHook,
+    tapManager?: TapManager
   ): Promise<Outcome> {
     const input = {
       parsed: { ...parsed, foreign_bindings: this.foreignBindings },
@@ -94,12 +96,18 @@ export class CommandWrapper {
       seed: seed,
       mbt: mbt ?? false,
       verbosity: this.verbosityLevel,
+      tap: tapManager?.enabled ?? false,
     }
 
-    const result = await this.runRustEvaluator('simulate-from-stdin', input, {
-      format: 'Running... [{bar}] {percentage}% | ETA: {eta}s | {value}/{total} samples | {speed} samples/s',
-      total: nruns,
-    })
+    const result = await this.runRustEvaluator(
+      'simulate-from-stdin',
+      input,
+      {
+        format: 'Running... [{bar}] {percentage}% | ETA: {eta}s | {value}/{total} samples | {speed} samples/s',
+        total: nruns,
+      },
+      tapManager
+    )
 
     // Handle errors from rust processes failing, where we don't manage to get output from rust
     if (result.isLeft()) {
@@ -170,7 +178,8 @@ export class CommandWrapper {
     seed: bigint | undefined,
     maxSamples: number,
     index: number,
-    onTrace?: TraceHook
+    onTrace?: TraceHook,
+    tapManager?: TapManager
   ): Promise<TestResult> {
     const testName = nameWithNamespaces(testDef.name, List(testDef.namespaces ?? []))
     const input = {
@@ -181,12 +190,18 @@ export class CommandWrapper {
       seed: seed,
       max_samples: maxSamples,
       verbosity: this.verbosityLevel,
+      tap: tapManager?.enabled ?? false,
     }
 
-    const result = await this.runRustEvaluator('test-from-stdin', input, {
-      format: `     ${testName} [{bar}] {percentage}% | ETA: {eta}s | {value}/{total} samples | {speed} samples/s`,
-      total: maxSamples,
-    })
+    const result = await this.runRustEvaluator(
+      'test-from-stdin',
+      input,
+      {
+        format: `     ${testName} [{bar}] {percentage}% | ETA: {eta}s | {value}/{total} samples | {speed} samples/s`,
+        total: maxSamples,
+      },
+      tapManager
+    )
 
     // Handle process errors
     if (result.isLeft()) {
@@ -281,7 +296,8 @@ export class CommandWrapper {
   private async runRustEvaluator(
     command: string,
     input: any,
-    progress?: { format: string; total: number }
+    progress?: { format: string; total: number },
+    tapManager?: TapManager
   ): Promise<Either<QuintError, string>> {
     const exe = await getRustEvaluatorPath()
     const args = [command]
@@ -362,19 +378,27 @@ export class CommandWrapper {
     })
 
     stderr.on('line', (line: string) => {
-      if (progressBar) {
-        try {
-          const progress = JSON.parse(line)
+      try {
+        const event = JSON.parse(line)
 
-          if (progress.type === 'progress') {
-            const elapsedSeconds = (Date.now() - startTime) / 1000
-            const speed = Math.round(progress.current / elapsedSeconds)
-            progressBar.update(progress.current, { speed })
-            return
-          }
-        } catch (_) {
-          progressBar.stop()
+        if (event.type === 'progress' && progressBar) {
+          const elapsedSeconds = (Date.now() - startTime) / 1000
+          const speed = Math.round(event.current / elapsedSeconds)
+          progressBar.update(event.current, { speed })
+          return
         }
+
+        if (event.type === 'tap' && tapManager?.enabled) {
+          tapManager.emitItf(
+            event.reference !== undefined ? BigInt(event.reference) : undefined,
+            event.label ?? 'tap',
+            event.value,
+            'rust'
+          )
+          return
+        }
+      } catch (_) {
+        progressBar?.stop()
       }
       stderrLines.push(line)
     })

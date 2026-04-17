@@ -6,6 +6,7 @@ import { Buffer } from 'buffer'
 import chalk from 'chalk'
 
 import { quintRepl } from '../../../src/repl'
+import { ReplOptions } from '../../../src/repl'
 import { dedent } from '../../textUtils'
 import { version } from '../../../src/version'
 
@@ -42,7 +43,7 @@ class ToStringWritable extends Writable {
 }
 
 // run a test with mocked input/output and return the input + output
-const withIO = async (inputText: string): Promise<string> => {
+const withIO = async (inputText: string, options: Partial<ReplOptions> = {}): Promise<string> => {
   // save the current chalk level and reset chalk to no color
   const savedChalkLevel = chalk.level
   chalk.level = 0
@@ -57,7 +58,7 @@ const withIO = async (inputText: string): Promise<string> => {
   // Use { end: false } to prevent ending output when input ends
   input.pipe(output, { end: false })
 
-  const rl = quintRepl(input, output, { verbosity: 1, backend: 'typescript' }, () => {})
+  const rl = quintRepl(input, output, { verbosity: 1, backend: 'typescript', ...options }, () => {})
   await output.isReady()
 
   // Send input line-by-line to the REPL. We emit 'data' events for each line,
@@ -85,11 +86,11 @@ const withIO = async (inputText: string): Promise<string> => {
 const banner = `Quint REPL ${version}
 Type ".exit" to exit, or ".help" for more information`
 
-async function assertRepl(input: string, output: string) {
+async function assertRepl(input: string, output: string, options: Partial<ReplOptions> = {}) {
   const expected = `${banner}
 ${output}`
 
-  const result = await withIO(input)
+  const result = await withIO(input, options)
   assert(typeof result === 'string', 'expected result to be a string')
   expect(result).to.equal(expected)
 }
@@ -107,6 +108,17 @@ describe('repl ok', () => {
       |>>> `
     )
     await assertRepl(input, output)
+  })
+
+  it('q::tap with stdout listener', async () => {
+    const input = 'q::tap("value", 5)\n'
+    const output = dedent(
+      `>>> q::tap("value", 5)
+      |[TAP] value 5
+      |5
+      |>>> `
+    )
+    await assertRepl(input, output, { tapListeners: ['stdout'] })
   })
 
   it('Map(1 -> 2, 3 -> 4)', async () => {

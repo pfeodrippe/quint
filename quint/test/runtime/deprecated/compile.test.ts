@@ -1101,6 +1101,24 @@ describe('compiling specs to runtime values', () => {
       assertVarAfterCall('n', '2', 'run1', input)
     })
 
+    it('q::tap', () => {
+      const input = dedent(
+        `var n: int
+        |run run1 = (n' = 1).then(n' = q::tap("n plus one", n + 1))
+        `
+      )
+      assertVarAfterCall('n', '2', 'run1', input)
+    })
+
+    it('q::tap with single argument', () => {
+      const input = dedent(
+        `var n: int
+        |run run1 = (n' = 1).then(n' = q::tap(n + 1))
+        `
+      )
+      assertVarAfterCall('n', '2', 'run1', input)
+    })
+
     it('unsupported operators', () => {
       assertResultAsString('allLists(1.to(3))', undefined)
 

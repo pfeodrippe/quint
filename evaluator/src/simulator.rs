@@ -44,6 +44,8 @@ pub struct SimulationConfig {
     pub store_metadata: bool,
     /// Verbosity level for output
     pub verbosity: Verbosity,
+    /// Whether q::tap should emit tap events
+    pub tap: bool,
 }
 
 /// Simulation output.
@@ -124,8 +126,8 @@ impl ParsedQuint {
     ) -> Result<SimulationResult, SimulationError> {
         let var_storage = Rc::new(RefCell::new(Storage::default()));
         let mut env = match config.seed {
-            Some(s) => Env::with_rand_state(var_storage, s, config.verbosity),
-            None => Env::new(var_storage, config.verbosity),
+            Some(s) => Env::with_rand_state_and_tap(var_storage, s, config.verbosity, config.tap),
+            None => Env::new_with_tap(var_storage, config.verbosity, config.tap),
         };
         self.simulate_with_env(&mut env, config, reporter)
     }

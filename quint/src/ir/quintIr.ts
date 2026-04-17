@@ -197,6 +197,7 @@ export const builtinOpCodes = [
   'q::test',
   'q::testOnce',
   'q::debug',
+  'q::tap',
   'range',
   'replaceAt',
   'reps',

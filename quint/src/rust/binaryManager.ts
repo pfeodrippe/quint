@@ -16,6 +16,7 @@
 import path from 'path'
 import os from 'os'
 import chalk from 'chalk'
+import { spawn } from 'child_process'
 import { rustEvaluatorDir } from '../config'
 
 export const QUINT_EVALUATOR_VERSION = 'v0.6.0'
@@ -49,6 +50,11 @@ export async function getRustEvaluatorPath(version: string = QUINT_EVALUATOR_VER
   // Map platform and architecture to asset name
   let { assetName, executable } = inferAssetAndExecutableNames(platform, arch)
 
+  const localEvaluator = await ensureLocalEvaluator(executable)
+  if (localEvaluator) {
+    return localEvaluator
+  }
+
   // Check if the evaluator is already downloaded
   const evaluatorDir = rustEvaluatorDir(version)
   const executablePath = path.join(evaluatorDir, executable)
@@ -58,6 +64,62 @@ export async function getRustEvaluatorPath(version: string = QUINT_EVALUATOR_VER
 
   // Otherwise, fetch it from GitHub releases
   return await fetchEvaluator(version, assetName, executable)
+}
+
+async function ensureLocalEvaluator(executable: string): Promise<string | undefined> {
+  const localPaths = [
+    path.resolve(__dirname, '../../../evaluator/target/debug', executable),
+    path.resolve(__dirname, '../../../evaluator/target/release', executable),
+    path.resolve(__dirname, '../../../../evaluator/target/debug', executable),
+    path.resolve(__dirname, '../../../../evaluator/target/release', executable),
+  ]
+
+  for (const candidate of localPaths) {
+    if (await exists(candidate)) {
+      return candidate
+    }
+  }
+
+  const cargoManifests = [
+    path.resolve(__dirname, '../../../evaluator/Cargo.toml'),
+    path.resolve(__dirname, '../../../../evaluator/Cargo.toml'),
+  ]
+
+  for (const manifest of cargoManifests) {
+    if (!(await exists(manifest))) {
+      continue
+    }
+
+    await buildLocalEvaluator(manifest)
+
+    for (const candidate of localPaths) {
+      if (await exists(candidate)) {
+        return candidate
+      }
+    }
+  }
+
+  return undefined
+}
+
+async function buildLocalEvaluator(manifestPath: string): Promise<void> {
+  await new Promise<void>((resolve, reject) => {
+    const process = spawn('cargo', ['build', '--manifest-path', manifestPath], {
+      stdio: 'ignore',
+      shell: false,
+    })
+
+    process.on('error', reject)
+    process.on('close', code => {
+      if (code === 0) {
+        resolve()
+      } else {
+        reject(new Error(`cargo build failed with exit code ${code}`))
+      }
+    })
+  }).catch(() => {
+    // Fall back to the released evaluator if the local build is unavailable.
+  })
 }
 
 /**

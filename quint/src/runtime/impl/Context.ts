@@ -14,6 +14,7 @@
 
 import { Either } from '@sweet-monads/either'
 import { QuintError } from '../../quintError'
+import { QuintEx } from '../../ir/quintIr'
 import { RuntimeValue } from './runtimeValue'
 import { TraceRecorder } from '../trace'
 import { VarStorage } from './VarStorage'
@@ -61,16 +62,27 @@ export class Context {
   public varStorage: VarStorage
 
   /**
+   * Optional sink for q::tap values.
+   */
+  public onTap?: (reference: bigint, label: string, value: QuintEx) => void
+
+  /**
    * Constructs a new evaluation context.
    *
    * @param recorder - The trace recorder to use.
    * @param rand - Function to generate random bigints.
    * @param varStorage - The variable storage to use (should be the same as the builder's)
    */
-  constructor(recorder: TraceRecorder, rand: (n: bigint) => bigint, varStorage: VarStorage) {
+  constructor(
+    recorder: TraceRecorder,
+    rand: (n: bigint) => bigint,
+    varStorage: VarStorage,
+    onTap?: (reference: bigint, label: string, value: QuintEx) => void
+  ) {
     this.recorder = recorder
     this.rand = rand
     this.varStorage = varStorage
+    this.onTap = onTap
   }
 
   /**

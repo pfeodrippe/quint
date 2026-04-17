@@ -15,6 +15,7 @@ fn tictactoe_ok() {
         seed: None,
         store_metadata: false,
         verbosity: Verbosity::default(),
+        tap: false,
     };
     let result = parsed.simulate(config, progress::no_report());
     assert!(result.is_ok());
@@ -36,6 +37,7 @@ fn tictactoe_violation() {
         seed: None,
         store_metadata: false,
         verbosity: Verbosity::default(),
+        tap: false,
     };
     let result = parsed.simulate(config, progress::no_report());
     assert!(result.is_ok());
@@ -68,6 +70,7 @@ fn instances_ok() {
         seed: None,
         store_metadata: false,
         verbosity: Verbosity::default(),
+        tap: false,
     };
     let result = parsed.simulate(config, progress::no_report());
     assert!(result.is_ok());
@@ -91,6 +94,7 @@ fn instance_overrides_ok() {
         seed: None,
         store_metadata: false,
         verbosity: Verbosity::default(),
+        tap: false,
     };
     let result = parsed.simulate(config, progress::no_report());
     assert!(result.is_ok());
@@ -119,6 +123,7 @@ fn one_of_empty_set_ok() {
         seed: None,
         store_metadata: false,
         verbosity: Verbosity::default(),
+        tap: false,
     };
     let result = parsed.simulate(config, progress::no_report());
 
@@ -143,6 +148,7 @@ fn tictactoe_multiple_violations() {
         seed: None,
         store_metadata: false,
         verbosity: Verbosity::default(),
+        tap: false,
     };
     let result = parsed.simulate(config, progress::no_report());
     assert!(result.is_ok());
@@ -171,6 +177,7 @@ fn tictactoe_n_traces_1_fast_return() {
         seed: None,
         store_metadata: false,
         verbosity: Verbosity::default(),
+        tap: false,
     };
     let result = parsed.simulate(config, progress::no_report());
     assert!(result.is_ok());
@@ -198,6 +205,7 @@ fn tictactoe_best_traces_quality_order() {
         seed: None,
         store_metadata: false,
         verbosity: Verbosity::default(),
+        tap: false,
     };
     let result = parsed.simulate(config, progress::no_report());
     assert!(result.is_ok());

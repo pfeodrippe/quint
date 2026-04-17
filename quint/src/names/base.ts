@@ -254,6 +254,7 @@ export const builtinNames = [
   'matchVariant',
   'variant',
   'q::debug',
+  'q::tap',
   'q::lastTrace',
   'q::test',
   'q::testOnce',

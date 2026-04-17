@@ -68,6 +68,7 @@ import { fail } from 'assert'
 import { newRng } from './rng'
 import { TestOptions, TestResult } from './runtime/testing'
 import { loadForeignBindings, loadRustForeignBindings } from './runtime/foreign'
+import { createTapManager, normalizeTapListenerSpecs } from './tap'
 
 export type stage =
   | 'loading'
@@ -162,6 +163,10 @@ export type ErrResult = { msg: string; stage: ErrorData }
 
 function getForeignBindingsPath(args: any): string | undefined {
   return args.foreignBindings ?? args['foreign-bindings']
+}
+
+function getTapListenerSpecs(args: any): string[] {
+  return normalizeTapListenerSpecs(args.tapListener ?? args['tap-listener'])
 }
 
 export type CLIProcedure<Stage> = Either<ErrResult, Stage>
@@ -280,6 +285,7 @@ export async function runRepl(argv: any) {
     seed: argv.seed,
     backend: argv.backend,
     foreignBindings,
+    tapListeners: getTapListenerSpecs(argv),
   }
   quintRepl(process.stdin, process.stdout, options)
 }
@@ -312,80 +318,98 @@ export async function runTests(prev: TypecheckedStage): Promise<CLIProcedure<Tes
   }
 
   const startMs = Date.now()
-
-  if (verbosity.hasResults(verbosityLevel)) {
-    console.log(`\n  ${mainName}`)
+  const tapManagerOrError = createTapManager(
+    getTapListenerSpecs(prev.args),
+    undefined,
+    reference => prev.sourceMap.get(reference)
+  )
+  if (tapManagerOrError.isLeft()) {
+    return cliErr('Argument error', {
+      ...testing,
+      errors: [mkErrorMessage(new Map())(tapManagerOrError.value)],
+    })
   }
+  const tapManager = tapManagerOrError.value
 
-  const testDefs = Array.from(prev.resolver.collector.definitionsByModule.get(mainName)!.values())
-    .flat()
-    .filter(d => d.kind === 'def' && options.testMatch(d.name))
-
-  let results: TestResult[]
-
-  if (prev.args.backend === 'rust') {
-    const foreignBindings = await loadRustForeignBindings(foreignBindingsPath, prev.resolver)
-    if (foreignBindings.isLeft()) {
-      return cliErr('Argument error', {
-        ...testing,
-        errors: [mkErrorMessage(prev.sourceMap)(foreignBindings.value)],
-      })
+  try {
+    if (verbosity.hasResults(verbosityLevel)) {
+      console.log(`\n  ${mainName}`)
     }
 
-    const commandWrapper = new CommandWrapper(verbosityLevel, foreignBindings.value)
-    results = []
-    for (const [index, def] of testDefs.entries()) {
-      const result = await commandWrapper.test(
-        def,
+    const testDefs = Array.from(prev.resolver.collector.definitionsByModule.get(mainName)!.values())
+      .flat()
+      .filter(d => d.kind === 'def' && options.testMatch(d.name))
+
+    let results: TestResult[]
+
+    if (prev.args.backend === 'rust') {
+      const foreignBindings = await loadRustForeignBindings(foreignBindingsPath, prev.resolver)
+      if (foreignBindings.isLeft()) {
+        return cliErr('Argument error', {
+          ...testing,
+          errors: [mkErrorMessage(prev.sourceMap)(foreignBindings.value)],
+        })
+      }
+
+      const commandWrapper = new CommandWrapper(verbosityLevel, foreignBindings.value)
+      results = []
+      for (const [index, def] of testDefs.entries()) {
+        const result = await commandWrapper.test(
+          def,
+          prev.table,
+          prev.args.seed,
+          options.maxSamples,
+          index,
+          options.onTrace,
+          tapManager
+        )
+        results.push(result)
+      }
+    } else {
+      const foreignBindings = await loadForeignBindings(foreignBindingsPath, prev.resolver)
+      if (foreignBindings.isLeft()) {
+        return cliErr('Argument error', {
+          ...testing,
+          errors: [mkErrorMessage(prev.sourceMap)(foreignBindings.value)],
+        })
+      }
+
+      const evaluator = new Evaluator(
         prev.table,
-        prev.args.seed,
-        options.maxSamples,
-        index,
-        options.onTrace
+        newTraceRecorder(verbosityLevel, options.rng, 1),
+        options.rng,
+        false,
+        foreignBindings.value,
+        (reference, label, value) => tapManager.emitQuint(reference, label, value, 'typescript')
       )
-      results.push(result)
-    }
-  } else {
-    const foreignBindings = await loadForeignBindings(foreignBindingsPath, prev.resolver)
-    if (foreignBindings.isLeft()) {
-      return cliErr('Argument error', {
-        ...testing,
-        errors: [mkErrorMessage(prev.sourceMap)(foreignBindings.value)],
-      })
+      results = testDefs.map((def, index) => evaluator.test(def, options.maxSamples, index, options.onTrace))
     }
 
-    const evaluator = new Evaluator(
-      prev.table,
-      newTraceRecorder(verbosityLevel, options.rng, 1),
-      options.rng,
-      false,
-      foreignBindings.value
-    )
-    results = testDefs.map((def, index) => evaluator.test(def, options.maxSamples, index, options.onTrace))
+    const elapsedMs = Date.now() - startMs
+    outputTestResults(results, verbosityLevel, elapsedMs)
+
+    const passed = results.filter(r => r.status === 'passed')
+    const failed = results.filter(r => r.status === 'failed')
+    const ignored = results.filter(r => r.status === 'ignored')
+
+    const stage = {
+      ...testing,
+      passed: passed.map(r => r.name),
+      failed: failed.map(r => r.name),
+      ignored: ignored.map(r => r.name),
+      errors: [],
+    }
+
+    if (failed.length === 0) {
+      return right(stage)
+    }
+
+    outputTestErrors(stage, verbosityLevel, failed)
+
+    return cliErr('Tests failed', stage)
+  } finally {
+    tapManager.close()
   }
-
-  const elapsedMs = Date.now() - startMs
-  outputTestResults(results, verbosityLevel, elapsedMs)
-
-  const passed = results.filter(r => r.status === 'passed')
-  const failed = results.filter(r => r.status === 'failed')
-  const ignored = results.filter(r => r.status === 'ignored')
-
-  const stage = {
-    ...testing,
-    passed: passed.map(r => r.name),
-    failed: failed.map(r => r.name),
-    ignored: ignored.map(r => r.name),
-    errors: [],
-  }
-
-  if (failed.length === 0) {
-    return right(stage)
-  }
-
-  outputTestErrors(stage, verbosityLevel, failed)
-
-  return cliErr('Tests failed', stage)
 }
 
 /**
@@ -429,6 +453,18 @@ export async function runSimulator(prev: TypecheckedStage): Promise<CLIProcedure
   }
 
   const recorder = newTraceRecorder(options.verbosity, options.rng, options.numberOfTraces)
+  const tapManagerOrError = createTapManager(
+    getTapListenerSpecs(prev.args),
+    undefined,
+    reference => prev.sourceMap.get(reference)
+  )
+  if (tapManagerOrError.isLeft()) {
+    return cliErr('Argument error', {
+      ...simulator,
+      errors: [mkErrorMessage(new Map())(tapManagerOrError.value)],
+    })
+  }
+  const tapManager = tapManagerOrError.value
 
   const argsParsingResult = mergeInMany([
     toExpr(prev, prev.args.init, { kind: 'action', flag: 'init' }),
@@ -444,71 +480,76 @@ export async function runSimulator(prev: TypecheckedStage): Promise<CLIProcedure
   const [init, step, invariant, ...witnesses] = argsParsingResult.value
 
   let outcome: Outcome
-  if (prev.args.backend == 'rust') {
-    const foreignBindings = await loadRustForeignBindings(foreignBindingsPath, prev.resolver)
-    if (foreignBindings.isLeft()) {
-      return cliErr('Argument error', {
-        ...simulator,
-        errors: [mkErrorMessage(prev.sourceMap)(foreignBindings.value)],
-      })
-    }
+  try {
+    if (prev.args.backend == 'rust') {
+      const foreignBindings = await loadRustForeignBindings(foreignBindingsPath, prev.resolver)
+      if (foreignBindings.isLeft()) {
+        return cliErr('Argument error', {
+          ...simulator,
+          errors: [mkErrorMessage(prev.sourceMap)(foreignBindings.value)],
+        })
+      }
 
-    const individualInvariantsResult = mergeInMany(individualInvariants.map(inv => toExpr(prev, inv)))
-    if (individualInvariantsResult.isLeft()) {
-      return cliErr('Argument error', {
-        ...simulator,
-        errors: individualInvariantsResult.value.map(mkErrorMessage(new Map())),
-      })
-    }
+      const individualInvariantsResult = mergeInMany(individualInvariants.map(inv => toExpr(prev, inv)))
+      if (individualInvariantsResult.isLeft()) {
+        return cliErr('Argument error', {
+          ...simulator,
+          errors: individualInvariantsResult.value.map(mkErrorMessage(new Map())),
+        })
+      }
 
-    const commandWrapper = new CommandWrapper(verbosityLevel, foreignBindings.value)
-    const nThreads = Math.min(prev.args.maxSamples, prev.args.nThreads)
-    outcome = await commandWrapper.simulate(
-      {
-        modules: [],
-        table: prev.resolver.table,
-        main: mainName,
+      const commandWrapper = new CommandWrapper(verbosityLevel, foreignBindings.value)
+      const nThreads = Math.min(prev.args.maxSamples, prev.args.nThreads)
+      outcome = await commandWrapper.simulate(
+        {
+          modules: [],
+          table: prev.resolver.table,
+          main: mainName,
+          init,
+          step,
+          invariants: individualInvariantsResult.value,
+          witnesses: witnesses,
+        },
+        prev.path,
+        prev.args.maxSamples,
+        prev.args.maxSteps,
+        prev.args.nTraces ?? 1,
+        nThreads,
+        prev.args.seed,
+        prev.args.mbt,
+        options.onTrace,
+        tapManager
+      )
+    } else {
+      const foreignBindings = await loadForeignBindings(foreignBindingsPath, prev.resolver)
+      if (foreignBindings.isLeft()) {
+        return cliErr('Argument error', {
+          ...simulator,
+          errors: [mkErrorMessage(prev.sourceMap)(foreignBindings.value)],
+        })
+      }
+
+      const evaluator = new Evaluator(
+        prev.resolver.table,
+        recorder,
+        options.rng,
+        options.storeMetadata,
+        foreignBindings.value,
+        (reference, label, value) => tapManager.emitQuint(reference, label, value, 'typescript')
+      )
+      outcome = evaluator.simulate(
         init,
         step,
-        invariants: individualInvariantsResult.value,
-        witnesses: witnesses,
-      },
-      prev.path,
-      prev.args.maxSamples,
-      prev.args.maxSteps,
-      prev.args.nTraces ?? 1,
-      nThreads,
-      prev.args.seed,
-      prev.args.mbt,
-      options.onTrace
-    )
-  } else {
-    const foreignBindings = await loadForeignBindings(foreignBindingsPath, prev.resolver)
-    if (foreignBindings.isLeft()) {
-      return cliErr('Argument error', {
-        ...simulator,
-        errors: [mkErrorMessage(prev.sourceMap)(foreignBindings.value)],
-      })
+        invariant,
+        witnesses,
+        prev.args.maxSamples,
+        prev.args.maxSteps,
+        prev.args.nTraces ?? 1,
+        options.onTrace
+      )
     }
-
-    // Use the typescript simulator
-    const evaluator = new Evaluator(
-      prev.resolver.table,
-      recorder,
-      options.rng,
-      options.storeMetadata,
-      foreignBindings.value
-    )
-    outcome = evaluator.simulate(
-      init,
-      step,
-      invariant,
-      witnesses,
-      prev.args.maxSamples,
-      prev.args.maxSteps,
-      prev.args.nTraces ?? 1,
-      options.onTrace
-    )
+  } finally {
+    tapManager.close()
   }
 
   const elapsedMs = Date.now() - startMs

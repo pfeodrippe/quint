@@ -918,6 +918,34 @@ module builtin {
   /// ```
   pure def q::debug(msg, value): (str, a) => a
 
+  /// `q::tap(msg, value)` sends the given message and value to all configured
+  /// tap listeners and returns the value unchanged.
+  ///
+  /// Like Clojure's `tap>`, this is meant for out-of-band observation. Unlike
+  /// `tap>`, `q::tap` is value-preserving so it can be inserted directly into
+  /// expressions and actions.
+  ///
+  /// Tap listeners are configured by the CLI, for example with
+  /// `--tap-listener stdout` or `--tap-listener jsonl:/tmp/quint-taps.jsonl`.
+  ///
+  /// When called with a single argument as `q::tap(expr)`, it taps the
+  /// expression itself as the message, followed by its value.
+  ///
+  /// ### Examples
+  ///
+  /// ```quint
+  /// var x: int
+  /// >>> (x' = 0).then(x' = q::tap("new x", x + 1))
+  /// true
+  /// ```
+  ///
+  /// ```quint
+  /// var x: int
+  /// >>> (x' = 0).then(x' = q::tap(x + 1))
+  /// true
+  /// ```
+  pure def q::tap(msg, value): (str, a) => a
+
   /// `apalache::generate(n)` generates a value of type `a` while constraining
   /// all of its children collections to have at most `n` elements. This operator
   /// must be used together with `nondet`, similar to `oneOf`.

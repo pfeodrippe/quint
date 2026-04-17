@@ -44,6 +44,14 @@ const defaultOpts = (yargs: any) =>
       type: 'string',
     })
 
+const tapOpts = (yargs: any) =>
+  yargs.option('tapListener', {
+    alias: ['tap-listener'],
+    desc: 'comma-separated tap listeners for q::tap. Supported: stdout, jsonl:/path/to/file.jsonl',
+    type: 'string',
+    array: true,
+  })
+
 // Arguments used by routines that pass thru the `compile` stage
 const compileOpts = (yargs: any) =>
   defaultOpts(yargs)
@@ -157,7 +165,7 @@ const replCmd = {
   command: ['repl [commands..]', '*'],
   desc: 'Run an interactive Read-Evaluate-Print-Loop. Optionally, takes one or more commands to execute upon entering the REPL.',
   builder: (yargs: any) =>
-    yargs
+    tapOpts(yargs)
       .option('require', {
         desc: 'filename[::module]. Preload the file and, optionally, import the module',
         alias: 'r',
@@ -197,7 +205,7 @@ const testCmd = {
   command: 'test <input>',
   desc: 'Run tests against a Quint specification',
   builder: (yargs: any) =>
-    defaultOpts(yargs)
+    tapOpts(defaultOpts(yargs))
       .option('main', {
         desc: 'name of the main module (by default, computed from filename)',
         type: 'string',
@@ -256,7 +264,7 @@ const runCmd = {
   command: 'run <input>',
   desc: 'Simulate a Quint specification and (optionally) check invariants',
   builder: (yargs: any) =>
-    defaultOpts(yargs)
+    tapOpts(defaultOpts(yargs))
       .option('main', {
         desc: 'name of the main module (by default, computed from filename)',
         type: 'string',

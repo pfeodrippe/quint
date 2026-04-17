@@ -37,6 +37,7 @@ import { AnalysisOutput, analyzeInc, analyzeModules } from './quintAnalyzer'
 import { NameResolver } from './names/resolver'
 import { diffRuntimeValueDoc } from './runtime/impl/runtimeValueDiff'
 import { loadForeignBindings, loadRustForeignBindings } from './runtime/foreign'
+import { createTapManager, TapManager } from './tap'
 
 // tunable settings
 export const settings = {
@@ -99,6 +100,7 @@ class ReplState {
   inputCounter: number
   // Whether to use the Rust evaluator
   useRustEvaluator: boolean
+  tapManager?: TapManager
 
   constructor(
     verbosityLevel: number,
@@ -106,7 +108,8 @@ class ReplState {
     useRustEvaluator: boolean = false,
     existingEvaluator?: Evaluator | ReplServerWrapper,
     existingNameResolver?: NameResolver,
-    out?: writer
+    out?: writer,
+    tapManager?: TapManager
   ) {
     const recorder = newTraceRecorder(verbosityLevel, rng)
     this.moduleHist = ''
@@ -114,13 +117,23 @@ class ReplState {
     this.lastLoadedFileAndModule = [undefined, undefined]
     this.compilationState = newCompilationState()
     this.useRustEvaluator = useRustEvaluator
+    this.tapManager = tapManager
     if (existingEvaluator) {
       // Reuse existing evaluator (important for Rust backend to avoid spawning multiple subprocesses)
       this.evaluator = existingEvaluator
     } else if (useRustEvaluator) {
-      this.evaluator = new ReplServerWrapper(new Map(), recorder, rng, out ?? (text => process.stdout.write(text)))
+      this.evaluator = new ReplServerWrapper(
+        new Map(),
+        recorder,
+        rng,
+        out ?? (text => process.stdout.write(text)),
+        [],
+        tapManager
+      )
     } else {
-      this.evaluator = new Evaluator(new Map(), recorder, rng)
+      this.evaluator = new Evaluator(new Map(), recorder, rng, false, new Map(), (reference, label, value) =>
+        tapManager?.emitQuint(reference, label, value, 'typescript')
+      )
     }
     this.nameResolver = existingNameResolver ?? new NameResolver()
     this.inputCounter = 0
@@ -132,7 +145,9 @@ class ReplState {
       newRng(this.rng.getState()),
       this.useRustEvaluator,
       this.evaluator, // Reuse evaluator
-      this.nameResolver // Reuse name resolver
+      this.nameResolver, // Reuse name resolver
+      undefined,
+      this.tapManager
     )
     copy.moduleHist = this.moduleHist
     copy.exprHist = this.exprHist
@@ -160,7 +175,9 @@ class ReplState {
       // Keep the Rust process alive, just reset its state
       await this.evaluator.reset()
     } else {
-      this.evaluator = new Evaluator(new Map(), recorder, rng)
+      this.evaluator = new Evaluator(new Map(), recorder, rng, false, new Map(), (reference, label, value) =>
+        this.tapManager?.emitQuint(reference, label, value, 'typescript')
+      )
     }
     this.nameResolver = new NameResolver()
     this.inputCounter = 0
@@ -213,6 +230,7 @@ export interface ReplOptions {
   seed?: bigint
   backend?: 'typescript' | 'rust'
   foreignBindings?: string
+  tapListeners?: string[]
 }
 
 // the entry point to the REPL
@@ -231,6 +249,11 @@ export function quintRepl(
   }
   // Check if we should use the Rust evaluator
   const useRustEvaluator = options.backend === 'rust'
+  const tapManagerResult = createTapManager(options.tapListeners, out)
+  if (tapManagerResult.isLeft()) {
+    throw new Error(tapManagerResult.value.message)
+  }
+  const tapManager = tapManagerResult.value
   if (verbosity.hasReplBanners(options.verbosity)) {
     out(chalk.gray(`Quint REPL ${version}`))
     if (useRustEvaluator) {
@@ -247,7 +270,8 @@ export function quintRepl(
 
   // the state
   const rng = options.seed !== undefined ? newRng(options.seed) : newRng()
-  const state: ReplState = new ReplState(options.verbosity, rng, useRustEvaluator, undefined, undefined, out)
+  const state: ReplState = new ReplState(options.verbosity, rng, useRustEvaluator, undefined, undefined, out, tapManager)
+  tapManager.setLocationResolver(reference => state.compilationState.sourceMap.get(reference))
 
   // we let the user type a multiline string, which is collected here:
   let multilineText = ''
@@ -525,6 +549,7 @@ export function quintRepl(
     // Wait for any pending line processing to complete
     await lineProcessingChain
     await state.shutdown()
+    tapManager.close()
     out('\n')
     exit()
   }

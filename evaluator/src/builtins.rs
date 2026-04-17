@@ -924,6 +924,10 @@ pub fn compile_eager_op(op: &str) -> CompiledExprWithArgs {
             Ok(args[1].clone())
         },
 
+        "q::tap" => |_env, args| {
+            Ok(args[1].clone())
+        },
+
         // `allLists` is not supported in the REPL, but we have `allListsUpTo`
         "allLists" => |_env, _args| {
             Err(QuintError::new(

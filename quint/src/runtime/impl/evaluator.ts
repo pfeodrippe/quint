@@ -55,12 +55,13 @@ export class Evaluator {
     recorder: TraceRecorder,
     rng: Rng,
     storeMetadata: boolean = false,
-    foreignBindings: ForeignBindingRegistry = new Map()
+    foreignBindings: ForeignBindingRegistry = new Map(),
+    onTap?: (reference: bigint, label: string, value: QuintEx) => void
   ) {
     this.recorder = recorder
     this.rng = rng
     this.builder = new Builder(table, storeMetadata, foreignBindings)
-    this.ctx = new Context(recorder, rng.next, this.builder.varStorage)
+    this.ctx = new Context(recorder, rng.next, this.builder.varStorage, onTap)
   }
 
   /**

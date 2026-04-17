@@ -747,6 +747,12 @@ export function builtinLambda(op: string): (ctx: Context, args: RuntimeValue[]) 
         return right(args[1])
       }
 
+    case 'q::tap':
+      return (ctx, args) => {
+        ctx.onTap?.(0n, args[0].toStr(), args[1].toQuintEx(zerog))
+        return right(args[1])
+      }
+
     // standard unary operators that are not handled by REPL
     case 'allLists':
     case 'chooseSome':

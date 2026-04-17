@@ -29,6 +29,7 @@ import { NamedRegister, VarStorage, initialRegisterValue } from './VarStorage'
 import { List } from 'immutable'
 import { evalNondet } from './nondet'
 import { ForeignBindingRegistry } from '../foreign'
+import { zerog } from '../../idGenerator'
 
 /**
  * The type returned by the builder in its methods, which can be called to get the
@@ -485,6 +486,18 @@ function buildExprCore(builder: Builder, expr: QuintEx): EvalFunction {
             })
           }
         })
+      }
+
+      if (expr.opcode === 'q::tap') {
+        const labelEval = buildExpr(builder, expr.args[0])
+        const valueEval = buildExpr(builder, expr.args[1])
+        return ctx =>
+          labelEval(ctx).chain(label =>
+            valueEval(ctx).map(value => {
+              ctx.onTap?.(expr.id, label.toStr(), value.toQuintEx(zerog))
+              return value
+            })
+          )
       }
 
       const args = expr.args.map(arg => buildExpr(builder, arg))

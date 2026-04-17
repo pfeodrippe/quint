@@ -18,6 +18,9 @@ It includes:
 10. `trace-debugger.ts`: a post-run raylib trace viewer with trace selection and state stepping
 11. `run-bank-trace-debugger.sh`: fast trace capture + viewer for the bank spec
 12. `run-two-phase-commit-trace-debugger.sh`: fast trace capture + viewer for the two-phase commit spec
+13. `bank-tap-debug.qnt`: a real-spec wrapper that emits structured `q::tap` snapshots
+14. `tap-portal.ts`: a raylib viewer for `q::tap` streams, inspired by Clojure's Portal
+15. `run-bank-tap-portal.sh`: runs the bank tap wrapper and opens the raylib tap portal
 
 ## What this demonstrates
 
@@ -28,6 +31,7 @@ It includes:
 5. a live visual debugger can be driven from a normal `quint run`, not just from the REPL
 6. specs that rely on large integers can use the Bun-backed TypeScript evaluator while still using the same foreign-binding API
 7. traces can be captured first and inspected afterwards, so simulation is not slowed down by rendering
+8. `q::tap` can stream structured values into multiple listeners, including a Portal-style raylib app
 
 ## Important caveat
 
@@ -224,3 +228,43 @@ Optional arguments:
 ```sh
 bash ./examples/foreign/raylib/run-two-phase-commit-trace-debugger.sh <trace-count> <max-samples> <max-steps> <seed>
 ```
+
+## Tap portal: Portal-style viewing for `q::tap`
+
+Quint now has `q::tap(message, value)` plus the `q::tap(expr)` shorthand, matching
+`q::debug`'s ergonomics while still behaving like a value-preserving `tap>`:
+it emits the label, value, and source location metadata to every configured listener
+and then returns the value unchanged.
+
+From the CLI you can attach listeners such as:
+
+```sh
+quint run spec.qnt --tap-listener stdout
+quint run spec.qnt --tap-listener jsonl:/tmp/quint-taps.jsonl
+```
+
+The raylib tap portal reads that JSONL stream and renders it however it wants,
+similar to how Clojure's Portal subscribes to `tap>`.
+
+### Bank tap portal
+
+This uses the real Cosmos bank spec, but instead of drawing during execution it
+emits structured snapshots with `q::tap`.
+
+```sh
+bash ./examples/foreign/raylib/run-bank-tap-portal.sh
+```
+
+Optional arguments:
+
+```sh
+bash ./examples/foreign/raylib/run-bank-tap-portal.sh <max-steps> <seed>
+```
+
+Controls:
+
+1. **Up/Down** to move through tapped values
+2. **Home/End** to jump to the beginning or latest tap
+
+The viewer renders bank snapshots specially (balances, supply, last transfer),
+and falls back to a generic structured view for anything else.

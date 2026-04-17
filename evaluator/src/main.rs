@@ -125,6 +125,8 @@ struct SimulateInput {
     #[serde(default)]
     mbt: bool,
     verbosity: Verbosity,
+    #[serde(default)]
+    tap: bool,
 }
 
 #[derive(Eq, PartialEq, Serialize)]
@@ -186,6 +188,8 @@ struct TestInput {
     max_samples: usize,
     #[serde(default)]
     verbosity: Verbosity,
+    #[serde(default)]
+    tap: bool,
 }
 
 /// Data expected on STDIN for evaluate-at-state
@@ -285,6 +289,7 @@ fn run_simulation(args: RunArgs) -> eyre::Result<()> {
         seed: args.seed,
         store_metadata: args.mbt,
         verbosity: Verbosity::default(),
+        tap: false,
     };
     let result = parsed.simulate(config, progress::no_report());
 
@@ -325,7 +330,7 @@ fn simulate_from_stdin() -> eyre::Result<()> {
         seed,
         mbt,
         verbosity,
-        ..
+        tap,
     } = serde_json::from_reader(io::stdin())?;
 
     let source = Arc::new(source);
@@ -338,6 +343,7 @@ fn simulate_from_stdin() -> eyre::Result<()> {
         seed,
         store_metadata: mbt,
         verbosity,
+        tap,
     };
     let outcome = if nthreads > 1 && seed.is_none() {
         simulate_in_parallel(source, parsed, config, nthreads)
@@ -367,6 +373,7 @@ fn test_from_stdin() -> eyre::Result<()> {
         seed,
         max_samples,
         verbosity,
+        tap,
     } = serde_json::from_reader(io::stdin())?;
 
     // Create test case and execute with progress reporting
@@ -377,7 +384,7 @@ fn test_from_stdin() -> eyre::Result<()> {
         foreign_bindings,
     };
     let reporter = progress::json_std_err_report(max_samples);
-    let result = test_case.execute(seed, max_samples, reporter, verbosity);
+    let result = test_case.execute(seed, max_samples, reporter, verbosity, tap);
     let output = to_test_output(result);
     serde_json::to_writer(io::stdout(), &output)?;
 
@@ -434,6 +441,7 @@ fn simulate_in_parallel(
         seed: _,
         store_metadata: mbt,
         verbosity,
+        tap,
     } = config;
     assert!(nthreads > 1, "nthreads must be > 1");
     nthreads = nthreads.min(nruns); //avoid spawning threads with no work
@@ -476,6 +484,7 @@ fn simulate_in_parallel(
                     seed: None,
                     store_metadata: mbt,
                     verbosity,
+                    tap,
                 };
                 let result = parsed.simulate(config, reporter);
                 let outcome = to_sim_output(source, result);

@@ -46,6 +46,7 @@ impl TestCase {
         max_samples: usize,
         mut reporter: R,
         verbosity: Verbosity,
+        tap: bool,
     ) -> TestResult {
         let test_name = &self.name;
 
@@ -67,8 +68,8 @@ impl TestCase {
             }
         };
         let mut env = match seed {
-            Some(s) => Env::with_rand_state(interpreter.var_storage.clone(), s, verbosity),
-            None => Env::new(interpreter.var_storage.clone(), verbosity),
+            Some(s) => Env::with_rand_state_and_tap(interpreter.var_storage.clone(), s, verbosity, tap),
+            None => Env::new_with_tap(interpreter.var_storage.clone(), verbosity, tap),
         };
 
         let seed = env.rand.get_state();

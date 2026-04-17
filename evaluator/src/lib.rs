@@ -18,6 +18,7 @@ pub mod rand;
 pub mod repl;
 pub mod simulator;
 pub mod storage;
+pub mod tap;
 pub mod tester;
 pub mod trace_quality;
 pub mod value;

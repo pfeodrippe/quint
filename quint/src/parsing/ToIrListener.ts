@@ -1299,8 +1299,8 @@ export class ToIrListener implements QuintListener {
   private pushApplication(ctx: any, name: string, args: QuintEx[]) {
     const id = this.getId(ctx)
 
-    // Special handling for q::debug with a single argument
-    if (name === 'q::debug' && args.length === 1) {
+    // Special handling for q::debug/q::tap with a single argument
+    if ((name === 'q::debug' || name === 'q::tap') && args.length === 1) {
       // Get the expression text from the context
       const expressionText = ctx.text
 

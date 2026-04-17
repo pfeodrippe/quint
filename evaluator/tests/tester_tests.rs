@@ -29,7 +29,7 @@ fn passing_test_ok() {
     let file_path = Path::new("fixtures/runs.qnt");
     let test_case = parse_test_from_path(file_path, "passingTest").unwrap();
 
-    let result = test_case.execute(Some(0), 1, progress::no_report(), Verbosity::default());
+    let result = test_case.execute(Some(0), 1, progress::no_report(), Verbosity::default(), false);
 
     // Test passed - no errors
     assert_eq!(result.errors.len(), 0);
@@ -42,7 +42,7 @@ fn failing_test_returns_qnt511() {
     let file_path = Path::new("fixtures/runs.qnt");
     let test_case = parse_test_from_path(file_path, "failingTest").unwrap();
 
-    let result = test_case.execute(Some(0), 1, progress::no_report(), Verbosity::default());
+    let result = test_case.execute(Some(0), 1, progress::no_report(), Verbosity::default(), false);
 
     // Test failed with QNT511 (test returned false)
     assert_eq!(result.errors.len(), 1);
@@ -59,7 +59,7 @@ fn failing_assert_returns_qnt508() {
     let file_path = Path::new("fixtures/runs.qnt");
     let test_case = parse_test_from_path(file_path, "failingAssertTest").unwrap();
 
-    let result = test_case.execute(Some(0), 1, progress::no_report(), Verbosity::default());
+    let result = test_case.execute(Some(0), 1, progress::no_report(), Verbosity::default(), false);
 
     // Test failed with QNT508 (assertion failed)
     assert_eq!(result.errors.len(), 1);
@@ -74,7 +74,7 @@ fn failing_expect_action_returns_qnt508() {
     let file_path = Path::new("fixtures/runs.qnt");
     let test_case = parse_test_from_path(file_path, "failingExpectActionTest").unwrap();
 
-    let result = test_case.execute(Some(0), 1, progress::no_report(), Verbosity::default());
+    let result = test_case.execute(Some(0), 1, progress::no_report(), Verbosity::default(), false);
 
     // Test failed with QNT508
     assert_eq!(result.errors.len(), 1);

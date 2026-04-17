@@ -9,6 +9,7 @@ use crate::progress::no_report;
 use crate::rand::Rand;
 use crate::simulator::{ParsedQuint, SimulationConfig};
 use crate::storage::{Storage, VariableRegister};
+use crate::tap::emit_tap;
 use crate::verbosity::Verbosity;
 use crate::foreign::{load_foreign_bindings, ForeignBindingRegistry};
 use crate::{builtins::*, ir::*, value::*};
@@ -98,16 +99,24 @@ pub struct Env {
 
     // Verbosity level controlling debug output collection.
     pub verbosity: Verbosity,
+
+    // Whether q::tap should emit tap events.
+    pub tap_enabled: bool,
 }
 
 impl Env {
     pub fn new(var_storage: Rc<RefCell<Storage>>, verbosity: Verbosity) -> Self {
+        Self::new_with_tap(var_storage, verbosity, false)
+    }
+
+    pub fn new_with_tap(var_storage: Rc<RefCell<Storage>>, verbosity: Verbosity, tap_enabled: bool) -> Self {
         Self {
             var_storage,
             rand: Rand::new(),
             trace: Vec::new(),
             diagnostics: Vec::new(),
             verbosity,
+            tap_enabled,
         }
     }
 
@@ -117,12 +126,22 @@ impl Env {
         state: u64,
         verbosity: Verbosity,
     ) -> Self {
+        Self::with_rand_state_and_tap(var_storage, state, verbosity, false)
+    }
+
+    pub fn with_rand_state_and_tap(
+        var_storage: Rc<RefCell<Storage>>,
+        state: u64,
+        verbosity: Verbosity,
+        tap_enabled: bool,
+    ) -> Self {
         Self {
             var_storage,
             rand: Rand::with_state(state),
             trace: Vec::new(),
             diagnostics: Vec::new(),
             verbosity,
+            tap_enabled,
         }
     }
 
@@ -757,7 +776,18 @@ impl Interpreter {
                 })
             }
             // A built-in. We already checked that this is not lazy before.
-            None => compile_eager_op(op),
+            None => {
+                if op == "q::tap" {
+                    let tap_id = *id;
+                    return CompiledExprWithArgs::new(move |env, args| {
+                        if env.tap_enabled {
+                            emit_tap(tap_id, &args[0].as_str(), &args[1]);
+                        }
+                        Ok(args[1].clone())
+                    });
+                }
+                compile_eager_op(op)
+            }
         }
     }
 
@@ -818,6 +848,7 @@ impl Interpreter {
                     seed,
                     store_metadata: false,
                     verbosity: env.verbosity,
+                    tap: env.tap_enabled,
                 },
                 no_report(),
             ) {

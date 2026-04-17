@@ -32,6 +32,7 @@ import { getRustEvaluatorPath } from './binaryManager'
 import { prettyQuintEx, terminalWidth } from '../graphics'
 import { Doc, brackets, format, group, line, space, text } from '../prettierimp'
 import { RustForeignBindingSpec } from '../runtime/foreign'
+import { TapManager } from '../tap'
 
 /**
  * Commands sent to the Rust REPL evaluator
@@ -43,6 +44,7 @@ type ReplCommand =
       seed?: bigint
       verbosity?: number
       foreign_bindings?: RustForeignBindingSpec[]
+      tap?: boolean
     }
   | { cmd: 'UpdateTable'; table: LookupTable; foreign_bindings?: RustForeignBindingSpec[] }
   | { cmd: 'Evaluate'; expr: QuintEx }
@@ -94,6 +96,7 @@ export class ReplServerWrapper {
   private out: (text: string) => void
   private currentTable: LookupTable
   private currentForeignBindings: RustForeignBindingSpec[]
+  private tapManager?: TapManager
 
   private initializationPromise: Promise<void>
 
@@ -102,13 +105,15 @@ export class ReplServerWrapper {
     recorder: TraceRecorder,
     rng: Rng,
     out: (text: string) => void,
-    foreignBindings: RustForeignBindingSpec[] = []
+    foreignBindings: RustForeignBindingSpec[] = [],
+    tapManager?: TapManager
   ) {
     this.recorder = recorder
     this.verbosityLevel = recorder.verbosityLevel
     this.out = out
     this.currentTable = table
     this.currentForeignBindings = foreignBindings
+    this.tapManager = tapManager
     this.initializationPromise = this.initialize(table, rng.getState(), foreignBindings)
   }
 
@@ -195,8 +200,41 @@ export class ReplServerWrapper {
       }
     })
 
+    const stderr = readline.createInterface({
+      input: this.process.stderr!,
+      terminal: false,
+    })
+
+    stderr.on('line', (line: string) => {
+      try {
+        const event = JSON.parse(line)
+        if (event.type === 'tap' && this.tapManager?.enabled) {
+          this.tapManager.emitItf(
+            event.reference !== undefined ? BigInt(event.reference) : undefined,
+            event.label ?? 'tap',
+            event.value,
+            'rust'
+          )
+          return
+        }
+      } catch (_) {
+        // Fall through to regular stderr logging below.
+      }
+
+      if (line.trim() !== '') {
+        console.error(line)
+      }
+    })
+
     // Send initialization command and WAIT for response
-    await this.sendCommand({ cmd: 'Initialize', table, seed, verbosity: this.verbosityLevel, foreign_bindings: foreignBindings })
+    await this.sendCommand({
+      cmd: 'Initialize',
+      table,
+      seed,
+      verbosity: this.verbosityLevel,
+      foreign_bindings: foreignBindings,
+      tap: this.tapManager?.enabled ?? false,
+    })
   }
 
   /**

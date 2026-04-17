@@ -1232,6 +1232,28 @@ fn run_q_debug_single_arg() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
+fn run_q_tap() -> Result<(), Box<dyn std::error::Error>> {
+    assert_var_after_run(
+        "n",
+        "2",
+        "run1",
+        "var n: int\n
+         run run1 = (n' = 1).then(n' = q::tap(\"n plus one\", n + 1))",
+    )
+}
+
+#[test]
+fn run_q_tap_single_arg() -> Result<(), Box<dyn std::error::Error>> {
+    assert_var_after_run(
+        "n",
+        "2",
+        "run1",
+        "var n: int\n
+         run run1 = (n' = 1).then(n' = q::tap(n + 1))",
+    )
+}
+
+#[test]
 fn compile_int_builtin() -> Result<(), Box<dyn std::error::Error>> {
     assert_from_string("Int", "Int")
 }
