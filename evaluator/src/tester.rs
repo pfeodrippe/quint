@@ -2,6 +2,7 @@ use crate::evaluator::{Env, Interpreter};
 use crate::ir::{ForeignBindingSpec, LookupDefinition, LookupTable, QuintError};
 use crate::itf::Trace;
 use crate::progress::Reporter;
+use crate::tap;
 use crate::verbosity::Verbosity;
 use serde::Serialize;
 
@@ -91,6 +92,7 @@ impl TestCase {
             let prev_rng_state = env.rand.get_state();
 
             reporter.next_sample();
+            let _trace_scope = tap::trace_scope(tap);
             nsamples += 1;
 
             let test_result = compiled_test.execute(&mut env);

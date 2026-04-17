@@ -83,7 +83,7 @@ module LamportMutex {
 
   // Process p receives a request from q and acknowledges it.
   action ReceiveRequest(p,q) = all {
-    network.get(p).get(q) != List(),
+    network.get(q).get(p) != List(),
     val m = network.get(q).get(p).head()
     val c = m.clock
     all {

@@ -926,8 +926,25 @@ module builtin {
   /// expressions and actions.
   ///
   /// Tap listeners are configured by the CLI, for example with
-  /// `--tap-listener stdout`, `--tap-listener jsonl:/tmp/quint-taps.jsonl`, or
+  /// `--tap-listener stdout`, `--tap-listener stats`,
+  /// `--tap-listener stats:json:/tmp/quint-stats.json`,
+  /// `--tap-listener stats:trace:last`,
+  /// `--tap-listener stats:trace:max`,
+  /// `--tap-listener stats:trace:sum`,
+  /// `--tap-listener jsonl:/tmp/quint-taps.jsonl`, or
   /// `--tap-listener-op MyModule.tapListener`.
+  ///
+  /// The `stats` listener is useful for TLC-style statistical properties:
+  /// instrument a spec with labeled `q::tap` measurements, run many simulations,
+  /// and let Quint aggregate summaries such as frequencies, min/max, average,
+  /// and percentiles by tap label.
+  ///
+  /// The `stats:trace:<reducer>` variants first reduce repeated taps within each
+  /// trace, then aggregate the reduced per-trace samples across all runs. This is
+  /// useful for properties like "final value per run", "max value reached per
+  /// run", "total work per run", or "how many times this event occurred per run".
+  /// The `min`, `max`, and `sum` reducers aggregate only integer-valued labels
+  /// and skip non-integer labels.
   ///
   /// When called with a single argument as `q::tap(expr)`, it taps the
   /// expression itself as the message, followed by its value.

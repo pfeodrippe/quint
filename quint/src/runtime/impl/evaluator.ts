@@ -41,6 +41,8 @@ export class Evaluator {
   public recorder: TraceRecorder
   private rng: Rng
   private builder: Builder
+  private onTraceStart?: () => void
+  private onTraceEnd?: () => void
 
   /**
    * Constructs an Evaluator that can be re-used across evaluations.
@@ -56,12 +58,16 @@ export class Evaluator {
     rng: Rng,
     storeMetadata: boolean = false,
     foreignBindings: ForeignBindingRegistry = new Map(),
-    onTap?: (reference: bigint, label: string, value: QuintEx) => void
+    onTap?: (reference: bigint, label: string, value: QuintEx) => void,
+    onTraceStart?: () => void,
+    onTraceEnd?: () => void
   ) {
     this.recorder = recorder
     this.rng = rng
     this.builder = new Builder(table, storeMetadata, foreignBindings)
     this.ctx = new Context(recorder, rng.next, this.builder.varStorage, onTap)
+    this.onTraceStart = onTraceStart
+    this.onTraceEnd = onTraceEnd
   }
 
   /**
@@ -212,6 +218,7 @@ export class Evaluator {
       progressBar.update(runNo, { speed })
       const traceWitnessed = new Array(witnesses.length).fill(false)
 
+      this.onTraceStart?.()
       this.recorder.onRunCall()
       this.reset()
       // Mocked def for the trace recorder
@@ -285,6 +292,7 @@ export class Evaluator {
 
       const outcome = failure ? left(failure) : right(rv.mkBool(errorsFound == 0))
       this.recorder.onRunReturn(outcome, this.trace.get())
+      this.onTraceEnd?.()
     }
     progressBar.stop()
 
@@ -362,6 +370,7 @@ export class Evaluator {
       progressBar.update(nsamples, { test: name, speed })
       // record the seed value
       seed = this.rng.getState()
+      this.onTraceStart?.()
       this.recorder.onRunCall()
       // reset the trace
       this.reset()
@@ -383,6 +392,7 @@ export class Evaluator {
       if (result.isLeft()) {
         // if there was an error, return immediately
         progressBar.stop()
+        this.onTraceEnd?.()
         return {
           name,
           status: 'failed',
@@ -397,6 +407,7 @@ export class Evaluator {
       if (ex.kind !== 'bool') {
         // if the test returned a malformed result, return immediately
         progressBar.stop()
+        this.onTraceEnd?.()
         return {
           name,
           status: 'ignored',
@@ -416,6 +427,7 @@ export class Evaluator {
         }
         onTrace(index, 'failed', this.varNames(), states, name)
         progressBar.stop()
+        this.onTraceEnd?.()
         return {
           name,
           status: 'failed',
@@ -431,6 +443,7 @@ export class Evaluator {
 
           onTrace(index, 'passed', this.varNames(), states, name)
           progressBar.stop()
+          this.onTraceEnd?.()
           return {
             name,
             status: 'passed',
@@ -441,6 +454,7 @@ export class Evaluator {
           }
         }
       }
+      this.onTraceEnd?.()
     }
 
     // the test was run maxSamples times, and no errors were found

@@ -329,6 +329,8 @@ export class CommandWrapper {
       )
       progressBar.start(progress.total, 0, { speed: '0' })
     }
+    let completedSamples = 0
+    let sawExplicitTraceEvents = false
 
     const startTime = Date.now()
 
@@ -385,6 +387,27 @@ export class CommandWrapper {
           const elapsedSeconds = (Date.now() - startTime) / 1000
           const speed = Math.round(event.current / elapsedSeconds)
           progressBar.update(event.current, { speed })
+          if (tapManager?.enabled && !sawExplicitTraceEvents) {
+            while (completedSamples < event.current) {
+              tapManager.endTrace()
+              completedSamples += 1
+              if (completedSamples < progress!.total) {
+                tapManager.beginTrace()
+              }
+            }
+          }
+          return
+        }
+
+        if (event.type === 'trace-start' && tapManager?.enabled) {
+          sawExplicitTraceEvents = true
+          tapManager.beginTrace()
+          return
+        }
+
+        if (event.type === 'trace-end' && tapManager?.enabled) {
+          sawExplicitTraceEvents = true
+          tapManager.endTrace()
           return
         }
 

@@ -438,7 +438,9 @@ export async function runTests(prev: TypecheckedStage): Promise<CLIProcedure<Tes
         options.rng,
         false,
         foreignBindings.value,
-        (reference, label, value) => tapManager.emitQuint(reference, label, value, 'typescript')
+        (reference, label, value) => tapManager.emitQuint(reference, label, value, 'typescript'),
+        () => tapManager.beginTrace(),
+        () => tapManager.endTrace()
       )
       results = testDefs.map((def, index) => evaluator.test(def, options.maxSamples, index, options.onTrace))
     }
@@ -620,7 +622,9 @@ export async function runSimulator(prev: TypecheckedStage): Promise<CLIProcedure
         options.rng,
         options.storeMetadata,
         foreignBindings.value,
-        (reference, label, value) => tapManager.emitQuint(reference, label, value, 'typescript')
+        (reference, label, value) => tapManager.emitQuint(reference, label, value, 'typescript'),
+        () => tapManager.beginTrace(),
+        () => tapManager.endTrace()
       )
       outcome = evaluator.simulate(
         init,

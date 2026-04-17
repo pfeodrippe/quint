@@ -8,6 +8,7 @@ use crate::{
     rand::Rand,
     storage::Storage,
     trace_quality::insert_sorted_by_quality,
+    tap,
     verbosity::Verbosity,
 };
 use serde::{Deserialize, Serialize};
@@ -215,6 +216,7 @@ impl ParsedQuint {
 
         for sample_number in 1..=samples {
             reporter.next_sample();
+            let _trace_scope = tap::trace_scope(config.tap);
             let seed = env.rand.get_state();
             trace_witnessed.fill(false);
             let mut remaining = compiled_witnesses.len();

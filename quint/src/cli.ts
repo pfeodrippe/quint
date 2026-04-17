@@ -48,7 +48,7 @@ const tapOpts = (yargs: any) =>
   yargs
     .option('tapListener', {
       alias: ['tap-listener'],
-      desc: 'comma-separated tap listeners for q::tap. Supported: stdout, jsonl:/path/to/file.jsonl',
+      desc: 'comma-separated tap listeners for q::tap. Supported: stdout, stats, stats:json:/path/to/file.json, stats:trace:last|min|max|count|sum, jsonl:/path/to/file.jsonl',
       type: 'string',
       array: true,
     })

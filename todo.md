@@ -1,5 +1,6 @@
 - [x] override
-- [ ] tap to log stuff
+- [x] tap to log stuff
+- [ ]
 - [ ] hooks
   - [ ] special operators
 - [ ] control not only the operators/hooks, but also the non-determinism itself
