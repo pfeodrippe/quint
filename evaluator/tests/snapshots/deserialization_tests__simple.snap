@@ -26,6 +26,7 @@ modules:
               - kind: int
                 id: 3
                 value: 1
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -41,6 +42,7 @@ modules:
             - kind: int
               id: 7
               value: 1
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -52,6 +54,7 @@ modules:
           kind: bool
           id: 11
           value: true
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -63,6 +66,7 @@ modules:
           kind: bool
           id: 13
           value: true
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -92,6 +96,7 @@ table:
           - kind: int
             id: 3
             value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -117,6 +122,7 @@ table:
           - kind: int
             id: 3
             value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -133,6 +139,7 @@ table:
         - kind: int
           id: 7
           value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -145,6 +152,7 @@ table:
       kind: bool
       id: 11
       value: true
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -157,6 +165,7 @@ table:
       kind: bool
       id: 13
       value: true
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0

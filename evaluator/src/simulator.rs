@@ -2,7 +2,7 @@
 
 use crate::{
     evaluator::{Env, Interpreter},
-    ir::{LookupTable, QuintError, QuintEx},
+    ir::{ForeignBindingSpec, LookupTable, QuintError, QuintEx},
     itf::{DebugMessage, Trace},
     progress::Reporter,
     rand::Rand,
@@ -26,6 +26,8 @@ pub struct ParsedQuint {
     pub invariants: Vec<QuintEx>,
     pub witnesses: Vec<QuintEx>,
     pub table: LookupTable,
+    #[serde(default)]
+    pub foreign_bindings: Vec<ForeignBindingSpec>,
 }
 
 /// Configuration for simulation runs.
@@ -158,8 +160,21 @@ impl ParsedQuint {
         env.trace.clear();
         env.diagnostics.clear();
 
-        let mut interpreter =
-            Interpreter::with_var_storage(self.table.clone(), env.var_storage.clone());
+        let mut interpreter = Interpreter::with_var_storage_and_bindings(
+            self.table.clone(),
+            env.var_storage.clone(),
+            self.foreign_bindings.clone(),
+        )
+        .map_err(|error| SimulationError {
+            seed: env.rand.get_state(),
+            trace: Trace {
+                states: Vec::new(),
+                violation: false,
+                seed: env.rand.get_state(),
+            },
+            error,
+            pending_diagnostics: Vec::new(),
+        })?;
 
         let verbosity = env.verbosity;
 

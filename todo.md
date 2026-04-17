@@ -1,2 +1,4 @@
 - [x] override
 - [ ] hooks
+- [ ] control not only the operators/hooks, but also the non-determinism itself
+- [ ] ability to drive real apps (a BIG one)

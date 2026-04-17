@@ -28,6 +28,7 @@ import { TestResult } from '../runtime/testing'
 import { List } from 'immutable'
 import { nameWithNamespaces } from '../runtime/impl/builder'
 import { Either, left, right } from '@sweet-monads/either'
+import { RustForeignBindingSpec } from '../runtime/foreign'
 import { getRustEvaluatorPath } from './binaryManager'
 import { bigintCheckerReplacer } from './helpers'
 
@@ -39,17 +40,20 @@ export type ParsedQuint = {
   step: QuintEx
   invariants: QuintEx[]
   witnesses: QuintEx[]
+  foreign_bindings?: RustForeignBindingSpec[]
 }
 
 export class CommandWrapper {
   private verbosityLevel: number
+  private foreignBindings: RustForeignBindingSpec[]
 
   /**
    * Constructor for CommandWrapper.
    * @param {number} verbosityLevel - The level of verbosity for logging.
    */
-  constructor(verbosityLevel: number) {
+  constructor(verbosityLevel: number, foreignBindings: RustForeignBindingSpec[] = []) {
     this.verbosityLevel = verbosityLevel
+    this.foreignBindings = foreignBindings
   }
 
   /**
@@ -81,7 +85,7 @@ export class CommandWrapper {
     onTrace?: TraceHook
   ): Promise<Outcome> {
     const input = {
-      parsed: parsed,
+      parsed: { ...parsed, foreign_bindings: this.foreignBindings },
       source: source,
       nruns: nruns,
       nsteps: nsteps,
@@ -173,6 +177,7 @@ export class CommandWrapper {
       name: testName,
       test_def: testDef,
       table: table,
+      foreign_bindings: this.foreignBindings,
       seed: seed,
       max_samples: maxSamples,
       verbosity: this.verbosityLevel,
@@ -247,7 +252,7 @@ export class CommandWrapper {
     table: LookupTable,
     exprs: QuintEx[]
   ): Promise<Either<QuintError, ItfValue[]>> {
-    const input = { table, state, exprs }
+    const input = { table, state, exprs, foreign_bindings: this.foreignBindings }
     const result = await this.runRustEvaluator('evaluate-at-state-from-stdin', input)
 
     if (result.isLeft()) {

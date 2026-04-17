@@ -32,6 +32,7 @@ modules:
             - kind: str
               id: 31
               value: black
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -65,6 +66,7 @@ modules:
             - kind: str
               id: 252
               value: black
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -90,6 +92,7 @@ modules:
                 - kind: int
                   id: 26
                   value: 1
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -227,6 +230,7 @@ modules:
                 - kind: name
                   id: 108
                   name: active
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -381,6 +385,7 @@ modules:
                   - kind: name
                     id: 151
                     name: active
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -459,6 +464,7 @@ modules:
                   - kind: name
                     id: 225
                     name: tcolor
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -483,6 +489,7 @@ modules:
             - kind: name
               id: 248
               name: tcolor
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -554,6 +561,7 @@ modules:
                         - kind: int
                           id: 275
                           value: 0
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -675,6 +683,7 @@ modules:
                 - kind: str
                   id: 350
                   value: black
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -741,6 +750,7 @@ modules:
                 - kind: name
                   id: 48
                   name: Color
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -781,6 +791,7 @@ modules:
                             - kind: int
                               id: 159
                               value: 0
+                declarationOnly: false
                 importedFrom: ~
                 namespaces: ~
                 depth: ~
@@ -792,6 +803,7 @@ modules:
                   - kind: name
                     id: 164
                     name: i
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -845,6 +857,7 @@ modules:
                               - kind: name
                                 id: 174
                                 name: i_207
+                  declarationOnly: false
                   importedFrom: ~
                   namespaces: ~
                   depth: ~
@@ -936,6 +949,7 @@ modules:
                         - kind: name
                           id: 201
                           name: tcolor
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -965,6 +979,7 @@ modules:
                 - kind: name
                   id: 258
                   name: vars
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1007,6 +1022,7 @@ modules:
                           - kind: name
                             id: 285
                             name: i_288
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1057,6 +1073,7 @@ modules:
                     - kind: name
                       id: 300
                       name: terminationDetected
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1115,6 +1132,7 @@ modules:
                     - kind: name
                       id: 315
                       name: terminationDetected
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1148,6 +1166,7 @@ modules:
                         - kind: name
                           id: 53
                           name: Bool
+                declarationOnly: false
                 importedFrom: ~
                 namespaces: ~
                 depth: ~
@@ -1183,6 +1202,7 @@ modules:
                         - kind: name
                           id: 62
                           name: Color
+                declarationOnly: false
                 importedFrom: ~
                 namespaces: ~
                 depth: ~
@@ -1211,6 +1231,7 @@ modules:
                     - kind: name
                       id: 70
                       name: Nodes
+                declarationOnly: false
                 importedFrom: ~
                 namespaces: ~
                 depth: ~
@@ -1235,6 +1256,7 @@ modules:
                 - kind: str
                   id: 77
                   value: black
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1257,6 +1279,7 @@ modules:
                 - kind: name
                   id: 231
                   name: Nodes
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -1279,6 +1302,7 @@ modules:
                   - kind: name
                     id: 236
                     name: i
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1297,6 +1321,7 @@ modules:
             - kind: name
               id: 242
               name: Environment
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1329,6 +1354,7 @@ modules:
                     - kind: name
                       id: 357
                       name: vars
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1340,6 +1366,7 @@ modules:
           kind: name
           id: 367
           name: init
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1351,6 +1378,7 @@ modules:
           kind: name
           id: 369
           name: step
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1390,6 +1418,7 @@ table:
             - kind: int
               id: 26
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -1409,6 +1438,7 @@ table:
         - kind: str
           id: 31
           value: black
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -1441,6 +1471,7 @@ table:
             - kind: int
               id: 26
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -1473,6 +1504,7 @@ table:
             - kind: int
               id: 26
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -1492,6 +1524,7 @@ table:
         - kind: str
           id: 31
           value: black
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -1524,6 +1557,7 @@ table:
             - kind: int
               id: 26
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -1549,6 +1583,7 @@ table:
         - kind: str
           id: 31
           value: black
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -1616,6 +1651,7 @@ table:
             - kind: name
               id: 48
               name: Color
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -1642,6 +1678,7 @@ table:
             - kind: int
               id: 26
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -1665,6 +1702,7 @@ table:
             - kind: name
               id: 53
               name: Bool
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -1688,6 +1726,7 @@ table:
             - kind: name
               id: 53
               name: Bool
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -1720,6 +1759,7 @@ table:
             - kind: int
               id: 26
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -1739,6 +1779,7 @@ table:
         - kind: str
           id: 31
           value: black
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -1762,6 +1803,7 @@ table:
             - kind: name
               id: 62
               name: Color
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -1785,6 +1827,7 @@ table:
             - kind: name
               id: 62
               name: Color
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -1817,6 +1860,7 @@ table:
             - kind: int
               id: 26
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -1833,6 +1877,7 @@ table:
         - kind: name
           id: 70
           name: Nodes
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -1849,6 +1894,7 @@ table:
         - kind: name
           id: 70
           name: Nodes
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -1895,6 +1941,7 @@ table:
                     - kind: name
                       id: 53
                       name: Bool
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -1930,6 +1977,7 @@ table:
                     - kind: name
                       id: 62
                       name: Color
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -1958,6 +2006,7 @@ table:
                 - kind: name
                   id: 70
                   name: Nodes
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -1982,6 +2031,7 @@ table:
             - kind: str
               id: 77
               value: black
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2153,6 +2203,7 @@ table:
             - kind: name
               id: 108
               name: active
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2398,6 +2449,7 @@ table:
               - kind: name
                 id: 151
                 name: active
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2509,6 +2561,7 @@ table:
             - kind: name
               id: 108
               name: active
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2535,6 +2588,7 @@ table:
             - kind: int
               id: 26
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2562,6 +2616,7 @@ table:
                 - kind: int
                   id: 159
                   value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -2589,6 +2644,7 @@ table:
                 - kind: int
                   id: 159
                   value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -2744,6 +2800,7 @@ table:
               - kind: name
                 id: 151
                 name: active
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2785,6 +2842,7 @@ table:
                         - kind: int
                           id: 159
                           value: 0
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -2796,6 +2854,7 @@ table:
               - kind: name
                 id: 164
                 name: i
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2831,6 +2890,7 @@ table:
             - kind: int
               id: 26
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2861,6 +2921,7 @@ table:
                 - kind: name
                   id: 174
                   name: i_207
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 3
@@ -2894,6 +2955,7 @@ table:
                 - kind: name
                   id: 174
                   name: i_207
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 3
@@ -2936,6 +2998,7 @@ table:
                 - kind: name
                   id: 174
                   name: i_207
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 3
@@ -3026,6 +3089,7 @@ table:
                           - kind: name
                             id: 174
                             name: i_207
+              declarationOnly: false
               importedFrom: ~
               namespaces: ~
               depth: ~
@@ -3117,6 +3181,7 @@ table:
                     - kind: name
                       id: 201
                       name: tcolor
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3256,6 +3321,7 @@ table:
               - kind: name
                 id: 225
                 name: tcolor
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3282,6 +3348,7 @@ table:
             - kind: int
               id: 26
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3298,6 +3365,7 @@ table:
         - kind: name
           id: 231
           name: Nodes
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -3314,6 +3382,7 @@ table:
         - kind: name
           id: 231
           name: Nodes
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -3368,6 +3437,7 @@ table:
                           - kind: name
                             id: 174
                             name: i_207
+              declarationOnly: false
               importedFrom: ~
               namespaces: ~
               depth: ~
@@ -3459,6 +3529,7 @@ table:
                     - kind: name
                       id: 201
                       name: tcolor
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3475,6 +3546,7 @@ table:
         - kind: name
           id: 231
           name: Nodes
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -3554,6 +3626,7 @@ table:
               - kind: name
                 id: 225
                 name: tcolor
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3577,6 +3650,7 @@ table:
             - kind: name
               id: 231
               name: Nodes
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -3599,6 +3673,7 @@ table:
               - kind: name
                 id: 236
                 name: i
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3640,6 +3715,7 @@ table:
                         - kind: int
                           id: 159
                           value: 0
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -3651,6 +3727,7 @@ table:
               - kind: name
                 id: 164
                 name: i
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3674,6 +3751,7 @@ table:
             - kind: name
               id: 231
               name: Nodes
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -3696,6 +3774,7 @@ table:
               - kind: name
                 id: 236
                 name: i
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3715,6 +3794,7 @@ table:
         - kind: name
           id: 242
           name: Environment
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3764,6 +3844,7 @@ table:
         - kind: name
           id: 248
           name: tcolor
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3789,6 +3870,7 @@ table:
         - kind: str
           id: 252
           value: black
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3826,6 +3908,7 @@ table:
         - kind: name
           id: 248
           name: tcolor
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3856,6 +3939,7 @@ table:
             - kind: name
               id: 258
               name: vars
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3952,6 +4036,7 @@ table:
                     - kind: int
                       id: 275
                       value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4024,6 +4109,7 @@ table:
                     - kind: int
                       id: 275
                       value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4050,6 +4136,7 @@ table:
             - kind: int
               id: 26
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4102,6 +4189,7 @@ table:
                       - kind: name
                         id: 285
                         name: i_288
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4128,6 +4216,7 @@ table:
             - kind: int
               id: 26
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4209,6 +4298,7 @@ table:
                     - kind: int
                       id: 275
                       value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4260,6 +4350,7 @@ table:
                 - kind: name
                   id: 300
                   name: terminationDetected
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4286,6 +4377,7 @@ table:
             - kind: int
               id: 26
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4367,6 +4459,7 @@ table:
                     - kind: int
                       id: 275
                       value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4426,6 +4519,7 @@ table:
                 - kind: name
                   id: 315
                   name: terminationDetected
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4452,6 +4546,7 @@ table:
             - kind: int
               id: 26
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4496,6 +4591,7 @@ table:
             - kind: int
               id: 26
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4645,6 +4741,7 @@ table:
             - kind: str
               id: 350
               value: black
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4712,6 +4809,7 @@ table:
             - kind: name
               id: 48
               name: Color
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4834,6 +4932,7 @@ table:
             - kind: str
               id: 350
               value: black
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4853,6 +4952,7 @@ table:
         - kind: name
           id: 242
           name: Environment
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4878,6 +4978,7 @@ table:
         - kind: name
           id: 248
           name: tcolor
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4911,6 +5012,7 @@ table:
                 - kind: name
                   id: 357
                   name: vars
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4923,6 +5025,7 @@ table:
       kind: int
       id: 363
       value: 3
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4957,6 +5060,7 @@ table:
                     - kind: name
                       id: 53
                       name: Bool
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -4992,6 +5096,7 @@ table:
                     - kind: name
                       id: 62
                       name: Color
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -5020,6 +5125,7 @@ table:
                 - kind: name
                   id: 70
                   name: Nodes
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -5044,6 +5150,7 @@ table:
             - kind: str
               id: 77
               value: black
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5056,6 +5163,7 @@ table:
       kind: name
       id: 367
       name: init
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5075,6 +5183,7 @@ table:
         - kind: name
           id: 242
           name: Environment
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5087,6 +5196,7 @@ table:
       kind: name
       id: 369
       name: step
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5106,6 +5216,7 @@ table:
         - kind: str
           id: 378
           value: black
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5125,6 +5236,7 @@ table:
         - kind: str
           id: 392
           value: black
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5157,6 +5269,7 @@ table:
             - kind: int
               id: 398
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5169,6 +5282,7 @@ table:
       kind: int
       id: 363
       value: 3
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5181,6 +5295,7 @@ table:
       kind: int
       id: 363
       value: 3
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5292,6 +5407,7 @@ table:
             - kind: name
               id: 436
               name: "ewd840_3::ewd840::active"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5328,6 +5444,7 @@ table:
       kind: int
       id: 363
       value: 3
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5513,6 +5630,7 @@ table:
               - kind: name
                 id: 480
                 name: "ewd840_3::ewd840::active"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5682,6 +5800,7 @@ table:
               - kind: name
                 id: 502
                 name: "ewd840_3::ewd840::tcolor"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5767,6 +5886,7 @@ table:
         - kind: name
           id: 508
           name: "ewd840_3::ewd840::tcolor"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5863,6 +5983,7 @@ table:
                     - kind: int
                       id: 527
                       value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6009,6 +6130,7 @@ table:
             - kind: str
               id: 561
               value: black
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6035,6 +6157,7 @@ table:
             - kind: int
               id: 398
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6079,6 +6202,7 @@ table:
             - kind: int
               id: 398
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6173,6 +6297,7 @@ table:
             - kind: name
               id: 579
               name: "ewd840_3::ewd840::Color"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6205,6 +6330,7 @@ table:
             - kind: int
               id: 398
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6237,6 +6363,7 @@ table:
             - kind: int
               id: 398
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6256,6 +6383,7 @@ table:
         - kind: str
           id: 378
           value: black
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6288,6 +6416,7 @@ table:
             - kind: int
               id: 398
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6313,6 +6442,7 @@ table:
         - kind: str
           id: 378
           value: black
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6354,6 +6484,7 @@ table:
                         - kind: int
                           id: 589
                           value: 0
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -6365,6 +6496,7 @@ table:
               - kind: name
                 id: 591
                 name: "ewd840_3::ewd840::i"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6476,6 +6608,7 @@ table:
             - kind: name
               id: 436
               name: "ewd840_3::ewd840::active"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6503,6 +6636,7 @@ table:
                 - kind: int
                   id: 589
                   value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -6529,6 +6663,7 @@ table:
             - kind: int
               id: 398
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6684,6 +6819,7 @@ table:
               - kind: name
                 id: 480
                 name: "ewd840_3::ewd840::active"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6711,6 +6847,7 @@ table:
                 - kind: int
                   id: 589
                   value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -6765,6 +6902,7 @@ table:
                           - kind: name
                             id: 605
                             name: "ewd840_3::ewd840::i_207"
+              declarationOnly: false
               importedFrom: ~
               namespaces: ~
               depth: ~
@@ -6856,6 +6994,7 @@ table:
                     - kind: name
                       id: 631
                       name: "ewd840_3::ewd840::tcolor"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6892,6 +7031,7 @@ table:
                 - kind: name
                   id: 605
                   name: "ewd840_3::ewd840::i_207"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 3
@@ -6918,6 +7058,7 @@ table:
             - kind: int
               id: 398
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6960,6 +7101,7 @@ table:
                 - kind: name
                   id: 605
                   name: "ewd840_3::ewd840::i_207"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 3
@@ -7002,6 +7144,7 @@ table:
                 - kind: name
                   id: 605
                   name: "ewd840_3::ewd840::i_207"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 3
@@ -7062,6 +7205,7 @@ table:
             - kind: name
               id: 638
               name: "ewd840_3::ewd840::vars"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7099,6 +7243,7 @@ table:
         - kind: name
           id: 508
           name: "ewd840_3::ewd840::tcolor"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7142,6 +7287,7 @@ table:
                       - kind: name
                         id: 649
                         name: "ewd840_3::ewd840::i_288"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7214,6 +7360,7 @@ table:
                     - kind: int
                       id: 527
                       value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7240,6 +7387,7 @@ table:
             - kind: int
               id: 398
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7300,6 +7448,7 @@ table:
                 - kind: name
                   id: 662
                   name: "ewd840_3::ewd840::terminationDetected"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7326,6 +7475,7 @@ table:
             - kind: int
               id: 398
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7407,6 +7557,7 @@ table:
                     - kind: int
                       id: 527
                       value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7466,6 +7617,7 @@ table:
                 - kind: name
                   id: 677
                   name: "ewd840_3::ewd840::terminationDetected"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7492,6 +7644,7 @@ table:
             - kind: int
               id: 398
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7573,6 +7726,7 @@ table:
                     - kind: int
                       id: 527
                       value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7607,6 +7761,7 @@ table:
                     - kind: name
                       id: 685
                       name: Bool
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -7642,6 +7797,7 @@ table:
                     - kind: name
                       id: 694
                       name: "ewd840_3::ewd840::Color"
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -7670,6 +7826,7 @@ table:
                 - kind: name
                   id: 701
                   name: "ewd840_3::ewd840::Nodes"
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -7694,6 +7851,7 @@ table:
             - kind: str
               id: 707
               value: black
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7717,6 +7875,7 @@ table:
             - kind: name
               id: 685
               name: Bool
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -7743,6 +7902,7 @@ table:
             - kind: int
               id: 398
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7772,6 +7932,7 @@ table:
             - kind: name
               id: 685
               name: Bool
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -7795,6 +7956,7 @@ table:
             - kind: name
               id: 694
               name: "ewd840_3::ewd840::Color"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -7821,6 +7983,7 @@ table:
             - kind: int
               id: 398
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7840,6 +8003,7 @@ table:
         - kind: str
           id: 378
           value: black
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7869,6 +8033,7 @@ table:
             - kind: name
               id: 694
               name: "ewd840_3::ewd840::Color"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -7885,6 +8050,7 @@ table:
         - kind: name
           id: 701
           name: "ewd840_3::ewd840::Nodes"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -7911,6 +8077,7 @@ table:
             - kind: int
               id: 398
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7933,6 +8100,7 @@ table:
         - kind: name
           id: 701
           name: "ewd840_3::ewd840::Nodes"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -7962,6 +8130,7 @@ table:
             - kind: name
               id: 712
               name: "ewd840_3::ewd840::Nodes"
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -7984,6 +8153,7 @@ table:
               - kind: name
                 id: 717
                 name: "ewd840_3::ewd840::i"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8000,6 +8170,7 @@ table:
         - kind: name
           id: 712
           name: "ewd840_3::ewd840::Nodes"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -8026,6 +8197,7 @@ table:
             - kind: int
               id: 398
               value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8080,6 +8252,7 @@ table:
                           - kind: name
                             id: 605
                             name: "ewd840_3::ewd840::i_207"
+              declarationOnly: false
               importedFrom: ~
               namespaces: ~
               depth: ~
@@ -8171,6 +8344,7 @@ table:
                     - kind: name
                       id: 631
                       name: "ewd840_3::ewd840::tcolor"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8187,6 +8361,7 @@ table:
         - kind: name
           id: 712
           name: "ewd840_3::ewd840::Nodes"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -8266,6 +8441,7 @@ table:
               - kind: name
                 id: 502
                 name: "ewd840_3::ewd840::tcolor"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8282,6 +8458,7 @@ table:
         - kind: name
           id: 712
           name: "ewd840_3::ewd840::Nodes"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -8301,6 +8478,7 @@ table:
         - kind: name
           id: 721
           name: "ewd840_3::ewd840::Environment"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8342,6 +8520,7 @@ table:
                         - kind: int
                           id: 589
                           value: 0
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -8353,6 +8532,7 @@ table:
               - kind: name
                 id: 591
                 name: "ewd840_3::ewd840::i"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8376,6 +8556,7 @@ table:
             - kind: name
               id: 712
               name: "ewd840_3::ewd840::Nodes"
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -8398,6 +8579,7 @@ table:
               - kind: name
                 id: 717
                 name: "ewd840_3::ewd840::i"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8431,6 +8613,7 @@ table:
                 - kind: name
                   id: 729
                   name: "ewd840_3::ewd840::vars"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8498,6 +8681,7 @@ table:
             - kind: name
               id: 579
               name: "ewd840_3::ewd840::Color"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8620,6 +8804,7 @@ table:
             - kind: str
               id: 561
               value: black
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8639,6 +8824,7 @@ table:
         - kind: name
           id: 721
           name: "ewd840_3::ewd840::Environment"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8664,6 +8850,7 @@ table:
         - kind: name
           id: 508
           name: "ewd840_3::ewd840::tcolor"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8676,6 +8863,7 @@ table:
       kind: name
       id: 731
       name: "ewd840_3::ewd840::init"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8710,6 +8898,7 @@ table:
                     - kind: name
                       id: 685
                       name: Bool
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -8745,6 +8934,7 @@ table:
                     - kind: name
                       id: 694
                       name: "ewd840_3::ewd840::Color"
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -8773,6 +8963,7 @@ table:
                 - kind: name
                   id: 701
                   name: "ewd840_3::ewd840::Nodes"
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -8797,6 +8988,7 @@ table:
             - kind: str
               id: 707
               value: black
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8809,6 +9001,7 @@ table:
       kind: name
       id: 733
       name: "ewd840_3::ewd840::step"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8828,6 +9021,7 @@ table:
         - kind: name
           id: 721
           name: "ewd840_3::ewd840::Environment"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0

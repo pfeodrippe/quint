@@ -31,13 +31,20 @@ import { zerog } from '../idGenerator'
 import { getRustEvaluatorPath } from './binaryManager'
 import { prettyQuintEx, terminalWidth } from '../graphics'
 import { Doc, brackets, format, group, line, space, text } from '../prettierimp'
+import { RustForeignBindingSpec } from '../runtime/foreign'
 
 /**
  * Commands sent to the Rust REPL evaluator
  */
 type ReplCommand =
-  | { cmd: 'Initialize'; table: LookupTable; seed?: bigint; verbosity?: number }
-  | { cmd: 'UpdateTable'; table: LookupTable }
+  | {
+      cmd: 'Initialize'
+      table: LookupTable
+      seed?: bigint
+      verbosity?: number
+      foreign_bindings?: RustForeignBindingSpec[]
+    }
+  | { cmd: 'UpdateTable'; table: LookupTable; foreign_bindings?: RustForeignBindingSpec[] }
   | { cmd: 'Evaluate'; expr: QuintEx }
   | { cmd: 'ReplShift' }
   | { cmd: 'GetTraceStates' }
@@ -85,20 +92,30 @@ export class ReplServerWrapper {
   private verbosityLevel: number
   private traceCache?: Trace
   private out: (text: string) => void
+  private currentTable: LookupTable
+  private currentForeignBindings: RustForeignBindingSpec[]
 
   private initializationPromise: Promise<void>
 
-  constructor(table: LookupTable, recorder: TraceRecorder, rng: Rng, out: (text: string) => void) {
+  constructor(
+    table: LookupTable,
+    recorder: TraceRecorder,
+    rng: Rng,
+    out: (text: string) => void,
+    foreignBindings: RustForeignBindingSpec[] = []
+  ) {
     this.recorder = recorder
     this.verbosityLevel = recorder.verbosityLevel
     this.out = out
-    this.initializationPromise = this.initialize(table, rng.getState())
+    this.currentTable = table
+    this.currentForeignBindings = foreignBindings
+    this.initializationPromise = this.initialize(table, rng.getState(), foreignBindings)
   }
 
   /**
    * Initialize the Rust evaluator process and wait for it to be ready
    */
-  private async initialize(table: LookupTable, seed: bigint): Promise<void> {
+  private async initialize(table: LookupTable, seed: bigint, foreignBindings: RustForeignBindingSpec[]): Promise<void> {
     // Get the path to the Rust evaluator (async, may download)
     const evaluatorPath = await getRustEvaluatorPath()
 
@@ -179,7 +196,7 @@ export class ReplServerWrapper {
     })
 
     // Send initialization command and WAIT for response
-    await this.sendCommand({ cmd: 'Initialize', table, seed, verbosity: this.verbosityLevel })
+    await this.sendCommand({ cmd: 'Initialize', table, seed, verbosity: this.verbosityLevel, foreign_bindings: foreignBindings })
   }
 
   /**
@@ -275,7 +292,15 @@ export class ReplServerWrapper {
 
   async updateTable(table: LookupTable): Promise<void> {
     await this.initializationPromise
-    await this.sendCommand({ cmd: 'UpdateTable', table })
+    this.currentTable = table
+    await this.sendCommand({ cmd: 'UpdateTable', table, foreign_bindings: this.currentForeignBindings })
+  }
+
+  async updateForeignBindings(foreignBindings: RustForeignBindingSpec[]): Promise<void> {
+    await this.initializationPromise
+    this.currentForeignBindings = foreignBindings
+    await this.sendCommand({ cmd: 'UpdateTable', table: this.currentTable, foreign_bindings: foreignBindings })
+    this.traceCache = undefined
   }
 
   async getSeed(): Promise<bigint> {

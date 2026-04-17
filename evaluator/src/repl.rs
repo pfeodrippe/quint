@@ -5,7 +5,7 @@
 //! between commands, allowing incremental expression evaluation.
 
 use crate::evaluator::{Env, Interpreter};
-use crate::ir::{LookupTable, QuintEx};
+use crate::ir::{ForeignBindingSpec, LookupTable, QuintEx};
 use crate::itf::DebugMessage;
 use crate::rand::Rand;
 use crate::value::Value;
@@ -23,12 +23,18 @@ enum ReplCommand {
     Initialize {
         table: LookupTable,
         #[serde(default)]
+        foreign_bindings: Vec<ForeignBindingSpec>,
+        #[serde(default)]
         seed: Option<u64>,
         #[serde(default)]
         verbosity: Verbosity,
     },
     /// Update the lookup table with new definitions
-    UpdateTable { table: LookupTable },
+    UpdateTable {
+        table: LookupTable,
+        #[serde(default)]
+        foreign_bindings: Vec<ForeignBindingSpec>,
+    },
     /// Evaluate a single expression
     Evaluate { expr: QuintEx },
     /// Shift state variables and check for undefined vars, returning old and new states
@@ -107,13 +113,25 @@ impl ReplEvaluator {
     fn initialize(
         &mut self,
         table: LookupTable,
+        foreign_bindings: Vec<ForeignBindingSpec>,
         seed: Option<u64>,
         verbosity: Verbosity,
     ) -> ReplResponse {
         self.verbosity = verbosity;
 
         // Create the interpreter with the table
-        let interpreter = Interpreter::new(table);
+        let interpreter = match Interpreter::with_var_storage_and_bindings(
+            table,
+            std::rc::Rc::new(std::cell::RefCell::new(crate::storage::Storage::default())),
+            foreign_bindings,
+        ) {
+            Ok(interpreter) => interpreter,
+            Err(error) => {
+                return ReplResponse::Error {
+                    message: error.to_string(),
+                }
+            }
+        };
         let storage = interpreter.var_storage.clone();
 
         self.interpreter = Some(interpreter);
@@ -128,13 +146,20 @@ impl ReplEvaluator {
         ReplResponse::Initialized { success: true }
     }
 
-    fn update_table(&mut self, table: LookupTable) -> ReplResponse {
-        // Update the interpreter's table if it exists, otherwise error
-        match &mut self.interpreter {
-            Some(interpreter) => {
-                interpreter.update_table(table);
+    fn update_table(&mut self, table: LookupTable, foreign_bindings: Vec<ForeignBindingSpec>) -> ReplResponse {
+        match (&self.interpreter, &self.env) {
+            (Some(interpreter), Some(_env)) => {
+                let storage = interpreter.var_storage.clone();
+                match Interpreter::with_var_storage_and_bindings(table, storage, foreign_bindings) {
+                    Ok(new_interpreter) => self.interpreter = Some(new_interpreter),
+                    Err(error) => {
+                        return ReplResponse::Error {
+                            message: error.to_string(),
+                        }
+                    }
+                }
             }
-            None => {
+            _ => {
                 return ReplResponse::Error {
                     message: "Evaluator not initialized".to_string(),
                 }
@@ -249,7 +274,14 @@ impl ReplEvaluator {
     fn reset(&mut self) -> ReplResponse {
         // Create a fresh interpreter (clears all caches, memos, registries).
         // The table will be repopulated via a subsequent UpdateTable command.
-        let interpreter = Interpreter::new(LookupTable::default());
+        let interpreter = match Interpreter::new(LookupTable::default()) {
+            Ok(interpreter) => interpreter,
+            Err(error) => {
+                return ReplResponse::Error {
+                    message: error.to_string(),
+                }
+            }
+        };
         let storage = interpreter.var_storage.clone();
         self.interpreter = Some(interpreter);
 
@@ -300,10 +332,14 @@ impl ReplEvaluator {
         match command {
             ReplCommand::Initialize {
                 table,
+                foreign_bindings,
                 seed,
                 verbosity,
-            } => self.initialize(table, seed, verbosity),
-            ReplCommand::UpdateTable { table } => self.update_table(table),
+            } => self.initialize(table, foreign_bindings, seed, verbosity),
+            ReplCommand::UpdateTable {
+                table,
+                foreign_bindings,
+            } => self.update_table(table, foreign_bindings),
             ReplCommand::Evaluate { expr } => self.evaluate(expr),
             ReplCommand::ReplShift {} => self.repl_shift(),
             ReplCommand::GetTraceStates {} => self.get_trace_states(),

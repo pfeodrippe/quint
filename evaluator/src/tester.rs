@@ -1,5 +1,5 @@
 use crate::evaluator::{Env, Interpreter};
-use crate::ir::{LookupDefinition, LookupTable, QuintError};
+use crate::ir::{ForeignBindingSpec, LookupDefinition, LookupTable, QuintError};
 use crate::itf::Trace;
 use crate::progress::Reporter;
 use crate::verbosity::Verbosity;
@@ -10,6 +10,7 @@ pub struct TestCase {
     pub name: String,
     pub test_def: LookupDefinition,
     pub table: LookupTable,
+    pub foreign_bindings: Vec<ForeignBindingSpec>,
 }
 
 /// Status of a test execution
@@ -48,7 +49,23 @@ impl TestCase {
     ) -> TestResult {
         let test_name = &self.name;
 
-        let mut interpreter = Interpreter::new(self.table.clone());
+        let mut interpreter = match Interpreter::with_var_storage_and_bindings(
+            self.table.clone(),
+            std::rc::Rc::new(std::cell::RefCell::new(crate::storage::Storage::default())),
+            self.foreign_bindings.clone(),
+        ) {
+            Ok(interpreter) => interpreter,
+            Err(error) => {
+                return TestResult {
+                    name: test_name.clone(),
+                    traces: vec![],
+                    status: TestStatus::Failed,
+                    errors: vec![error],
+                    seed: 0,
+                    nsamples: 0,
+                }
+            }
+        };
         let mut env = match seed {
             Some(s) => Env::with_rand_state(interpreter.var_storage.clone(), s, verbosity),
             None => Env::new(interpreter.var_storage.clone(), verbosity),

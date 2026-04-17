@@ -36,7 +36,7 @@ import { walkDeclaration, walkExpression } from './ir/IRVisitor'
 import { AnalysisOutput, analyzeInc, analyzeModules } from './quintAnalyzer'
 import { NameResolver } from './names/resolver'
 import { diffRuntimeValueDoc } from './runtime/impl/runtimeValueDiff'
-import { loadForeignBindings } from './runtime/foreign'
+import { loadForeignBindings, loadRustForeignBindings } from './runtime/foreign'
 
 // tunable settings
 export const settings = {
@@ -659,7 +659,18 @@ function loadFromFile(out: writer, state: ReplState, filename: string): ReplStat
 }
 
 async function refreshForeignBindings(out: writer, state: ReplState, options: ReplOptions): Promise<boolean> {
-  if (!options.foreignBindings || state.evaluator instanceof ReplServerWrapper) {
+  if (!options.foreignBindings) {
+    return true
+  }
+
+  if (state.evaluator instanceof ReplServerWrapper) {
+    const bindings = await loadRustForeignBindings(options.foreignBindings, state.nameResolver)
+    if (bindings.isLeft()) {
+      out(chalk.red(`${bindings.value.message}\n`))
+      return false
+    }
+
+    await state.evaluator.updateForeignBindings(bindings.value)
     return true
   }
 

@@ -33,7 +33,7 @@ npm i @informalsystems/quint -g
 
 ## Foreign bindings
 
-Quint supports **foreign bindings** for declaration-only operators on the **TypeScript backend under Bun**.
+Quint supports **foreign bindings** for declaration-only operators.
 
 At the Quint call site, these operators behave like ordinary definitions:
 
@@ -63,7 +63,8 @@ Current limits:
 
 1. only declaration-only `pure def` and `pure val` targets are supported
 2. host implementations must be synchronous
-3. the Rust backend does not support foreign bindings
+3. `module` and `wasm` bindings require the TypeScript backend under Bun
+4. the Rust backend currently supports `ffi` bindings only
 
 See [foreign-bindings](./foreign-bindings.md) for the binding file format and adapter contracts.
 

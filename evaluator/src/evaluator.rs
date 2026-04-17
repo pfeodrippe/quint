@@ -10,6 +10,7 @@ use crate::rand::Rand;
 use crate::simulator::{ParsedQuint, SimulationConfig};
 use crate::storage::{Storage, VariableRegister};
 use crate::verbosity::Verbosity;
+use crate::foreign::{load_foreign_bindings, ForeignBindingRegistry};
 use crate::{builtins::*, ir::*, value::*};
 use fxhash::{FxHashMap, FxHashSet};
 use std::cell::RefCell;
@@ -180,15 +181,34 @@ pub struct Interpreter {
     // Initial nondet picks to be registered in the storage. This ensures that
     // at step 0, all nondet variable names are present in the map (with None values).
     initial_nondet_picks: FxHashSet<QuintName>,
+
+    foreign_bindings: ForeignBindingRegistry,
+    foreign_binding_specs: Vec<ForeignBindingSpec>,
 }
 
 impl Interpreter {
-    pub fn new(table: LookupTable) -> Self {
-        Self::with_var_storage(table, Rc::new(RefCell::new(Storage::default())))
+    pub fn new(table: LookupTable) -> Result<Self, QuintError> {
+        Self::with_var_storage_and_bindings(
+            table,
+            Rc::new(RefCell::new(Storage::default())),
+            Vec::new(),
+        )
     }
 
-    pub fn with_var_storage(table: LookupTable, var_storage: Rc<RefCell<Storage>>) -> Self {
-        Self {
+    pub fn with_var_storage(
+        table: LookupTable,
+        var_storage: Rc<RefCell<Storage>>,
+    ) -> Result<Self, QuintError> {
+        Self::with_var_storage_and_bindings(table, var_storage, Vec::new())
+    }
+
+    pub fn with_var_storage_and_bindings(
+        table: LookupTable,
+        var_storage: Rc<RefCell<Storage>>,
+        foreign_binding_specs: Vec<ForeignBindingSpec>,
+    ) -> Result<Self, QuintError> {
+        let foreign_bindings = load_foreign_bindings(&foreign_binding_specs)?;
+        Ok(Self {
             table,
             param_registry: FxHashMap::default(),
             const_registry: FxHashMap::default(),
@@ -198,14 +218,9 @@ impl Interpreter {
             memo_by_instance: FxHashMap::default(),
             namespaces: Vec::new(),
             initial_nondet_picks: FxHashSet::default(),
-        }
-    }
-
-    /// Update the lookup table.
-    /// Assumes the new table is an extension of the old one,
-    /// and therefore all caches are still valid
-    pub fn update_table(&mut self, table: LookupTable) {
-        self.table = table;
+            foreign_bindings,
+            foreign_binding_specs,
+        })
     }
 
     /// Shift the state, moving `next_vars` to `vars`.
@@ -343,6 +358,7 @@ impl Interpreter {
                             name: param.name.clone(),
                             qualifier: OpQualifier::PureVal,
                             expr,
+                            declaration_only: false,
                             imported_from: None,
                             namespaces: None,
                             depth: None,
@@ -388,6 +404,53 @@ impl Interpreter {
 
         let compiled_def = match def {
             LookupDefinition::Definition(QuintDeclaration::QuintOpDef(op)) => {
+                if op.declaration_only {
+                    if let Some(binding) = self.foreign_bindings.get(&op.id) {
+                        let binding = binding.clone();
+                        if let QuintEx::QuintLambda { params, .. } = &op.expr {
+                            let params = params.clone();
+                            let param_registers = params
+                                .iter()
+                                .map(|param| self.get_or_create_param(param))
+                                .collect::<Vec<_>>();
+                            let lambda_params = params.clone();
+                            let lambda_registers = param_registers.clone();
+                            let binding_for_lambda = binding.clone();
+
+                            return CompiledExpr::new(move |_| {
+                                let inner_params = lambda_params.clone();
+                                let inner_registers = lambda_registers.clone();
+                                let inner_binding = binding_for_lambda.clone();
+                                Ok(Value::lambda(
+                                    inner_registers.clone(),
+                                    CompiledExpr::new(move |_env| {
+                                        let mut args = Vec::with_capacity(inner_params.len());
+                                        for (param, register) in inner_params.iter().zip(inner_registers.iter()) {
+                                            match register.borrow().clone() {
+                                                Ok(value) => args.push(value),
+                                                Err(error) => return Err(error.push_trace(param.id)),
+                                            }
+                                        }
+                                        inner_binding.invoke(args)
+                                    }),
+                                ))
+                            });
+                        }
+
+                        return CompiledExpr::new(move |_| binding.invoke(Vec::new()));
+                    }
+
+                    return CompiledExpr::new({
+                        let name = op.name.clone();
+                        move |_| {
+                            Err(QuintError::new(
+                                "QNT524",
+                                &format!("Declaration-only operator {name} requires a foreign binding"),
+                            ))
+                        }
+                    });
+                }
+
                 let base_expr = if matches!(op.expr, QuintEx::QuintLambda { .. })
                     || op.depth.is_none_or(|x| x == 0)
                 {
@@ -734,6 +797,7 @@ impl Interpreter {
             invariants: vec![inv_ex],
             witnesses: vec![],
             table: self.table.clone(),
+            foreign_bindings: self.foreign_binding_specs.clone(),
         };
 
         CompiledExpr::new(move |env| {
@@ -834,11 +898,19 @@ pub fn evaluate_at_state(
     state: itf::Value,
     table: &LookupTable,
     exprs: &[QuintEx],
+    foreign_bindings: &[ForeignBindingSpec],
 ) -> Vec<EvalResult> {
     let state_value = Value::from_itf(state);
 
     // Create the interpreter for evaluating the invariant expressions
-    let mut interpreter = Interpreter::new(table.clone());
+    let mut interpreter = match Interpreter::with_var_storage_and_bindings(
+        table.clone(),
+        Rc::new(RefCell::new(Storage::default())),
+        foreign_bindings.to_vec(),
+    ) {
+        Ok(interpreter) => interpreter,
+        Err(error) => return exprs.iter().map(|_| Err(error.clone())).collect(),
+    };
     let mut env = Env::new(interpreter.var_storage.clone(), Verbosity::default());
 
     // Compile the expressions
@@ -898,7 +970,7 @@ fn can_cache(def: &LookupDefinition) -> Cache {
 
 /// Utility to compile and evaluate an expression in a new interpreter
 pub fn run(table: &LookupTable, expr: &QuintEx) -> Result<Value, QuintError> {
-    let mut interpreter = Interpreter::new(table.clone());
+    let mut interpreter = Interpreter::new(table.clone())?;
     let mut env = Env::new(interpreter.var_storage.clone(), Verbosity::default());
 
     interpreter.eval(&mut env, expr.clone())

@@ -286,6 +286,7 @@ modules:
                     - kind: int
                       id: 120
                       value: 3
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -338,6 +339,7 @@ modules:
                 - kind: int
                   id: 135
                   value: 3
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -372,6 +374,7 @@ modules:
                 - kind: int
                   id: 39
                   value: 3
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -391,6 +394,7 @@ modules:
               id: 10
               opcode: Tup
               args: []
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -417,6 +421,7 @@ modules:
               id: 6
               opcode: Tup
               args: []
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -441,6 +446,7 @@ modules:
               - kind: name
                 id: 19
                 name: __OccupiedParam_21
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -460,6 +466,7 @@ modules:
               id: 24
               opcode: Tup
               args: []
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -510,6 +517,7 @@ modules:
                   - kind: int
                     id: 150
                     value: 2
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -582,6 +590,7 @@ modules:
                               kind: name
                               id: 465
                               name: Empty
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -640,6 +649,7 @@ modules:
                     - kind: name
                       id: 161
                       name: p_168
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -689,6 +699,7 @@ modules:
                   kind: bool
                   id: 176
                   value: false
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -707,6 +718,7 @@ modules:
             - kind: name
               id: 187
               name: isEmpty
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -757,6 +769,7 @@ modules:
                           - kind: name
                             id: 196
                             name: player_202
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -779,6 +792,7 @@ modules:
                 - kind: name
                   id: 205
                   name: isEmpty
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -862,6 +876,7 @@ modules:
                   - kind: int
                     id: 245
                     value: 1
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -945,6 +960,7 @@ modules:
                   - kind: int
                     id: 268
                     value: 1
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1028,6 +1044,7 @@ modules:
                   - kind: int
                     id: 291
                     value: 2
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1050,6 +1067,7 @@ modules:
                 - kind: int
                   id: 305
                   value: 2
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1131,6 +1149,7 @@ modules:
                                 - kind: name
                                   id: 326
                                   name: player_334
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1172,6 +1191,7 @@ modules:
                     - kind: name
                       id: 214
                       name: O
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1205,6 +1225,7 @@ modules:
             - kind: name
               id: 224
               name: boardFull
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1223,6 +1244,7 @@ modules:
             - kind: name
               id: 297
               name: canWinWithPattern
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1241,6 +1263,7 @@ modules:
             - kind: name
               id: 301
               name: canBlockWithPattern
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1259,6 +1282,7 @@ modules:
             - kind: name
               id: 310
               name: canSetupWinWithPattern
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1284,6 +1308,7 @@ modules:
                 - kind: int
                   id: 374
                   value: 2
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1319,6 +1344,7 @@ modules:
                       - kind: name
                         id: 397
                         name: isEmpty
+              declarationOnly: false
               importedFrom: ~
               namespaces: ~
               depth: ~
@@ -1333,6 +1359,7 @@ modules:
                 - kind: name
                   id: 402
                   name: coordinate
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1355,6 +1382,7 @@ modules:
                 - kind: name
                   id: 407
                   name: corners
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -1369,6 +1397,7 @@ modules:
               - kind: name
                 id: 411
                 name: corner
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1388,6 +1417,7 @@ modules:
                 - kind: name
                   id: 486
                   name: X
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1407,6 +1437,7 @@ modules:
                 - kind: name
                   id: 490
                   name: O
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1426,6 +1457,7 @@ modules:
                 - kind: name
                   id: 499
                   name: X
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1472,6 +1504,7 @@ modules:
                 - kind: name
                   id: 449
                   name: X
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1487,6 +1520,7 @@ modules:
             - kind: name
               id: 494
               name: stalemate
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1498,6 +1532,7 @@ modules:
           kind: name
           id: 497
           name: OHasNotWon
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1534,6 +1569,7 @@ modules:
                         - kind: name
                           id: 338
                           name: canWinWithPattern
+                declarationOnly: false
                 importedFrom: ~
                 namespaces: ~
                 depth: ~
@@ -1559,6 +1595,7 @@ modules:
                           - kind: name
                             id: 343
                             name: isEmpty
+                  declarationOnly: false
                   importedFrom: ~
                   namespaces: ~
                   depth: ~
@@ -1573,6 +1610,7 @@ modules:
                     - kind: name
                       id: 348
                       name: coordinate
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1609,6 +1647,7 @@ modules:
                         - kind: name
                           id: 356
                           name: canBlockWithPattern
+                declarationOnly: false
                 importedFrom: ~
                 namespaces: ~
                 depth: ~
@@ -1634,6 +1673,7 @@ modules:
                           - kind: name
                             id: 361
                             name: isEmpty
+                  declarationOnly: false
                   importedFrom: ~
                   namespaces: ~
                   depth: ~
@@ -1648,6 +1688,7 @@ modules:
                     - kind: name
                       id: 366
                       name: coordinate
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1681,6 +1722,7 @@ modules:
                         - kind: name
                           id: 379
                           name: canSetupWinWithPattern
+                declarationOnly: false
                 importedFrom: ~
                 namespaces: ~
                 depth: ~
@@ -1706,6 +1748,7 @@ modules:
                           - kind: name
                             id: 384
                             name: isEmpty
+                  declarationOnly: false
                   importedFrom: ~
                   namespaces: ~
                   depth: ~
@@ -1720,6 +1763,7 @@ modules:
                     - kind: name
                       id: 389
                       name: coordinate
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1816,6 +1860,7 @@ modules:
                 - kind: name
                   id: 437
                   name: O
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1861,6 +1906,7 @@ modules:
                     - kind: name
                       id: 480
                       name: nextTurn
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1872,6 +1918,7 @@ modules:
           kind: name
           id: 504
           name: init
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1883,6 +1930,7 @@ modules:
           kind: name
           id: 506
           name: step
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1904,6 +1952,7 @@ table:
           id: 6
           opcode: Tup
           args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -1924,6 +1973,7 @@ table:
           id: 10
           opcode: Tup
           args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -1952,6 +2002,7 @@ table:
           - kind: name
             id: 19
             name: __OccupiedParam_21
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -1972,6 +2023,7 @@ table:
           id: 24
           opcode: Tup
           args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2005,6 +2057,7 @@ table:
             - kind: int
               id: 39
               value: 3
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2290,6 +2343,7 @@ table:
                 - kind: int
                   id: 120
                   value: 3
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2343,6 +2397,7 @@ table:
             - kind: int
               id: 135
               value: 3
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2401,6 +2456,7 @@ table:
               - kind: int
                 id: 150
                 value: 2
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2450,6 +2506,7 @@ table:
               - kind: int
                 id: 150
                 value: 2
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2515,6 +2572,7 @@ table:
                 - kind: name
                   id: 161
                   name: p_168
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2564,6 +2622,7 @@ table:
               - kind: int
                 id: 150
                 value: 2
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2614,6 +2673,7 @@ table:
               kind: bool
               id: 176
               value: false
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2647,6 +2707,7 @@ table:
             - kind: int
               id: 39
               value: 3
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2697,6 +2758,7 @@ table:
               kind: bool
               id: 176
               value: false
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2716,6 +2778,7 @@ table:
         - kind: name
           id: 187
           name: isEmpty
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3001,6 +3064,7 @@ table:
                 - kind: int
                   id: 120
                   value: 3
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3069,6 +3133,7 @@ table:
                 - kind: name
                   id: 161
                   name: p_168
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3120,6 +3185,7 @@ table:
                       - kind: name
                         id: 196
                         name: player_202
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3153,6 +3219,7 @@ table:
             - kind: int
               id: 39
               value: 3
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3203,6 +3270,7 @@ table:
               kind: bool
               id: 176
               value: false
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3226,6 +3294,7 @@ table:
             - kind: name
               id: 205
               name: isEmpty
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3249,6 +3318,7 @@ table:
             - kind: name
               id: 205
               name: isEmpty
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3269,6 +3339,7 @@ table:
           id: 6
           opcode: Tup
           args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3320,6 +3391,7 @@ table:
                       - kind: name
                         id: 196
                         name: player_202
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3340,6 +3412,7 @@ table:
           id: 10
           opcode: Tup
           args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3391,6 +3464,7 @@ table:
                       - kind: name
                         id: 196
                         name: player_202
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3433,6 +3507,7 @@ table:
                 - kind: name
                   id: 214
                   name: O
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3453,6 +3528,7 @@ table:
           id: 6
           opcode: Tup
           args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3504,6 +3580,7 @@ table:
                       - kind: name
                         id: 196
                         name: player_202
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3524,6 +3601,7 @@ table:
           id: 10
           opcode: Tup
           args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3575,6 +3653,7 @@ table:
                       - kind: name
                         id: 196
                         name: player_202
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3598,6 +3677,7 @@ table:
             - kind: name
               id: 205
               name: isEmpty
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3632,6 +3712,7 @@ table:
         - kind: name
           id: 224
           name: boardFull
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3658,6 +3739,7 @@ table:
           id: 6
           opcode: Tup
           args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3717,6 +3799,7 @@ table:
                 - kind: name
                   id: 161
                   name: p_168
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3773,6 +3856,7 @@ table:
               kind: bool
               id: 176
               value: false
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3857,6 +3941,7 @@ table:
               - kind: int
                 id: 245
                 value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3883,6 +3968,7 @@ table:
           id: 10
           opcode: Tup
           args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3942,6 +4028,7 @@ table:
                 - kind: name
                   id: 161
                   name: p_168
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3998,6 +4085,7 @@ table:
               kind: bool
               id: 176
               value: false
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4082,6 +4170,7 @@ table:
               - kind: int
                 id: 268
                 value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4108,6 +4197,7 @@ table:
           id: 6
           opcode: Tup
           args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4167,6 +4257,7 @@ table:
                 - kind: name
                   id: 161
                   name: p_168
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4223,6 +4314,7 @@ table:
               kind: bool
               id: 176
               value: false
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4307,6 +4399,7 @@ table:
               - kind: int
                 id: 291
                 value: 2
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4592,6 +4685,7 @@ table:
                 - kind: int
                   id: 120
                   value: 3
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4676,6 +4770,7 @@ table:
               - kind: int
                 id: 245
                 value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4695,6 +4790,7 @@ table:
         - kind: name
           id: 297
           name: canWinWithPattern
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4980,6 +5076,7 @@ table:
                 - kind: int
                   id: 120
                   value: 3
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5064,6 +5161,7 @@ table:
               - kind: int
                 id: 268
                 value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5083,6 +5181,7 @@ table:
         - kind: name
           id: 301
           name: canBlockWithPattern
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5133,6 +5232,7 @@ table:
               kind: bool
               id: 176
               value: false
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5156,6 +5256,7 @@ table:
             - kind: int
               id: 305
               value: 2
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5441,6 +5542,7 @@ table:
                 - kind: int
                   id: 120
                   value: 3
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5525,6 +5627,7 @@ table:
               - kind: int
                 id: 291
                 value: 2
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5544,6 +5647,7 @@ table:
         - kind: name
           id: 310
           name: canSetupWinWithPattern
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5597,6 +5701,7 @@ table:
               kind: bool
               id: 176
               value: false
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5640,6 +5745,7 @@ table:
           - kind: name
             id: 19
             name: __OccupiedParam_21
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5728,6 +5834,7 @@ table:
                             - kind: name
                               id: 326
                               name: player_334
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5747,6 +5854,7 @@ table:
         - kind: name
           id: 297
           name: canWinWithPattern
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6032,6 +6140,7 @@ table:
                 - kind: int
                   id: 120
                   value: 3
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6116,6 +6225,7 @@ table:
               - kind: int
                 id: 245
                 value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6139,6 +6249,7 @@ table:
             - kind: name
               id: 338
               name: canWinWithPattern
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -6162,6 +6273,7 @@ table:
             - kind: name
               id: 338
               name: canWinWithPattern
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -6212,6 +6324,7 @@ table:
               kind: bool
               id: 176
               value: false
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6235,6 +6348,7 @@ table:
             - kind: name
               id: 343
               name: isEmpty
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 3
@@ -6255,6 +6369,7 @@ table:
           id: 6
           opcode: Tup
           args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6278,6 +6393,7 @@ table:
             - kind: name
               id: 343
               name: isEmpty
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 3
@@ -6360,6 +6476,7 @@ table:
                             - kind: name
                               id: 326
                               name: player_334
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6397,6 +6514,7 @@ table:
                     - kind: name
                       id: 338
                       name: canWinWithPattern
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -6422,6 +6540,7 @@ table:
                       - kind: name
                         id: 343
                         name: isEmpty
+              declarationOnly: false
               importedFrom: ~
               namespaces: ~
               depth: ~
@@ -6436,6 +6555,7 @@ table:
                 - kind: name
                   id: 348
                   name: coordinate
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6455,6 +6575,7 @@ table:
         - kind: name
           id: 301
           name: canBlockWithPattern
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6740,6 +6861,7 @@ table:
                 - kind: int
                   id: 120
                   value: 3
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6824,6 +6946,7 @@ table:
               - kind: int
                 id: 268
                 value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6847,6 +6970,7 @@ table:
             - kind: name
               id: 356
               name: canBlockWithPattern
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -6870,6 +6994,7 @@ table:
             - kind: name
               id: 356
               name: canBlockWithPattern
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -6920,6 +7045,7 @@ table:
               kind: bool
               id: 176
               value: false
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6943,6 +7069,7 @@ table:
             - kind: name
               id: 361
               name: isEmpty
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 3
@@ -6963,6 +7090,7 @@ table:
           id: 6
           opcode: Tup
           args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6986,6 +7114,7 @@ table:
             - kind: name
               id: 361
               name: isEmpty
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 3
@@ -7068,6 +7197,7 @@ table:
                             - kind: name
                               id: 326
                               name: player_334
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7105,6 +7235,7 @@ table:
                     - kind: name
                       id: 356
                       name: canBlockWithPattern
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -7130,6 +7261,7 @@ table:
                       - kind: name
                         id: 361
                         name: isEmpty
+              declarationOnly: false
               importedFrom: ~
               namespaces: ~
               depth: ~
@@ -7144,6 +7276,7 @@ table:
                 - kind: name
                   id: 366
                   name: coordinate
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7164,6 +7297,7 @@ table:
           id: 6
           opcode: Tup
           args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7246,6 +7380,7 @@ table:
                             - kind: name
                               id: 326
                               name: player_334
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7272,6 +7407,7 @@ table:
             - kind: int
               id: 374
               value: 2
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7557,6 +7693,7 @@ table:
                 - kind: int
                   id: 120
                   value: 3
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7641,6 +7778,7 @@ table:
               - kind: int
                 id: 291
                 value: 2
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7664,6 +7802,7 @@ table:
             - kind: name
               id: 379
               name: canSetupWinWithPattern
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -7687,6 +7826,7 @@ table:
             - kind: name
               id: 379
               name: canSetupWinWithPattern
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -7737,6 +7877,7 @@ table:
               kind: bool
               id: 176
               value: false
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7760,6 +7901,7 @@ table:
             - kind: name
               id: 384
               name: isEmpty
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 3
@@ -7780,6 +7922,7 @@ table:
           id: 6
           opcode: Tup
           args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7803,6 +7946,7 @@ table:
             - kind: name
               id: 384
               name: isEmpty
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 3
@@ -7885,6 +8029,7 @@ table:
                             - kind: name
                               id: 326
                               name: player_334
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7919,6 +8064,7 @@ table:
                     - kind: name
                       id: 379
                       name: canSetupWinWithPattern
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -7944,6 +8090,7 @@ table:
                       - kind: name
                         id: 384
                         name: isEmpty
+              declarationOnly: false
               importedFrom: ~
               namespaces: ~
               depth: ~
@@ -7958,6 +8105,7 @@ table:
                 - kind: name
                   id: 389
                   name: coordinate
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7991,6 +8139,7 @@ table:
             - kind: int
               id: 39
               value: 3
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8041,6 +8190,7 @@ table:
               kind: bool
               id: 176
               value: false
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8064,6 +8214,7 @@ table:
             - kind: name
               id: 397
               name: isEmpty
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 3
@@ -8090,6 +8241,7 @@ table:
             - kind: name
               id: 397
               name: isEmpty
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 3
@@ -8172,6 +8324,7 @@ table:
                             - kind: name
                               id: 326
                               name: player_334
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8208,6 +8361,7 @@ table:
                   - kind: name
                     id: 397
                     name: isEmpty
+          declarationOnly: false
           importedFrom: ~
           namespaces: ~
           depth: ~
@@ -8222,6 +8376,7 @@ table:
             - kind: name
               id: 402
               name: coordinate
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8275,6 +8430,7 @@ table:
             - kind: int
               id: 135
               value: 3
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8291,6 +8447,7 @@ table:
         - kind: name
           id: 407
           name: corners
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -8311,6 +8468,7 @@ table:
           id: 6
           opcode: Tup
           args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8327,6 +8485,7 @@ table:
         - kind: name
           id: 407
           name: corners
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -8409,6 +8568,7 @@ table:
                             - kind: name
                               id: 326
                               name: player_334
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8432,6 +8592,7 @@ table:
             - kind: name
               id: 407
               name: corners
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -8446,6 +8607,7 @@ table:
           - kind: name
             id: 411
             name: corner
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8472,6 +8634,7 @@ table:
           id: 6
           opcode: Tup
           args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8506,6 +8669,7 @@ table:
         - kind: name
           id: 224
           name: boardFull
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8525,6 +8689,7 @@ table:
         - kind: name
           id: 187
           name: isEmpty
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8548,6 +8713,7 @@ table:
             - kind: name
               id: 407
               name: corners
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -8562,6 +8728,7 @@ table:
           - kind: name
             id: 411
             name: corner
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8581,6 +8748,7 @@ table:
         - kind: name
           id: 297
           name: canWinWithPattern
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8618,6 +8786,7 @@ table:
                     - kind: name
                       id: 338
                       name: canWinWithPattern
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -8643,6 +8812,7 @@ table:
                       - kind: name
                         id: 343
                         name: isEmpty
+              declarationOnly: false
               importedFrom: ~
               namespaces: ~
               depth: ~
@@ -8657,6 +8827,7 @@ table:
                 - kind: name
                   id: 348
                   name: coordinate
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8676,6 +8847,7 @@ table:
         - kind: name
           id: 301
           name: canBlockWithPattern
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8713,6 +8885,7 @@ table:
                     - kind: name
                       id: 356
                       name: canBlockWithPattern
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -8738,6 +8911,7 @@ table:
                       - kind: name
                         id: 361
                         name: isEmpty
+              declarationOnly: false
               importedFrom: ~
               namespaces: ~
               depth: ~
@@ -8752,6 +8926,7 @@ table:
                 - kind: name
                   id: 366
                   name: coordinate
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8775,6 +8950,7 @@ table:
             - kind: int
               id: 305
               value: 2
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8801,6 +8977,7 @@ table:
             - kind: int
               id: 374
               value: 2
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8820,6 +8997,7 @@ table:
         - kind: name
           id: 310
           name: canSetupWinWithPattern
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8854,6 +9032,7 @@ table:
                     - kind: name
                       id: 379
                       name: canSetupWinWithPattern
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -8879,6 +9058,7 @@ table:
                       - kind: name
                         id: 384
                         name: isEmpty
+              declarationOnly: false
               importedFrom: ~
               namespaces: ~
               depth: ~
@@ -8893,6 +9073,7 @@ table:
                 - kind: name
                   id: 389
                   name: coordinate
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8913,6 +9094,7 @@ table:
           id: 6
           opcode: Tup
           args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8949,6 +9131,7 @@ table:
                   - kind: name
                     id: 397
                     name: isEmpty
+          declarationOnly: false
           importedFrom: ~
           namespaces: ~
           depth: ~
@@ -8963,6 +9146,7 @@ table:
             - kind: name
               id: 402
               name: coordinate
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -8983,6 +9167,7 @@ table:
           id: 10
           opcode: Tup
           args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -9086,6 +9271,7 @@ table:
             - kind: name
               id: 437
               name: O
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -9112,6 +9298,7 @@ table:
           id: 10
           opcode: Tup
           args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -9146,6 +9333,7 @@ table:
         - kind: name
           id: 224
           name: boardFull
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -9166,6 +9354,7 @@ table:
           id: 10
           opcode: Tup
           args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -9202,6 +9391,7 @@ table:
                   - kind: name
                     id: 397
                     name: isEmpty
+          declarationOnly: false
           importedFrom: ~
           namespaces: ~
           depth: ~
@@ -9216,6 +9406,7 @@ table:
             - kind: name
               id: 402
               name: coordinate
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -9236,6 +9427,7 @@ table:
           id: 6
           opcode: Tup
           args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -9289,6 +9481,7 @@ table:
             - kind: name
               id: 449
               name: X
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -9309,6 +9502,7 @@ table:
           id: 6
           opcode: Tup
           args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -9335,6 +9529,7 @@ table:
           id: 24
           opcode: Tup
           args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -9414,6 +9609,7 @@ table:
                           kind: name
                           id: 465
                           name: Empty
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -9511,6 +9707,7 @@ table:
             - kind: name
               id: 437
               name: O
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -9558,6 +9755,7 @@ table:
             - kind: name
               id: 449
               name: X
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -9592,6 +9790,7 @@ table:
         - kind: name
           id: 224
           name: boardFull
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -9662,6 +9861,7 @@ table:
                 - kind: name
                   id: 480
                   name: nextTurn
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -9682,6 +9882,7 @@ table:
           id: 6
           opcode: Tup
           args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -9733,6 +9934,7 @@ table:
                       - kind: name
                         id: 196
                         name: player_202
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -9753,6 +9955,7 @@ table:
             - kind: name
               id: 486
               name: X
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -9773,6 +9976,7 @@ table:
           id: 10
           opcode: Tup
           args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -9824,6 +10028,7 @@ table:
                       - kind: name
                         id: 196
                         name: player_202
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -9844,6 +10049,7 @@ table:
             - kind: name
               id: 490
               name: O
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -9886,6 +10092,7 @@ table:
                 - kind: name
                   id: 214
                   name: O
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -9902,6 +10109,7 @@ table:
         - kind: name
           id: 494
           name: stalemate
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -9922,6 +10130,7 @@ table:
             - kind: name
               id: 490
               name: O
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -9934,6 +10143,7 @@ table:
       kind: name
       id: 497
       name: OHasNotWon
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -9954,6 +10164,7 @@ table:
           id: 6
           opcode: Tup
           args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -10005,6 +10216,7 @@ table:
                       - kind: name
                         id: 196
                         name: player_202
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -10025,6 +10237,7 @@ table:
             - kind: name
               id: 499
               name: X
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -10098,6 +10311,7 @@ table:
                           kind: name
                           id: 465
                           name: Empty
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -10110,6 +10324,7 @@ table:
       kind: name
       id: 504
       name: init
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -10156,6 +10371,7 @@ table:
                 - kind: name
                   id: 480
                   name: nextTurn
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -10168,6 +10384,7 @@ table:
       kind: name
       id: 506
       name: step
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0

@@ -37,6 +37,11 @@ interface GitHubAsset {
  * @throws Will throw an error if the evaluator is not found or cannot be downloaded.
  */
 export async function getRustEvaluatorPath(version: string = QUINT_EVALUATOR_VERSION): Promise<string> {
+  const overridePath = process.env.QUINT_RUST_EVALUATOR_PATH
+  if (overridePath && overridePath.trim() !== '') {
+    return overridePath
+  }
+
   // Determine platform and architecture
   const platform = os.platform()
   const arch = os.arch()

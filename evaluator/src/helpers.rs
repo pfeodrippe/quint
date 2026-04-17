@@ -101,6 +101,7 @@ pub fn parse_from_path(
             .clone()],
         witnesses: vec![],
         table: output.table,
+        foreign_bindings: vec![],
     })
 }
 

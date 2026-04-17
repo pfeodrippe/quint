@@ -13,6 +13,7 @@ modules:
           kind: int
           id: 223
           value: 5
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: 0
@@ -24,6 +25,7 @@ modules:
           kind: int
           id: 224
           value: 7
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: 0
@@ -83,6 +85,7 @@ modules:
                                 - kind: int
                                   id: 298
                                   value: 1
+                declarationOnly: false
                 importedFrom: ~
                 namespaces: ~
                 depth: ~
@@ -97,6 +100,7 @@ modules:
                   - kind: name
                     id: 301
                     name: "ewd426::self_stabilization::initial"
+        declarationOnly: false
         importedFrom:
           kind: import
           id: 227
@@ -110,6 +114,7 @@ modules:
           kind: name
           id: 235
           name: "ewd426::self_stabilization::init"
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -121,6 +126,7 @@ modules:
           kind: int
           id: 240
           value: 0
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: 0
@@ -132,6 +138,7 @@ modules:
           kind: name
           id: 246
           name: "ewd426::self_stabilization::N"
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: 0
@@ -221,6 +228,7 @@ modules:
                               - kind: int
                                 id: 284
                                 value: 1
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: 0
@@ -320,6 +328,7 @@ modules:
                           - kind: int
                             id: 378
                             value: 1
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: 0
@@ -369,6 +378,7 @@ modules:
                           - kind: name
                             id: 391
                             name: "ewd426::self_stabilization::i_104"
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -400,6 +410,7 @@ modules:
                       - kind: name
                         id: 399
                         name: "ewd426::self_stabilization::node"
+        declarationOnly: false
         importedFrom:
           kind: import
           id: 227
@@ -413,6 +424,7 @@ modules:
           kind: name
           id: 237
           name: "ewd426::self_stabilization::step"
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -438,6 +450,7 @@ table:
       kind: int
       id: 9
       value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -456,6 +469,7 @@ table:
       kind: name
       id: 11
       name: N
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -471,6 +485,7 @@ table:
       kind: int
       id: 9
       value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -486,6 +501,7 @@ table:
       kind: int
       id: 9
       value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -501,6 +517,7 @@ table:
       kind: name
       id: 11
       name: N
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -603,6 +620,7 @@ table:
                           - kind: int
                             id: 39
                             value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -699,6 +717,7 @@ table:
                           - kind: int
                             id: 39
                             value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -720,6 +739,7 @@ table:
       kind: int
       id: 9
       value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -735,6 +755,7 @@ table:
       kind: int
       id: 9
       value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -847,6 +868,7 @@ table:
                       - kind: int
                         id: 73
                         value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -903,6 +925,7 @@ table:
                     - kind: int
                       id: 85
                       value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -947,6 +970,7 @@ table:
                     - kind: int
                       id: 85
                       value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -1008,6 +1032,7 @@ table:
                             - kind: int
                               id: 85
                               value: 1
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -1022,6 +1047,7 @@ table:
               - kind: name
                 id: 91
                 name: initial
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -1127,6 +1153,7 @@ table:
                           - kind: int
                             id: 39
                             value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -1170,6 +1197,7 @@ table:
                   - kind: name
                     id: 102
                     name: i_104
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -1219,6 +1247,7 @@ table:
                   - kind: name
                     id: 102
                     name: i_104
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -1268,6 +1297,7 @@ table:
                   - kind: name
                     id: 102
                     name: i_104
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -1368,6 +1398,7 @@ table:
                       - kind: int
                         id: 73
                         value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -1424,6 +1455,7 @@ table:
                       - kind: name
                         id: 102
                         name: i_104
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1455,6 +1487,7 @@ table:
                   - kind: name
                     id: 111
                     name: node
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -1560,6 +1593,7 @@ table:
                           - kind: int
                             id: 39
                             value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -1615,6 +1649,7 @@ table:
               id: 128
               opcode: Set
               args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -1670,6 +1705,7 @@ table:
               id: 128
               opcode: Set
               args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -1791,6 +1827,7 @@ table:
                       - kind: int
                         id: 73
                         value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -1859,6 +1896,7 @@ table:
                   id: 128
                   opcode: Set
                   args: []
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -1908,6 +1946,7 @@ table:
                         - kind: name
                           id: 139
                           name: x_142
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2010,6 +2049,7 @@ table:
                           - kind: int
                             id: 39
                             value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2059,6 +2099,7 @@ table:
                     - kind: name
                       id: 158
                       name: i_160
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2109,6 +2150,7 @@ table:
                       - kind: name
                         id: 102
                         name: i_104
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -2140,6 +2182,7 @@ table:
                   - kind: name
                     id: 111
                     name: node
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2201,6 +2244,7 @@ table:
                     - kind: name
                       id: 158
                       name: i_160
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2246,6 +2290,7 @@ table:
                 - kind: int
                   id: 171
                   value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2301,6 +2346,7 @@ table:
                     - kind: name
                       id: 158
                       name: i_160
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2356,6 +2402,7 @@ table:
                     - kind: name
                       id: 158
                       name: i_160
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2405,6 +2452,7 @@ table:
                     - kind: int
                       id: 182
                       value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2455,6 +2503,7 @@ table:
                       - kind: name
                         id: 102
                         name: i_104
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -2486,6 +2535,7 @@ table:
                   - kind: name
                     id: 111
                     name: node
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2547,6 +2597,7 @@ table:
                     - kind: name
                       id: 158
                       name: i_160
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2596,6 +2647,7 @@ table:
                     - kind: int
                       id: 194
                       value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2651,6 +2703,7 @@ table:
                     - kind: name
                       id: 158
                       name: i_160
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2674,6 +2727,7 @@ table:
         - kind: int
           id: 202
           value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2773,6 +2827,7 @@ table:
                           - kind: int
                             id: 39
                             value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2815,6 +2870,7 @@ table:
                 - kind: name
                   id: 216
                   name: i_218
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2827,6 +2883,7 @@ table:
       kind: int
       id: 223
       value: 5
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2839,6 +2896,7 @@ table:
       kind: int
       id: 224
       value: 7
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2851,6 +2909,7 @@ table:
       kind: int
       id: 229
       value: 3
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2863,6 +2922,7 @@ table:
       kind: int
       id: 230
       value: 2
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2918,6 +2978,7 @@ table:
                             - kind: int
                               id: 298
                               value: 1
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -2932,6 +2993,7 @@ table:
               - kind: name
                 id: 301
                 name: "ewd426::self_stabilization::initial"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2944,6 +3006,7 @@ table:
       kind: name
       id: 235
       name: "ewd426::self_stabilization::init"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -2994,6 +3057,7 @@ table:
                       - kind: name
                         id: 391
                         name: "ewd426::self_stabilization::i_104"
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -3025,6 +3089,7 @@ table:
                   - kind: name
                     id: 399
                     name: "ewd426::self_stabilization::node"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3037,6 +3102,7 @@ table:
       kind: name
       id: 237
       name: "ewd426::self_stabilization::step"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3049,6 +3115,7 @@ table:
       kind: int
       id: 240
       value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3061,6 +3128,7 @@ table:
       kind: name
       id: 246
       name: "ewd426::self_stabilization::N"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3073,6 +3141,7 @@ table:
       kind: int
       id: 223
       value: 5
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3085,6 +3154,7 @@ table:
       kind: int
       id: 224
       value: 7
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3097,6 +3167,7 @@ table:
       kind: int
       id: 223
       value: 5
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3187,6 +3258,7 @@ table:
                           - kind: int
                             id: 284
                             value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3202,6 +3274,7 @@ table:
       kind: int
       id: 240
       value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3217,6 +3290,7 @@ table:
       kind: int
       id: 240
       value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3232,6 +3306,7 @@ table:
       kind: name
       id: 246
       name: "ewd426::self_stabilization::N"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3299,6 +3374,7 @@ table:
                             - kind: int
                               id: 298
                               value: 1
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -3313,6 +3389,7 @@ table:
               - kind: name
                 id: 301
                 name: "ewd426::self_stabilization::initial"
+    declarationOnly: false
     importedFrom:
       kind: import
       id: 227
@@ -3359,6 +3436,7 @@ table:
                     - kind: int
                       id: 298
                       value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -3371,6 +3449,7 @@ table:
       kind: int
       id: 223
       value: 5
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3383,6 +3462,7 @@ table:
       kind: int
       id: 224
       value: 7
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3433,6 +3513,7 @@ table:
                     - kind: int
                       id: 298
                       value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -3482,6 +3563,7 @@ table:
                     - kind: name
                       id: 321
                       name: "ewd426::self_stabilization::i_160"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3494,6 +3576,7 @@ table:
       kind: int
       id: 223
       value: 5
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3584,6 +3667,7 @@ table:
                           - kind: int
                             id: 284
                             value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3632,6 +3716,7 @@ table:
                 - kind: name
                   id: 341
                   name: "ewd426::self_stabilization::i_218"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3725,6 +3810,7 @@ table:
                           - kind: int
                             id: 284
                             value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3831,6 +3917,7 @@ table:
                       - kind: int
                         id: 378
                         value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3921,6 +4008,7 @@ table:
                           - kind: int
                             id: 284
                             value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3948,6 +4036,7 @@ table:
       kind: int
       id: 240
       value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3963,6 +4052,7 @@ table:
       kind: int
       id: 240
       value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -3975,6 +4065,7 @@ table:
       kind: int
       id: 224
       value: 7
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4031,6 +4122,7 @@ table:
                       - kind: name
                         id: 391
                         name: "ewd426::self_stabilization::i_104"
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -4062,6 +4154,7 @@ table:
                   - kind: name
                     id: 399
                     name: "ewd426::self_stabilization::node"
+    declarationOnly: false
     importedFrom:
       kind: import
       id: 227
@@ -4107,6 +4200,7 @@ table:
                   - kind: name
                     id: 391
                     name: "ewd426::self_stabilization::i_104"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -4119,6 +4213,7 @@ table:
       kind: int
       id: 223
       value: 5
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4209,6 +4304,7 @@ table:
                           - kind: int
                             id: 284
                             value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4273,6 +4369,7 @@ table:
                   - kind: name
                     id: 391
                     name: "ewd426::self_stabilization::i_104"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -4373,6 +4470,7 @@ table:
                       - kind: int
                         id: 378
                         value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4422,6 +4520,7 @@ table:
                   - kind: name
                     id: 391
                     name: "ewd426::self_stabilization::i_104"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -4484,6 +4583,7 @@ table:
                   id: 415
                   opcode: Set
                   args: []
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -4533,6 +4633,7 @@ table:
                         - kind: name
                           id: 429
                           name: "ewd426::self_stabilization::x_142"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4588,6 +4689,7 @@ table:
               id: 415
               opcode: Set
               args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -4600,6 +4702,7 @@ table:
       kind: int
       id: 223
       value: 5
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4690,6 +4793,7 @@ table:
                           - kind: int
                             id: 284
                             value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4760,6 +4864,7 @@ table:
               id: 415
               opcode: Set
               args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -4872,6 +4977,7 @@ table:
                       - kind: int
                         id: 378
                         value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4930,6 +5036,7 @@ table:
                     - kind: int
                       id: 441
                       value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -4979,6 +5086,7 @@ table:
                     - kind: name
                       id: 321
                       name: "ewd426::self_stabilization::i_160"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5034,6 +5142,7 @@ table:
                     - kind: name
                       id: 321
                       name: "ewd426::self_stabilization::i_160"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5063,6 +5172,7 @@ table:
         - kind: int
           id: 446
           value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5112,6 +5222,7 @@ table:
                     - kind: name
                       id: 321
                       name: "ewd426::self_stabilization::i_160"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5163,6 +5274,7 @@ table:
                 - kind: int
                   id: 457
                   value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5213,6 +5325,7 @@ table:
                       - kind: name
                         id: 391
                         name: "ewd426::self_stabilization::i_104"
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -5244,6 +5357,7 @@ table:
                   - kind: name
                     id: 399
                     name: "ewd426::self_stabilization::node"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5299,6 +5413,7 @@ table:
                     - kind: name
                       id: 321
                       name: "ewd426::self_stabilization::i_160"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5354,6 +5469,7 @@ table:
                     - kind: int
                       id: 469
                       value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5404,6 +5520,7 @@ table:
                       - kind: name
                         id: 391
                         name: "ewd426::self_stabilization::i_104"
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -5435,6 +5552,7 @@ table:
                   - kind: name
                     id: 399
                     name: "ewd426::self_stabilization::node"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5490,6 +5608,7 @@ table:
                     - kind: name
                       id: 321
                       name: "ewd426::self_stabilization::i_160"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5508,6 +5627,7 @@ table:
       kind: int
       id: 471
       value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5520,6 +5640,7 @@ table:
       kind: name
       id: 477
       name: "broken_ewd426::self_stabilization::N"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5532,6 +5653,7 @@ table:
       kind: int
       id: 229
       value: 3
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5544,6 +5666,7 @@ table:
       kind: int
       id: 230
       value: 2
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5556,6 +5679,7 @@ table:
       kind: int
       id: 229
       value: 3
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5646,6 +5770,7 @@ table:
                           - kind: int
                             id: 515
                             value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5661,6 +5786,7 @@ table:
       kind: int
       id: 471
       value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5676,6 +5802,7 @@ table:
       kind: int
       id: 471
       value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5691,6 +5818,7 @@ table:
       kind: name
       id: 477
       name: "broken_ewd426::self_stabilization::N"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5758,6 +5886,7 @@ table:
                             - kind: int
                               id: 529
                               value: 1
+            declarationOnly: false
             importedFrom: ~
             namespaces: ~
             depth: ~
@@ -5772,6 +5901,7 @@ table:
               - kind: name
                 id: 532
                 name: "broken_ewd426::self_stabilization::initial"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5816,6 +5946,7 @@ table:
                     - kind: int
                       id: 529
                       value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -5828,6 +5959,7 @@ table:
       kind: int
       id: 229
       value: 3
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5840,6 +5972,7 @@ table:
       kind: int
       id: 230
       value: 2
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5890,6 +6023,7 @@ table:
                     - kind: int
                       id: 529
                       value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -5939,6 +6073,7 @@ table:
                     - kind: name
                       id: 552
                       name: "broken_ewd426::self_stabilization::i_160"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -5951,6 +6086,7 @@ table:
       kind: int
       id: 229
       value: 3
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6041,6 +6177,7 @@ table:
                           - kind: int
                             id: 515
                             value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6089,6 +6226,7 @@ table:
                 - kind: name
                   id: 572
                   name: "broken_ewd426::self_stabilization::i_218"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6182,6 +6320,7 @@ table:
                           - kind: int
                             id: 515
                             value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6288,6 +6427,7 @@ table:
                       - kind: int
                         id: 609
                         value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6378,6 +6518,7 @@ table:
                           - kind: int
                             id: 515
                             value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6405,6 +6546,7 @@ table:
       kind: int
       id: 471
       value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6420,6 +6562,7 @@ table:
       kind: int
       id: 471
       value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6432,6 +6575,7 @@ table:
       kind: int
       id: 230
       value: 2
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6488,6 +6632,7 @@ table:
                       - kind: name
                         id: 622
                         name: "broken_ewd426::self_stabilization::i_104"
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -6519,6 +6664,7 @@ table:
                   - kind: name
                     id: 630
                     name: "broken_ewd426::self_stabilization::node"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6562,6 +6708,7 @@ table:
                   - kind: name
                     id: 622
                     name: "broken_ewd426::self_stabilization::i_104"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -6574,6 +6721,7 @@ table:
       kind: int
       id: 229
       value: 3
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6664,6 +6812,7 @@ table:
                           - kind: int
                             id: 515
                             value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6728,6 +6877,7 @@ table:
                   - kind: name
                     id: 622
                     name: "broken_ewd426::self_stabilization::i_104"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -6828,6 +6978,7 @@ table:
                       - kind: int
                         id: 609
                         value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -6877,6 +7028,7 @@ table:
                   - kind: name
                     id: 622
                     name: "broken_ewd426::self_stabilization::i_104"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -6939,6 +7091,7 @@ table:
                   id: 646
                   opcode: Set
                   args: []
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -6988,6 +7141,7 @@ table:
                         - kind: name
                           id: 660
                           name: "broken_ewd426::self_stabilization::x_142"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7043,6 +7197,7 @@ table:
               id: 646
               opcode: Set
               args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -7055,6 +7210,7 @@ table:
       kind: int
       id: 229
       value: 3
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7145,6 +7301,7 @@ table:
                           - kind: int
                             id: 515
                             value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7215,6 +7372,7 @@ table:
               id: 646
               opcode: Set
               args: []
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 2
@@ -7327,6 +7485,7 @@ table:
                       - kind: int
                         id: 609
                         value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7385,6 +7544,7 @@ table:
                     - kind: int
                       id: 672
                       value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7434,6 +7594,7 @@ table:
                     - kind: name
                       id: 552
                       name: "broken_ewd426::self_stabilization::i_160"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7489,6 +7650,7 @@ table:
                     - kind: name
                       id: 552
                       name: "broken_ewd426::self_stabilization::i_160"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7518,6 +7680,7 @@ table:
         - kind: int
           id: 677
           value: 0
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7567,6 +7730,7 @@ table:
                     - kind: name
                       id: 552
                       name: "broken_ewd426::self_stabilization::i_160"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7618,6 +7782,7 @@ table:
                 - kind: int
                   id: 688
                   value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7668,6 +7833,7 @@ table:
                       - kind: name
                         id: 622
                         name: "broken_ewd426::self_stabilization::i_104"
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -7699,6 +7865,7 @@ table:
                   - kind: name
                     id: 630
                     name: "broken_ewd426::self_stabilization::node"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7754,6 +7921,7 @@ table:
                     - kind: name
                       id: 552
                       name: "broken_ewd426::self_stabilization::i_160"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7809,6 +7977,7 @@ table:
                     - kind: int
                       id: 700
                       value: 1
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7859,6 +8028,7 @@ table:
                       - kind: name
                         id: 622
                         name: "broken_ewd426::self_stabilization::i_104"
+        declarationOnly: false
         importedFrom: ~
         namespaces: ~
         depth: ~
@@ -7890,6 +8060,7 @@ table:
                   - kind: name
                     id: 630
                     name: "broken_ewd426::self_stabilization::node"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0
@@ -7945,6 +8116,7 @@ table:
                     - kind: name
                       id: 552
                       name: "broken_ewd426::self_stabilization::i_160"
+    declarationOnly: false
     importedFrom: ~
     namespaces: ~
     depth: 0

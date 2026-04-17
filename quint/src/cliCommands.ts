@@ -67,7 +67,7 @@ import { deriveVerbosity, getInvariants, guessMainModule, isMatchingTest, mkErro
 import { fail } from 'assert'
 import { newRng } from './rng'
 import { TestOptions, TestResult } from './runtime/testing'
-import { loadForeignBindings } from './runtime/foreign'
+import { loadForeignBindings, loadRustForeignBindings } from './runtime/foreign'
 
 export type stage =
   | 'loading'
@@ -262,11 +262,6 @@ export async function typecheck(parsed: ParsedStage): Promise<CLIProcedure<Typec
  */
 export async function runRepl(argv: any) {
   const foreignBindings = getForeignBindingsPath(argv)
-  if (argv.backend === 'rust' && foreignBindings) {
-    console.error('Foreign bindings are only supported by the Bun-powered TypeScript backend.')
-    process.exitCode = 1
-    return
-  }
 
   let filename: string | undefined = undefined
   let moduleName: string | undefined = undefined
@@ -308,26 +303,6 @@ export async function runTests(prev: TypecheckedStage): Promise<CLIProcedure<Tes
     return handleMainModuleError(prev, mainName)
   }
 
-  if (prev.args.backend === 'rust' && foreignBindingsPath) {
-    return cliErr('Argument error', {
-      ...testing,
-      errors: [
-        mkErrorMessage(prev.sourceMap)({
-          code: 'QNT526',
-          message: 'Foreign bindings are only supported by the Bun-powered TypeScript backend',
-        }),
-      ],
-    })
-  }
-
-  const foreignBindings = await loadForeignBindings(foreignBindingsPath, prev.resolver)
-  if (foreignBindings.isLeft()) {
-    return cliErr('Argument error', {
-      ...testing,
-      errors: [mkErrorMessage(prev.sourceMap)(foreignBindings.value)],
-    })
-  }
-
   const options: TestOptions = {
     testMatch: (n: string) => isMatchingTest(prev.args.match, n),
     maxSamples: prev.args.maxSamples,
@@ -349,7 +324,15 @@ export async function runTests(prev: TypecheckedStage): Promise<CLIProcedure<Tes
   let results: TestResult[]
 
   if (prev.args.backend === 'rust') {
-    const commandWrapper = new CommandWrapper(verbosityLevel)
+    const foreignBindings = await loadRustForeignBindings(foreignBindingsPath, prev.resolver)
+    if (foreignBindings.isLeft()) {
+      return cliErr('Argument error', {
+        ...testing,
+        errors: [mkErrorMessage(prev.sourceMap)(foreignBindings.value)],
+      })
+    }
+
+    const commandWrapper = new CommandWrapper(verbosityLevel, foreignBindings.value)
     results = []
     for (const [index, def] of testDefs.entries()) {
       const result = await commandWrapper.test(
@@ -363,6 +346,14 @@ export async function runTests(prev: TypecheckedStage): Promise<CLIProcedure<Tes
       results.push(result)
     }
   } else {
+    const foreignBindings = await loadForeignBindings(foreignBindingsPath, prev.resolver)
+    if (foreignBindings.isLeft()) {
+      return cliErr('Argument error', {
+        ...testing,
+        errors: [mkErrorMessage(prev.sourceMap)(foreignBindings.value)],
+      })
+    }
+
     const evaluator = new Evaluator(
       prev.table,
       newTraceRecorder(verbosityLevel, options.rng, 1),
@@ -414,26 +405,6 @@ export async function runSimulator(prev: TypecheckedStage): Promise<CLIProcedure
     return handleMainModuleError(prev, mainName)
   }
 
-  if (prev.args.backend === 'rust' && foreignBindingsPath) {
-    return cliErr('Argument error', {
-      ...simulator,
-      errors: [
-        mkErrorMessage(prev.sourceMap)({
-          code: 'QNT526',
-          message: 'Foreign bindings are only supported by the Bun-powered TypeScript backend',
-        }),
-      ],
-    })
-  }
-
-  const foreignBindings = await loadForeignBindings(foreignBindingsPath, prev.resolver)
-  if (foreignBindings.isLeft()) {
-    return cliErr('Argument error', {
-      ...simulator,
-      errors: [mkErrorMessage(prev.sourceMap)(foreignBindings.value)],
-    })
-  }
-
   const rng = newRng(prev.args.seed)
 
   // We use:
@@ -474,6 +445,14 @@ export async function runSimulator(prev: TypecheckedStage): Promise<CLIProcedure
 
   let outcome: Outcome
   if (prev.args.backend == 'rust') {
+    const foreignBindings = await loadRustForeignBindings(foreignBindingsPath, prev.resolver)
+    if (foreignBindings.isLeft()) {
+      return cliErr('Argument error', {
+        ...simulator,
+        errors: [mkErrorMessage(prev.sourceMap)(foreignBindings.value)],
+      })
+    }
+
     const individualInvariantsResult = mergeInMany(individualInvariants.map(inv => toExpr(prev, inv)))
     if (individualInvariantsResult.isLeft()) {
       return cliErr('Argument error', {
@@ -482,7 +461,7 @@ export async function runSimulator(prev: TypecheckedStage): Promise<CLIProcedure
       })
     }
 
-    const commandWrapper = new CommandWrapper(verbosityLevel)
+    const commandWrapper = new CommandWrapper(verbosityLevel, foreignBindings.value)
     const nThreads = Math.min(prev.args.maxSamples, prev.args.nThreads)
     outcome = await commandWrapper.simulate(
       {
@@ -504,6 +483,14 @@ export async function runSimulator(prev: TypecheckedStage): Promise<CLIProcedure
       options.onTrace
     )
   } else {
+    const foreignBindings = await loadForeignBindings(foreignBindingsPath, prev.resolver)
+    if (foreignBindings.isLeft()) {
+      return cliErr('Argument error', {
+        ...simulator,
+        errors: [mkErrorMessage(prev.sourceMap)(foreignBindings.value)],
+      })
+    }
+
     // Use the typescript simulator
     const evaluator = new Evaluator(
       prev.resolver.table,

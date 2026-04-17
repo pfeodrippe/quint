@@ -56,6 +56,28 @@ pub struct QuintOutput {
     pub main: QuintName,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum ForeignAbi {
+    Int,
+    Bool,
+    Str,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ForeignBindingSpec {
+    pub id: QuintId,
+    pub module: String,
+    pub name: String,
+    pub library: String,
+    pub symbol: String,
+    #[serde(default)]
+    pub free_symbol: Option<String>,
+    pub args: Vec<ForeignAbi>,
+    pub result: ForeignAbi,
+}
+
 /// LookupTable with custom deserialization to handle string keys from JSONbig
 #[derive(Default, Serialize, Debug, Clone)]
 pub struct LookupTable(IndexMap<QuintId, LookupDefinition, FxBuildHasher>);
@@ -163,6 +185,8 @@ pub struct OpDef {
     pub name: QuintName,
     pub qualifier: OpQualifier,
     pub expr: QuintEx,
+    #[serde(rename = "declarationOnly", default)]
+    pub declaration_only: bool,
     #[serde(rename = "importedFrom")]
     pub imported_from: Option<ImportedFrom>,
     pub namespaces: Option<Vec<QuintName>>,

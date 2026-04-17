@@ -13,7 +13,7 @@ use std::time::Instant;
 use argh::FromArgs;
 use eyre::bail;
 use quint_evaluator::evaluator::evaluate_at_state;
-use quint_evaluator::ir::{LookupDefinition, LookupTable, QuintError, QuintEx};
+use quint_evaluator::ir::{ForeignBindingSpec, LookupDefinition, LookupTable, QuintError, QuintEx};
 use quint_evaluator::progress;
 use quint_evaluator::simulator::{
     ParsedQuint, SimulationConfig, SimulationError, SimulationResult, TraceStatistics,
@@ -180,6 +180,8 @@ struct TestInput {
     test_def: LookupDefinition,
     table: LookupTable,
     #[serde(default)]
+    foreign_bindings: Vec<ForeignBindingSpec>,
+    #[serde(default)]
     seed: Option<u64>,
     max_samples: usize,
     #[serde(default)]
@@ -192,6 +194,8 @@ struct EvaluateAtStateInput {
     state: itf::State<itf::Value>,
     table: LookupTable,
     exprs: Vec<QuintEx>,
+    #[serde(default)]
+    foreign_bindings: Vec<ForeignBindingSpec>,
 }
 
 /// Data to be written to STDOUT after evaluate-at-state
@@ -359,6 +363,7 @@ fn test_from_stdin() -> eyre::Result<()> {
         name,
         test_def,
         table,
+        foreign_bindings,
         seed,
         max_samples,
         verbosity,
@@ -369,6 +374,7 @@ fn test_from_stdin() -> eyre::Result<()> {
         test_def,
         table,
         name,
+        foreign_bindings,
     };
     let reporter = progress::json_std_err_report(max_samples);
     let result = test_case.execute(seed, max_samples, reporter, verbosity);
@@ -388,9 +394,10 @@ fn evaluate_at_state_from_stdin() -> eyre::Result<()> {
         table,
         state,
         exprs,
+        foreign_bindings,
     } = serde_json::from_reader(io::stdin())?;
 
-    let eval_results = evaluate_at_state(state.value, &table, &exprs);
+    let eval_results = evaluate_at_state(state.value, &table, &exprs, &foreign_bindings);
 
     // Convert results to output format
     let results: Vec<EvaluateResult> = eval_results

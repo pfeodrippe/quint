@@ -44,6 +44,19 @@ interface BindingConfigFile {
   bindings: BindingSpec[]
 }
 
+export type RustForeignAbi = 'int' | 'bool' | 'str'
+
+export interface RustForeignBindingSpec {
+  id: bigint
+  module: string
+  name: string
+  library: string
+  symbol: string
+  freeSymbol?: string
+  args: RustForeignAbi[]
+  result: RustForeignAbi
+}
+
 export interface ForeignBinding {
   kind: BindingKind
   invoke(args: RuntimeValue[]): Either<QuintError, RuntimeValue>
@@ -147,6 +160,22 @@ type FfiCodec = {
   decode(value: unknown): Either<QuintError, RuntimeValue>
   encode(value: RuntimeValue): Either<QuintError, unknown>
   returnsCString?: boolean
+}
+
+function buildNativeAbiType(type: QuintType, spec: FfiBindingSpec): Either<QuintError, RustForeignAbi> {
+  switch (type.kind) {
+    case 'int':
+    case 'bool':
+    case 'str':
+      return right(type.kind)
+    default:
+      return left(
+        foreignError(
+          'QNT527',
+          `FFI binding ${spec.module}.${spec.name} only supports primitive Quint types (int, bool, str) in the native ABI`
+        )
+      )
+  }
 }
 
 function buildFfiCodec(
@@ -264,17 +293,55 @@ function buildFfiCodec(
   }
 }
 
-function buildFfiSignature(
+function buildNativeAbiSignature(
   def: QuintOpDef,
-  spec: FfiBindingSpec,
-  ffiTypes: Record<string, number>
-): Either<QuintError, { args: FfiCodec[]; result: FfiCodec }> {
+  spec: FfiBindingSpec
+): Either<QuintError, { args: RustForeignAbi[]; result: RustForeignAbi }> {
   if (!def.typeAnnotation) {
     return left(foreignError('QNT527', `FFI binding ${spec.module}.${spec.name} requires an explicit type annotation`))
   }
 
   const argTypes = def.typeAnnotation.kind === 'oper' ? def.typeAnnotation.args : []
   const resultType = def.typeAnnotation.kind === 'oper' ? def.typeAnnotation.res : def.typeAnnotation
+
+  const args: RustForeignAbi[] = []
+  for (const type of argTypes) {
+    const abiType = buildNativeAbiType(type, spec)
+    if (abiType.isLeft()) {
+      return left(abiType.value)
+    }
+    args.push(abiType.value)
+  }
+
+  const result = buildNativeAbiType(resultType, spec)
+  if (result.isLeft()) {
+    return left(result.value)
+  }
+
+  if (spec.freeSymbol && result.value !== 'str') {
+    return left(
+      foreignError('QNT519', `FFI binding ${spec.module}.${spec.name} may only use freeSymbol with str results`)
+    )
+  }
+
+  return right({ args, result: result.value })
+}
+
+function buildFfiSignature(
+  def: QuintOpDef,
+  spec: FfiBindingSpec,
+  ffiTypes: Record<string, number>
+): Either<QuintError, { args: FfiCodec[]; result: FfiCodec }> {
+  const nativeSignature = buildNativeAbiSignature(def, spec)
+  if (nativeSignature.isLeft()) {
+    return left(nativeSignature.value)
+  }
+
+  const argTypes = def.typeAnnotation?.kind === 'oper' ? def.typeAnnotation.args : []
+  const resultType = def.typeAnnotation?.kind === 'oper' ? def.typeAnnotation.res : def.typeAnnotation
+  if (!resultType) {
+    return left(foreignError('QNT527', `FFI binding ${spec.module}.${spec.name} requires an explicit type annotation`))
+  }
 
   const args: FfiCodec[] = []
   for (const type of argTypes) {
@@ -288,12 +355,6 @@ function buildFfiSignature(
   const result = buildFfiCodec(resultType, spec, ffiTypes)
   if (result.isLeft()) {
     return left(result.value)
-  }
-
-  if (spec.freeSymbol && !result.value.returnsCString) {
-    return left(
-      foreignError('QNT519', `FFI binding ${spec.module}.${spec.name} may only use freeSymbol with str results`)
-    )
   }
 
   return right({ args, result: result.value })
@@ -675,4 +736,62 @@ export async function loadForeignBindings(
   }
 
   return right(registry)
+}
+
+export async function loadRustForeignBindings(
+  configPath: string | undefined,
+  resolver: NameResolver
+): Promise<Either<QuintError, RustForeignBindingSpec[]>> {
+  if (!configPath) {
+    return right([])
+  }
+
+  const resolvedConfigPath = resolve(configPath)
+  const config = readBindingConfig(resolvedConfigPath)
+  if (config.isLeft()) {
+    return left(config.value)
+  }
+
+  const bindings: RustForeignBindingSpec[] = []
+  const seenIds = new Set<bigint>()
+  const baseDir = dirname(resolvedConfigPath)
+
+  for (const spec of config.value.bindings) {
+    if (spec.kind !== 'ffi') {
+      return left(
+        foreignError(
+          'QNT526',
+          `Rust backend foreign bindings only support kind "ffi"; ${spec.module}.${spec.name} uses ${spec.kind}`
+        )
+      )
+    }
+
+    const def = findBoundDefinition(resolver, spec.module, spec.name)
+    if (def.isLeft()) {
+      return left(def.value)
+    }
+
+    if (seenIds.has(def.value.id)) {
+      return left(foreignError('QNT519', `Duplicate foreign binding for ${spec.module}.${spec.name}`))
+    }
+
+    const signature = buildNativeAbiSignature(def.value, spec)
+    if (signature.isLeft()) {
+      return left(signature.value)
+    }
+
+    seenIds.add(def.value.id)
+    bindings.push({
+      id: def.value.id,
+      module: spec.module,
+      name: spec.name,
+      library: resolve(baseDir, spec.library),
+      symbol: spec.symbol,
+      freeSymbol: spec.freeSymbol,
+      args: signature.value.args,
+      result: signature.value.result,
+    })
+  }
+
+  return right(bindings)
 }

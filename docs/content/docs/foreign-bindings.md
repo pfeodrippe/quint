@@ -1,12 +1,12 @@
 # Foreign bindings
 
-Quint can bind **declaration-only** operators to host implementations loaded by the TypeScript evaluator.
+Quint can bind **declaration-only** operators to host implementations.
 
 This feature is currently:
 
-1. **Bun-only** at runtime
-2. available only through the **TypeScript** backend
-3. limited to **synchronous** `pure def` and `pure val` declarations
+1. available for **synchronous** declaration-only `pure def` and `pure val` targets
+2. supports `module`, `ffi`, and `wasm` bindings on the **TypeScript backend under Bun**
+3. supports `ffi` bindings on the **Rust** backend through the same `--foreign-bindings` file
 
 ## Declaring a foreign operator
 
@@ -81,7 +81,7 @@ Arguments and results use the same ITF-shaped JSON values that Quint already use
 
 ## `ffi` bindings
 
-`ffi` bindings use Bun's `bun:ffi` support to call a symbol from a native shared library.
+`ffi` bindings call a symbol from a native shared library.
 
 ```json
 {
@@ -102,6 +102,12 @@ Current fast native ABI contract:
    - `str` -> `cstring`
 3. Non-primitive FFI signatures are rejected explicitly.
 4. `freeSymbol` is optional and only valid when the result type is `str`.
+
+Backend notes:
+
+1. On the **TypeScript backend**, `ffi` bindings use Bun's `bun:ffi`.
+2. On the **Rust backend**, the same binding file is normalized by the CLI and executed inside the Rust evaluator.
+3. The Rust backend currently supports only `kind: "ffi"` bindings.
 
 That makes the native side straightforward for Rust, Zig, or C shims:
 
@@ -138,9 +144,9 @@ For non-trivial Wasm toolchains, that usually means using JS-visible glue genera
 
 ## Current limitations
 
-1. Foreign bindings are rejected on the Rust backend.
-2. Async host functions are rejected.
-3. Only declaration-only `pure def` and `pure val` targets are supported.
-4. There is no subprocess fallback path.
-5. Invalid bindings and invalid host return values fail explicitly.
+1. Async host functions are rejected.
+2. Only declaration-only `pure def` and `pure val` targets are supported.
+3. There is no subprocess fallback path.
+4. Invalid bindings and invalid host return values fail explicitly.
+5. `module` and `wasm` bindings are currently TypeScript-backend-only.
 6. A checked-in stress script is available via `npm run bun-foreign-stress` to compare native-override timing against an equivalent pure Quint operator.

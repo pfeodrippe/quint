@@ -10,7 +10,7 @@ import { newIdGenerator } from '../../src/idGenerator'
 import { parse, parseExpressionOrDeclaration } from '../../src/parsing/quintParserFrontend'
 import { fileSourceResolver } from '../../src/parsing/sourceResolver'
 import { newRng } from '../../src/rng'
-import { loadForeignBindings } from '../../src/runtime/foreign'
+import { loadForeignBindings, loadRustForeignBindings } from '../../src/runtime/foreign'
 import { Evaluator } from '../../src/runtime/impl/evaluator'
 import { newTraceRecorder } from '../../src/runtime/trace'
 
@@ -365,6 +365,46 @@ describe('foreign bindings', () => {
       assert.fail('Expected invalid ffi result to fail')
     }
     assert.equal(result.value.code, 'QNT523')
+  })
+
+  it('normalizes ffi bindings for the Rust backend', async () => {
+    const configPath = makeTempBindings(
+      {},
+      {
+        bindings: [{ kind: 'ffi', module: 'Math', name: 'add1', library: './libforeign.dylib', symbol: 'add1_host' }],
+      }
+    )
+    const { resolver } = prepare('add1(1)', 'pure def add1(x: int): int')
+    const registry = await loadRustForeignBindings(configPath, resolver)
+
+    assert.isTrue(registry.isRight(), registry.isLeft() ? registry.value.message : undefined)
+    if (registry.isLeft()) {
+      assert.fail(registry.value.message)
+    }
+
+    assert.lengthOf(registry.value, 1)
+    const binding = registry.value[0]
+    assert.sameMembers(binding.args, ['int'])
+    assert.equal(binding.result, 'int')
+    assert.equal(binding.symbol, 'add1_host')
+    assert.match(binding.library, /libforeign\.dylib$/)
+  })
+
+  it('rejects non-ffi bindings for the Rust backend', async () => {
+    const configPath = makeTempBindings(
+      { 'module.cjs': 'module.exports = { add1: x => x }' },
+      {
+        bindings: [{ kind: 'module', module: 'Math', name: 'add1', path: './module.cjs' }],
+      }
+    )
+    const { resolver } = prepare('add1(1)', 'pure def add1(x: int): int')
+    const registry = await loadRustForeignBindings(configPath, resolver)
+
+    assert.isTrue(registry.isLeft())
+    if (registry.isRight()) {
+      assert.fail('Expected Rust backend module binding to fail')
+    }
+    assert.equal(registry.value.code, 'QNT526')
   })
 
   it('invokes wasm bindings through the wasm adapter', async () => {

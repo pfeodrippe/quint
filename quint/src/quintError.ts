@@ -145,7 +145,7 @@ export type ErrorCode =
   | 'QNT524'
   /* QNT525: Foreign binding must be synchronous */
   | 'QNT525'
-  /* QNT526: Rust backend does not support foreign bindings */
+  /* QNT526: Rust backend only supports ffi foreign bindings */
   | 'QNT526'
   /* QNT527: Foreign FFI signature or value is not supported by the native ABI */
   | 'QNT527'

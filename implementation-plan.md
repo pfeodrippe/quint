@@ -49,7 +49,7 @@ So the project plan is now Bun-first and in-process-first.
 2. In-repo implementation plan created.
 3. Declaration-only operator support has already been implemented across parser/IR/printing/type/effect layers.
 4. Quint now compiles under Bun and the existing test suite passes under Bun and Node.
-5. A first Bun-only foreign binding slice is now implemented for declaration-only pure defs/vals through:
+5. A first foreign binding slice is now implemented for declaration-only pure defs/vals through:
    - `module` bindings
    - `ffi` bindings via Bun's `bun:ffi` module
    - `wasm` bindings via Bun module loading
@@ -60,13 +60,14 @@ So the project plan is now Bun-first and in-process-first.
 
 1. **Done:** declaration-only operator groundwork
 2. **Done:** Bun compile/test parity
-3. **Done:** Bun-only foreign binding loader and evaluator dispatch
+3. **Done:** TypeScript foreign binding loader and evaluator dispatch
 4. **Done:** config validation, runtime guardrails, and explicit error codes
 5. **Done:** unit coverage for `module`, `ffi`, and `wasm` adapters
 6. **Done:** Bun CLI integration coverage for `run`, `test`, and REPL
 7. **Done:** real Rust `cdylib` fixture coverage for native overrides
 8. **Done:** native-vs-pure stress benchmark script for operator-call timing
 9. **Done:** repo fixtures and user-facing documentation for the Bun-first slice
+10. **Done:** Rust backend `ffi` support through the same `--foreign-bindings` API
 
 ## Target architecture
 
@@ -104,7 +105,7 @@ There is **no `command` binding** in this plan.
 
 1. First slice is restricted to **pure** operators only.
 2. Only **declaration-only** operators may be externally implemented in the first slice.
-3. Foreign dispatch is only supported in the **Bun runtime path**.
+3. Foreign dispatch is supported on the **TypeScript backend under Bun**, and native `ffi` dispatch is also supported on the **Rust backend**.
 4. Unsupported runtimes or unsupported operator kinds must fail explicitly.
 5. No silent fallback to fake bodies, subprocesses, or generic slow paths.
 
@@ -122,7 +123,6 @@ There is **no `command` binding** in this plan.
 
 ### Out of scope
 
-1. Rust evaluator backend support for foreign overrides.
 2. Verification semantics for foreign operators in Apalache/TLC.
 3. Effectful or stateful foreign operators.
 4. Async host calls in the first slice.
@@ -150,7 +150,7 @@ This section is now a **completed execution checklist** for the Bun-first scope.
 Every phase below is implemented for the current feature boundary:
 
 1. declaration-only pure operators
-2. Bun-only TypeScript backend execution
+2. TypeScript backend execution under Bun
 3. synchronous `module`, `ffi`, and `wasm` bindings
 4. `run`, `test`, and REPL integration
 5. unit, integration, and documentation coverage

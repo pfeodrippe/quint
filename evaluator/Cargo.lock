@@ -145,7 +145,7 @@ dependencies = [
  "num-traits",
  "serde",
  "wasm-bindgen",
- "windows-link",
+ "windows-link 0.1.1",
 ]
 
 [[package]]
@@ -644,6 +644,35 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c19937216e9d3aa9956d9bb8dfc0b0c8beb6058fc4f7a4dc4d850edf86a237d6"
 
 [[package]]
+name = "libffi"
+version = "4.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b0feebbe0ccd382a2790f78d380540500d7b78ed7a3498b68fcfbc1593749a94"
+dependencies = [
+ "libc",
+ "libffi-sys",
+]
+
+[[package]]
+name = "libffi-sys"
+version = "3.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "90c6c6e17136d4bc439d43a2f3c6ccf0731cccc016d897473a29791d3c2160c3"
+dependencies = [
+ "cc",
+]
+
+[[package]]
+name = "libloading"
+version = "0.8.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d7c4b02199fee7c5d21a5ae7d8cfa79a6ef5bb2fc834d6e9058e89c825efdc55"
+dependencies = [
+ "cfg-if",
+ "windows-link 0.2.1",
+]
+
+[[package]]
 name = "libmimalloc-sys"
 version = "0.1.44"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -866,6 +895,8 @@ dependencies = [
  "insta",
  "itertools 0.14.0",
  "itf",
+ "libffi",
+ "libloading",
  "mimalloc",
  "num-bigint",
  "num-traits",
@@ -1488,7 +1519,7 @@ checksum = "4763c1de310c86d75a878046489e2e5ba02c649d185f21c67d4cf8a56d098980"
 dependencies = [
  "windows-implement 0.60.0",
  "windows-interface 0.59.1",
- "windows-link",
+ "windows-link 0.1.1",
  "windows-result 0.3.2",
  "windows-strings 0.4.0",
 ]
@@ -1544,6 +1575,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "76840935b766e1b0a05c0066835fb9ec80071d4c09a16f6bd5f7e655e3c14c38"
 
 [[package]]
+name = "windows-link"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f0805222e57f7521d6a62e36fa9163bc891acd422f971defe97d64e70d0a4fe5"
+
+[[package]]
 name = "windows-result"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1558,7 +1595,7 @@ version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c64fd11a4fd95df68efcfee5f44a294fe71b8bc6a91993e2791938abcc712252"
 dependencies = [
- "windows-link",
+ "windows-link 0.1.1",
 ]
 
 [[package]]
@@ -1577,7 +1614,7 @@ version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7a2ba9642430ee452d5a7aa78d72907ebe8cfda358e8cb7918a2050581322f97"
 dependencies = [
- "windows-link",
+ "windows-link 0.1.1",
 ]
 
 [[package]]

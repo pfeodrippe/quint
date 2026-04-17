@@ -20,6 +20,7 @@ fn parse_test_from_path(file_path: &Path, test_name: &str) -> Result<TestCase, B
         name: test_name.to_string(),
         test_def,
         table: output.table,
+        foreign_bindings: vec![],
     })
 }
 

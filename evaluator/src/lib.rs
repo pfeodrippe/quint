@@ -5,6 +5,7 @@
 
 pub mod builtins;
 pub mod evaluator;
+pub mod foreign;
 pub mod helpers;
 pub mod ir;
 pub mod itf;
