@@ -53,13 +53,6 @@ cat >"$bindings" <<EOF
     {
       "kind": "ffi",
       "module": "raylibDemo",
-      "name": "rlPresent",
-      "library": "$library",
-      "symbol": "rl_present_host"
-    },
-    {
-      "kind": "ffi",
-      "module": "raylibDemo",
       "name": "rlDrawText",
       "library": "$library",
       "symbol": "rl_draw_text_host"

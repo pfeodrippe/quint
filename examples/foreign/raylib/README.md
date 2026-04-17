@@ -15,7 +15,7 @@ It includes:
 1. a Quint spec can call into a real native graphics library through FFI
 2. the shim can keep state behind the foreign-call boundary
 3. the same `--foreign-bindings` file API works with the **Rust backend**
-4. Quint does **not** need to initialize the window directly; the shim owns that
+4. Quint does **not** need to initialize or present the window directly; the shim owns that
 
 ## Important caveat
 
@@ -57,10 +57,10 @@ Then you can drive the window directly from Quint:
 rlSetCounter(7)
 rlDrawText("Hello from Quint", 180, 120, 30, 255, 255, 255)
 rlDrawCircle(400, 280, 70, 0, 121, 241)
-rlPresent(30, 30, 48)
 rlWindowShouldClose
 rlCloseWindow
 ```
 
-`rlSetCounter(n)` updates a persistent `Counter: n` label that the shim draws in
-the top-left corner on every presented frame.
+The first draw or counter call opens the window automatically. `rlSetCounter(n)`
+updates a persistent `Counter: n` label in the top-left corner, and each draw
+or counter call repaints the retained scene immediately on the native side.
