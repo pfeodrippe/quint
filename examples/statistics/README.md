@@ -63,6 +63,12 @@ Run one example:
 examples/statistics/run-stats.sh two-phase-commit 200 1
 ```
 
+Override the default per-target step budget:
+
+```bash
+examples/statistics/run-stats.sh lightclient 200 1 6
+```
+
 The built-in `stats` listener prints summaries such as:
 
 - integer percentiles and average
@@ -122,6 +128,31 @@ examples/statistics/run-stats.sh random-walk 200 1
 The JSON file contains one aggregated report with per-label summaries for every
 tap label observed during the run.
 
+## Generic A/B diffs
+
+The highest-value workflow after collecting stats is **comparing two reports**.
+
+Compare two targets directly:
+
+```bash
+examples/statistics/compare-stats-targets.sh lightclient paxos 200 1
+```
+
+Compare two existing JSON reports:
+
+```bash
+examples/statistics/compare-stats-reports.sh before /tmp/before.json after /tmp/after.json
+```
+
+Useful environment variables:
+
+- `LABELS=label1,label2,...` to restrict the comparison to a known set of labels
+- `LABEL_PREFIX=prefix.` to compare every shared label under a namespace
+- `CATEGORY_LIMIT=12` to show more categorical values per label
+
+Categorical comparisons include **95% Wilson confidence intervals** for outcome
+rates, so the result is more meaningful than raw percentages alone.
+
 ## Comparing spec v2 against v1
 
 The important pattern is: **instrument both versions with the same labels** and
@@ -158,6 +189,53 @@ This is the main workflow for comparing spec revisions:
 1. keep the metric labels stable across versions
 2. run the same simulation budget and seed policy
 3. compare outcome and cost distributions, not just one trace
+
+## Sweeps across seeds and step budgets
+
+The next most useful workflow is checking whether the same trend holds across
+multiple seeds and budgets:
+
+```bash
+examples/statistics/sweep-stats.sh \
+  --targets lightclient,paxos \
+  --samples 50 \
+  --seeds 1,2,3 \
+  --max-steps default,6,12 \
+  --labels lightclient.outcome,paxos.outcome
+```
+
+You can also save the sweep summary as JSON:
+
+```bash
+examples/statistics/sweep-stats.sh \
+  --targets queue-v1,queue-v2 \
+  --samples 100 \
+  --seeds 1,2,3,4 \
+  --labels queue_perf.outcome,queue_perf.report_steps \
+  --out-json /tmp/quint-sweep.json
+```
+
+When a row shows `missing`, the selected label was not emitted for that run.
+This often means the run hit the external step cap before the wrapper reached
+its `report` action.
+
+## Filtered trace capture
+
+Distributions are useful, but debugging still needs concrete traces. The
+interesting-trace helper keeps only traces whose stats match a filter:
+
+```bash
+examples/statistics/capture-interesting-traces.sh \
+  --target lightclient \
+  --keep 3 \
+  --attempts 40 \
+  --where 'lightclient.verdict_each_step=NOT_ENOUGH_TRUST' \
+  --where 'lightclient.outcome=success'
+```
+
+This runs one sample at a time, saves only matching ITF traces plus their
+one-sample stats reports, and writes an `index.json` manifest for the kept
+matches.
 
 ## Live visualization with raylib
 

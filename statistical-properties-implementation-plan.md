@@ -185,3 +185,54 @@ Implemented:
   intent than `q::tap` for statistics-only use.
 - A future labeled reducer API may be useful when different tap labels need
   different per-trace reducers in the same run.
+
+## Ranked next feature wave
+
+The current stats surface is already useful for one target at a time. The next
+highest-value work is to turn it into a repeatable **analysis workflow**.
+
+### Highest value
+
+1. **Generic A/B stats diffs**
+   - compare any two targets or reports, not just queue v1/v2
+   - show deltas for p50/p90/avg and categorical outcome rates
+   - include confidence intervals for outcome percentages so comparisons are less hand-wavy
+2. **Sweep runner**
+   - run the same target across multiple seeds and optional step budgets
+   - emit machine-readable summaries plus a compact table for selected labels
+   - make it easy to answer “does this trend hold across budgets and seeds?”
+3. **Interesting-trace capture**
+   - repeatedly run one sample at a time
+   - keep only traces whose stats match a filter such as `outcome=INVALID` or
+     `verdict_each_step=NOT_ENOUGH_TRUST`
+   - bridge from distributions back to debuggable concrete traces
+
+### Medium value
+
+4. **Confidence-interval support in comparison tooling**
+   - especially for success / timeout / failure rates
+5. **Conditional stat views**
+   - e.g. “steps on success only” or “max backlog on timeouts only”
+6. **Coverage-style summary rows**
+   - action names, rounds reached, coarse state buckets, label presence
+
+### Lower value
+
+7. **Joint-distribution / correlation reports**
+   - e.g. rounds vs evidence size, steps vs outcome
+8. **Dashboard controls**
+   - pause, focus one label, export snapshot JSON, reducer switching
+9. **Reusable wrapper helpers**
+   - `reportOnce`, max-seen counters, occupancy helpers, standardized outcome labels
+10. **First-class spec-parameter sweeps**
+    - expose model parameters directly through wrappers instead of only seed/step-budget sweeps
+
+## Current implementation wave
+
+This implementation pass focuses on the top three items above:
+
+1. add reusable runner overrides that higher-level tools can build on
+2. add a generic comparison tool with confidence intervals
+3. add a sweep runner
+4. add interesting-trace capture
+5. document the new workflow in the project plan and statistics README

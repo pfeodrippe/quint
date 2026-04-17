@@ -10,7 +10,11 @@ bun_bin="${BUN_BIN:-}"
 target="${1:-all}"
 samples="${2:-200}"
 seed="${3:-1}"
+custom_max_steps="${4:-${MAX_STEPS_OVERRIDE:-}}"
 listener="${LISTENER:-stats}"
+verbosity="${VERBOSITY:-0}"
+out_itf="${OUT_ITF:-}"
+n_traces="${N_TRACES:-}"
 
 if [[ -z "$bun_bin" ]]; then
   bun_bin="$(command -v bun || true)"
@@ -27,19 +31,40 @@ run_example() {
   local backend="${6:-rust}"
   local runtime="${7:-node}"
   local tap_listener="${8:-$listener}"
+  local resolved_max_steps="$max_steps"
+  local -a extra_args=()
+  local -a command=()
+
+  if [[ -n "$custom_max_steps" ]]; then
+    resolved_max_steps="$custom_max_steps"
+  fi
+
+  if [[ -n "$n_traces" ]]; then
+    extra_args+=("--n-traces=$n_traces")
+  fi
+
+  if [[ -n "$out_itf" ]]; then
+    extra_args+=("--out-itf" "$out_itf")
+  fi
 
   echo "== $name =="
-  "$runtime" "$quint_dir/dist/src/cli.js" run "$spec" \
-    --main="$main" \
-    --init=init \
-    --step=step \
-    --backend="$backend" \
-    --tap-listener="$tap_listener" \
-    --max-samples="$samples" \
-    --max-steps="$max_steps" \
-    --seed="$seed" \
-    --verbosity=0 \
+  command=(
+    "$runtime" "$quint_dir/dist/src/cli.js" run "$spec"
+    --main="$main"
+    --init=init
+    --step=step
+    --backend="$backend"
+    --tap-listener="$tap_listener"
+    --max-samples="$samples"
+    --max-steps="$resolved_max_steps"
+    --seed="$seed"
+    --verbosity="$verbosity"
     --invariant="$invariant"
+  )
+  if ((${#extra_args[@]} > 0)); then
+    command+=("${extra_args[@]}")
+  fi
+  "${command[@]}"
   echo ""
 }
 
@@ -156,7 +181,7 @@ case "$target" in
     run_example "queue-v2" "$example_dir/queue_perf_v2_stats.qnt" "queuePerfV2Stats" "boundsInv" 61
     ;;
   *)
-    echo "Usage: $(basename "$0") [all|random-walk|die-hard|two-phase-commit|lamport-mutex|dining-philosophers|bank|paxos|tendermint|lightclient|queue-v1|queue-v2] [samples] [seed]" >&2
+    echo "Usage: $(basename "$0") [all|random-walk|die-hard|two-phase-commit|lamport-mutex|dining-philosophers|bank|paxos|tendermint|lightclient|queue-v1|queue-v2] [samples] [seed] [max-steps]" >&2
     exit 1
     ;;
 esac
