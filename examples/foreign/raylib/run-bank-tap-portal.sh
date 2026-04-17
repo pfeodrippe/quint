@@ -7,7 +7,6 @@ repo_dir="$(cd "$example_dir/../../.." && pwd)"
 quint_dir="$repo_dir/quint"
 native_dir="$example_dir/native-rust"
 spec_path="$example_dir/bank-tap-debug.qnt"
-bindings_path="$example_dir/tap-portal-bindings.json"
 bun_bin="${BUN_BIN:-}"
 
 if [[ -z "$bun_bin" ]]; then
@@ -24,6 +23,43 @@ seed="${2:-1}"
 
 npm --prefix "$quint_dir" run compile >/dev/null
 cargo build --manifest-path "$native_dir/Cargo.toml" >/dev/null
+
+case "$(uname -s)" in
+  Darwin)
+    library="$native_dir/target/debug/libquint_raylib_demo.dylib"
+    ;;
+  Linux)
+    library="$native_dir/target/debug/libquint_raylib_demo.so"
+    ;;
+  MINGW*|MSYS*|CYGWIN*)
+    library="$native_dir/target/debug/quint_raylib_demo.dll"
+    ;;
+  *)
+    echo "Unsupported OS for raylib example: $(uname -s)" >&2
+    exit 1
+    ;;
+esac
+
+bindings_dir="$(mktemp -d "${TMPDIR:-/tmp}/quint-tap-listener-bindings.XXXXXX")"
+bindings_path="$bindings_dir/bindings.json"
+cleanup() {
+  rm -rf "$bindings_dir"
+}
+trap cleanup EXIT
+
+cat >"$bindings_path" <<EOF
+{
+  "bindings": [
+    {
+      "kind": "ffi",
+      "module": "bankTapDebug",
+      "name": "tapPortalListener",
+      "library": "$library",
+      "symbol": "rl_tap_portal_listener_host"
+    }
+  ]
+}
+EOF
 
 "$bun_bin" "$quint_dir/dist/src/cli.js" run "$spec_path" \
   --backend=typescript \

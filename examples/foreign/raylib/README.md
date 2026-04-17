@@ -20,8 +20,7 @@ It includes:
 12. `run-two-phase-commit-trace-debugger.sh`: fast trace capture + viewer for the two-phase commit spec
 13. `bank-tap-debug.qnt`: a real-spec wrapper that emits structured `q::tap` snapshots
 14. `tap-portal.ts`: a standalone raylib viewer for JSONL `q::tap` streams
-15. `tap-portal-listener.ts`: a direct operator-backed raylib listener for `q::tap`
-16. `run-bank-tap-portal.sh`: runs the bank tap wrapper with a direct tap-listener operator (no middleman file)
+15. `run-bank-tap-portal.sh`: runs the bank tap wrapper with a direct tap-listener operator that calls into the native Rust raylib shim (no middleman file)
 
 ## What this demonstrates
 
@@ -253,14 +252,14 @@ bun quint/dist/src/cli.js run spec.qnt \
 ```
 
 That operator is invoked directly for every tap event, so it can talk to Bun
-modules, WASM, or raylib FFI without a middleman file. The JSONL route is still
+modules, WASM, or native raylib FFI without a middleman file. The JSONL route is still
 useful for generic post-processing or external consumers.
 
 ### Bank tap portal
 
-This uses the real Cosmos bank spec and attaches a **direct raylib tap listener
-operator** through `--tap-listener-op`, so the UI is updated directly from each
-`q::tap` event during execution.
+This uses the real Cosmos bank spec and attaches a **direct native raylib tap
+listener operator** through `--tap-listener-op`, so each `q::tap` event is sent
+into the Rust shim and rendered there.
 
 ```sh
 bash ./examples/foreign/raylib/run-bank-tap-portal.sh
