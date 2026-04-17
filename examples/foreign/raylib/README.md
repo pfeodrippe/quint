@@ -21,6 +21,7 @@ It includes:
 13. `bank-tap-debug.qnt`: a real-spec wrapper that emits structured `q::tap` snapshots
 14. `tap-portal.ts`: a standalone raylib viewer for JSONL `q::tap` streams
 15. `run-bank-tap-portal.sh`: runs the bank tap wrapper with a direct tap-listener operator that calls into the native Rust raylib shim (no middleman file)
+16. `statistics-live-*.qnt` + `run-statistics-live.sh`: wrapper specs plus a generic live statistics dashboard for the simulation examples in `examples/statistics/`
 
 ## What this demonstrates
 
@@ -32,6 +33,8 @@ It includes:
 6. specs that rely on large integers can use the Bun-backed TypeScript evaluator while still using the same foreign-binding API
 7. traces can be captured first and inspected afterwards, so simulation is not slowed down by rendering
 8. `q::tap` can stream structured values into multiple listeners, including a Portal-style raylib app
+9. the same native listener can render **running statistical distributions** while a simulation is still executing
+10. the statistics dashboard can be throttled into a stable, readable summary view instead of a per-event ticker
 
 ## Important caveat
 
@@ -274,3 +277,33 @@ bash ./examples/foreign/raylib/run-bank-tap-portal.sh <max-steps> <seed>
 The direct listener is intentionally more `q::debug`-like than the JSONL portal:
 it keeps a live list of recent taps on the left and the latest tapped value on
 the right.
+
+### Live statistics dashboard
+
+The same direct-listener path can also render **running statistics** instead of
+just the latest structured tap payload.
+
+Run it like this:
+
+```sh
+bash ./examples/foreign/raylib/run-statistics-live.sh random-walk
+```
+
+Or point it at another statistical example:
+
+```sh
+bash ./examples/foreign/raylib/run-statistics-live.sh two-phase-commit 200 1
+bash ./examples/foreign/raylib/run-statistics-live.sh queue-v1 200 1
+bash ./examples/foreign/raylib/run-statistics-live.sh queue-v2 200 1
+```
+
+What it shows live:
+
+1. recent tap events as they arrive
+2. per-label running histograms for integer measurements
+3. per-label running frequency bars for categorical outcomes
+4. completion / timeout / backlog distributions while the run is still in flight
+
+The queue v1/v2 pair is especially useful here: run the two versions separately
+and compare how quickly the backlog distribution collapses and how often each
+version clears the workload before the report limit.

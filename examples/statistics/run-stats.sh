@@ -76,15 +76,33 @@ case "$target" in
       "safetyInv" \
       41
     ;;
+  queue-v1)
+    run_example \
+      "queue-v1" \
+      "$example_dir/queue_perf_v1_stats.qnt" \
+      "queuePerfV1Stats" \
+      "boundsInv" \
+      61
+    ;;
+  queue-v2)
+    run_example \
+      "queue-v2" \
+      "$example_dir/queue_perf_v2_stats.qnt" \
+      "queuePerfV2Stats" \
+      "boundsInv" \
+      61
+    ;;
   all)
     run_example "random-walk" "$example_dir/random_walk_stats.qnt" "randomWalkStats" "boundsInv" 81
     run_example "die-hard" "$example_dir/die_hard_stats.qnt" "dieHardStats" "boundsInv" 401
     run_example "two-phase-commit" "$example_dir/two_phase_commit_stats.qnt" "twoPhaseCommitStats" "consistencyInv" 21
     run_example "lamport-mutex" "$example_dir/lamport_mutex_stats.qnt" "lamportMutexStats" "mutexInv" 81
     run_example "dining-philosophers" "$example_dir/dining_philosophers_stats.qnt" "diningPhilosophersStats" "safetyInv" 41
+    run_example "queue-v1" "$example_dir/queue_perf_v1_stats.qnt" "queuePerfV1Stats" "boundsInv" 61
+    run_example "queue-v2" "$example_dir/queue_perf_v2_stats.qnt" "queuePerfV2Stats" "boundsInv" 61
     ;;
   *)
-    echo "Usage: $(basename "$0") [all|random-walk|die-hard|two-phase-commit|lamport-mutex|dining-philosophers] [samples] [seed]" >&2
+    echo "Usage: $(basename "$0") [all|random-walk|die-hard|two-phase-commit|lamport-mutex|dining-philosophers|queue-v1|queue-v2] [samples] [seed]" >&2
     exit 1
     ;;
 esac

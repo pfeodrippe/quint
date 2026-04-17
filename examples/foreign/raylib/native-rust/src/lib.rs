@@ -1,6 +1,7 @@
 use raylib::ffi;
 use serde::Deserialize;
 use serde_json::Value;
+use std::collections::BTreeMap;
 use std::env;
 use std::ffi::{c_char, CStr, CString};
 use std::sync::{Mutex, OnceLock};
@@ -42,6 +43,9 @@ struct HostState {
     rects: Vec<RectCommand>,
     screenshot_path: Option<String>,
     screenshot_taken: bool,
+    tap_delay_ms: u64,
+    tap_render_interval_ms: u64,
+    last_tap_render_ms: u64,
     tap_portal: Option<TapPortalState>,
     texts: Vec<TextCommand>,
 }
@@ -57,6 +61,15 @@ impl Default for HostState {
             rects: Vec::new(),
             screenshot_path: env::var("QUINT_RAYLIB_SCREENSHOT_PATH").ok(),
             screenshot_taken: false,
+            tap_delay_ms: env::var("QUINT_RAYLIB_TAP_DELAY_MS")
+                .ok()
+                .and_then(|value| value.parse::<u64>().ok())
+                .unwrap_or(0),
+            tap_render_interval_ms: env::var("QUINT_RAYLIB_TAP_RENDER_INTERVAL_MS")
+                .ok()
+                .and_then(|value| value.parse::<u64>().ok())
+                .unwrap_or(1000),
+            last_tap_render_ms: 0,
             tap_portal: None,
             texts: Vec::new(),
         }
@@ -65,25 +78,37 @@ impl Default for HostState {
 
 #[derive(Clone)]
 struct TapPortalState {
-    events: Vec<TapPortalEvent>,
+    latest_event: Option<TapPortalEvent>,
+    total_events: usize,
+    stats_by_label: BTreeMap<String, TapLabelStats>,
+}
+
+#[derive(Clone, Default)]
+struct TapLabelStats {
+    location: String,
+    sample_count: usize,
+    int_values: Vec<i64>,
+    int_sum: i128,
+    int_counts: BTreeMap<i64, usize>,
+    bool_true: usize,
+    bool_false: usize,
+    string_counts: BTreeMap<String, usize>,
+    other_counts: BTreeMap<String, usize>,
 }
 
 #[derive(Clone)]
 struct TapPortalEvent {
     sequence: i64,
-    backend: String,
+    timestamp: u64,
     label: String,
     location: String,
-    summary: String,
     value: Value,
-    stats: Vec<String>,
-    detail_lines: Vec<String>,
 }
 
 #[derive(Deserialize)]
 struct IncomingTapEvent {
     sequence: i64,
-    backend: String,
+    timestamp: u64,
     label: String,
     location: Option<IncomingTapLocation>,
     value: Value,
@@ -126,6 +151,7 @@ fn close_window_if_open(state: &mut HostState) {
     state.window_open = false;
     state.circles.clear();
     state.rects.clear();
+    state.last_tap_render_ms = 0;
     state.tap_portal = None;
     state.texts.clear();
 }
@@ -155,7 +181,7 @@ fn ensure_window(state: &mut HostState) {
     }
 
     let (width, height) = if state.tap_portal.is_some() {
-        (1000, 520)
+        (1280, 760)
     } else {
         (800, 450)
     };
@@ -244,51 +270,68 @@ fn draw_circle_direct(x: i32, y: i32, radius: i32, color: ffi::Color) {
 }
 
 fn truncate_text(text: &str, max_len: usize) -> String {
+    if max_len == 0 {
+        return String::new();
+    }
+    if text.chars().count() <= max_len {
+        return text.to_string();
+    }
+    if max_len <= 3 {
+        return ".".repeat(max_len);
+    }
+
     let mut chars = text.chars();
     let mut out = String::new();
-    for _ in 0..max_len {
+    for _ in 0..(max_len - 3) {
         if let Some(ch) = chars.next() {
             out.push(ch);
         } else {
             return out;
         }
     }
-    if chars.next().is_some() {
-        out.pop();
-        out.push('…');
-    }
+    out.push_str("...");
     out
 }
 
-fn wrap_text(text: &str, width: usize) -> Vec<String> {
-    let mut lines = Vec::new();
-    let mut current = String::new();
-    for word in text.split_whitespace() {
-        let next = if current.is_empty() {
-            word.to_string()
-        } else {
-            format!("{current} {word}")
-        };
-        if next.chars().count() <= width {
-            current = next;
-        } else {
-            if !current.is_empty() {
-                lines.push(current);
-            }
-            current = word.to_string();
-        }
+fn humanize_identifier(text: &str) -> String {
+    text.replace('_', " ")
+}
+
+fn label_scope(label: &str) -> Option<String> {
+    label
+        .split_once('.')
+        .map(|(scope, _)| humanize_identifier(scope))
+}
+
+fn label_metric(label: &str) -> String {
+    humanize_identifier(
+        label
+            .split_once('.')
+            .map(|(_, metric)| metric)
+            .unwrap_or(label),
+    )
+}
+
+fn compact_path(path: &str) -> String {
+    let normalized = path.replace('\\', "/");
+    let parts = normalized
+        .split('/')
+        .filter(|segment| !segment.is_empty())
+        .collect::<Vec<_>>();
+    if parts.len() <= 3 {
+        return normalized;
     }
-    if !current.is_empty() {
-        lines.push(current);
-    }
-    lines
+    format!(".../{}", parts[parts.len() - 3..].join("/"))
 }
 
 fn itf_int_text(value: Option<&Value>) -> Option<String> {
     match value? {
         Value::Number(n) => Some(n.to_string()),
         Value::String(s) => Some(s.clone()),
-        Value::Object(map) => map.get("#bigint").and_then(|v| v.as_str()).map(|s| s.to_string()),
+        Value::Object(map) => map
+            .get("#bigint")
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_string()),
         _ => None,
     }
 }
@@ -367,149 +410,469 @@ fn balance_amount(balances: &Value, addr: &str, denom: &str) -> i64 {
 fn location_text(location: &Option<IncomingTapLocation>) -> String {
     location
         .as_ref()
-        .map(|loc| format!("{}:{}:{}", loc.source, loc.start.line + 1, loc.start.col + 1))
+        .map(|loc| {
+            format!(
+                "{}:{}:{}",
+                compact_path(&loc.source),
+                loc.start.line + 1,
+                loc.start.col + 1
+            )
+        })
         .unwrap_or_else(|| "no source location".to_string())
-}
-
-fn build_summary(sequence: i64, label: &str, value: &Value) -> String {
-    if let Value::Object(record) = value {
-        if let Some(tick) = itf_int_text(record.get("tick")) {
-            let verdict = record
-                .get("last")
-                .and_then(Value::as_object)
-                .and_then(|last| last.get("ok"))
-                .and_then(Value::as_bool)
-                .map(|ok| if ok { "ok" } else { "err" })
-                .unwrap_or("tap");
-            return format!("#{sequence} {} t={tick} {verdict}", truncate_text(label, 18));
-        }
-    }
-    format!("#{sequence} {}", truncate_text(label, 26))
-}
-
-fn build_stats(value: &Value) -> Vec<String> {
-    let mut stats = Vec::new();
-    let Value::Object(record) = value else {
-        return stats;
-    };
-
-    if let Some(tick) = itf_int_text(record.get("tick")) {
-        stats.push(format!("tick {tick}"));
-    }
-    if let Some(successes) = itf_int_text(record.get("successes")) {
-        stats.push(format!("successes {successes}"));
-    }
-    if let Some(failures) = itf_int_text(record.get("failures")) {
-        stats.push(format!("failures {failures}"));
-    }
-    if let Some(last) = record.get("last").and_then(Value::as_object) {
-        let from = last.get("from").and_then(Value::as_str).unwrap_or("?");
-        let to = last.get("to").and_then(Value::as_str).unwrap_or("?");
-        let denom = last.get("denom").and_then(Value::as_str).unwrap_or("?");
-        let amount = itf_int_text(last.get("amount")).unwrap_or_else(|| "0".to_string());
-        let outcome = last
-            .get("ok")
-            .and_then(Value::as_bool)
-            .map(|ok| if ok { "ok" } else { "err" })
-            .unwrap_or("tap");
-        stats.push(format!("last {from} -> {to}  {amount} {denom}  {outcome}"));
-        if let Some(error) = last.get("error").and_then(Value::as_str) {
-            if !error.is_empty() {
-                stats.push(format!("error {}", truncate_text(error, 52)));
-            }
-        }
-    }
-    stats
-}
-
-fn detail_lines(value: &Value) -> Vec<String> {
-    let pretty = serde_json::to_string_pretty(value).unwrap_or_else(|_| value.to_string());
-    pretty.lines().flat_map(|line| wrap_text(line, 56)).collect()
 }
 
 fn convert_tap_event(event: IncomingTapEvent) -> TapPortalEvent {
     TapPortalEvent {
         sequence: event.sequence,
-        backend: event.backend,
+        timestamp: event.timestamp,
         label: event.label.clone(),
         location: location_text(&event.location),
-        summary: build_summary(event.sequence, &event.label, &event.value),
         value: event.value.clone(),
-        stats: build_stats(&event.value),
-        detail_lines: detail_lines(&event.value),
     }
 }
 
+fn increment_count(counts: &mut BTreeMap<String, usize>, key: String) {
+    *counts.entry(key).or_insert(0) += 1;
+}
+
+fn update_label_stats(stats: &mut TapLabelStats, event: &TapPortalEvent) {
+    if stats.location.is_empty() {
+        stats.location = event.location.clone();
+    }
+    stats.sample_count += 1;
+
+    if let Some(int_value) = itf_int(Some(&event.value)) {
+        stats.int_values.push(int_value);
+        stats.int_sum += i128::from(int_value);
+        *stats.int_counts.entry(int_value).or_insert(0) += 1;
+        return;
+    }
+
+    if let Some(flag) = event.value.as_bool() {
+        if flag {
+            stats.bool_true += 1;
+        } else {
+            stats.bool_false += 1;
+        }
+        return;
+    }
+
+    if let Some(text) = event.value.as_str() {
+        increment_count(&mut stats.string_counts, truncate_text(text, 36));
+        return;
+    }
+
+    increment_count(
+        &mut stats.other_counts,
+        truncate_text(
+            &serde_json::to_string(&event.value).unwrap_or_else(|_| event.value.to_string()),
+            36,
+        ),
+    );
+}
+
+fn percentile_i64(sorted: &[i64], quantile: f64) -> i64 {
+    let index = ((sorted.len() as f64 * quantile).ceil() as usize)
+        .saturating_sub(1)
+        .min(sorted.len().saturating_sub(1));
+    sorted[index]
+}
+
+fn average_i64(sum: i128, count: usize) -> f64 {
+    if count == 0 {
+        0.0
+    } else {
+        sum as f64 / count as f64
+    }
+}
+
+fn top_count_entries(counts: &BTreeMap<String, usize>, limit: usize) -> Vec<(String, usize)> {
+    let mut entries = counts
+        .iter()
+        .map(|(value, count)| (value.clone(), *count))
+        .collect::<Vec<_>>();
+    entries.sort_by(|left, right| right.1.cmp(&left.1).then_with(|| left.0.cmp(&right.0)));
+    entries.truncate(limit);
+    entries
+}
+
+fn numeric_bars(stats: &TapLabelStats, max_bars: usize) -> Vec<(String, usize)> {
+    if stats.int_counts.is_empty() {
+        return Vec::new();
+    }
+
+    let min = *stats.int_counts.keys().next().unwrap();
+    let max = *stats.int_counts.keys().last().unwrap();
+    if stats.int_counts.len() <= max_bars && max - min <= 24 {
+        return stats
+            .int_counts
+            .iter()
+            .map(|(value, count)| (value.to_string(), *count))
+            .collect();
+    }
+
+    let bin_count = max_bars.max(1).min(8);
+    let span = (max - min + 1).max(bin_count as i64);
+    let bin_width = ((span + bin_count as i64 - 1) / bin_count as i64).max(1);
+    let mut bins = vec![0usize; bin_count];
+
+    for (value, count) in &stats.int_counts {
+        let index = (((*value - min) / bin_width) as usize).min(bin_count - 1);
+        bins[index] += *count;
+    }
+
+    bins.into_iter()
+        .enumerate()
+        .filter(|(_, count)| *count > 0)
+        .map(|(index, count)| {
+            let start = min + index as i64 * bin_width;
+            let end = (start + bin_width - 1).min(max);
+            let label = if start == end {
+                start.to_string()
+            } else {
+                format!("{start}..{end}")
+            };
+            (label, count)
+        })
+        .collect()
+}
+
+fn categorical_bars(stats: &TapLabelStats) -> Vec<(String, usize)> {
+    if stats.bool_true + stats.bool_false > 0 {
+        let mut entries = Vec::new();
+        if stats.bool_true > 0 {
+            entries.push(("true".to_string(), stats.bool_true));
+        }
+        if stats.bool_false > 0 {
+            entries.push(("false".to_string(), stats.bool_false));
+        }
+        return entries;
+    }
+
+    if !stats.string_counts.is_empty() {
+        return top_count_entries(&stats.string_counts, 5);
+    }
+
+    top_count_entries(&stats.other_counts, 5)
+}
+
+fn label_overview_text(stats: &TapLabelStats) -> String {
+    if !stats.int_values.is_empty() {
+        let min = *stats.int_values.iter().min().unwrap_or(&0);
+        let max = *stats.int_values.iter().max().unwrap_or(&0);
+        let avg = average_i64(stats.int_sum, stats.int_values.len());
+        return format!("range {min}..{max}  avg {avg:.1}");
+    }
+
+    if stats.bool_true + stats.bool_false > 0 {
+        return format!("true {}  false {}", stats.bool_true, stats.bool_false);
+    }
+
+    let distinct = if !stats.string_counts.is_empty() {
+        stats.string_counts.len()
+    } else {
+        stats.other_counts.len()
+    };
+    format!("distinct values {distinct}")
+}
+
+fn render_vertical_bars(
+    entries: &[(String, usize)],
+    x: i32,
+    y: i32,
+    width: i32,
+    height: i32,
+    color: ffi::Color,
+) {
+    if entries.is_empty() || width <= 0 || height <= 0 {
+        return;
+    }
+
+    let label_height = 22;
+    let bar_height = (height - label_height).max(24);
+    let gap = 8;
+    let total_gap = gap * (entries.len().saturating_sub(1) as i32);
+    let bar_width = ((width - total_gap) / entries.len() as i32).max(16);
+    let max_count = entries.iter().map(|(_, count)| *count).max().unwrap_or(1) as f32;
+
+    for (index, (label, count)) in entries.iter().enumerate() {
+        let left = x + index as i32 * (bar_width + gap);
+        let draw_height = ((*count as f32 / max_count) * (bar_height - 18) as f32).round() as i32;
+        draw_rect_direct(
+            left,
+            y + bar_height - draw_height,
+            bar_width,
+            draw_height,
+            color,
+        );
+        draw_text_direct(
+            &count.to_string(),
+            left,
+            y + bar_height - draw_height - 18,
+            14,
+            rgb(235, 235, 235),
+        );
+        draw_text_direct(
+            &truncate_text(label, 10),
+            left,
+            y + bar_height + 2,
+            14,
+            rgb(210, 210, 210),
+        );
+    }
+}
+
+fn render_horizontal_bars(
+    entries: &[(String, usize)],
+    x: i32,
+    y: i32,
+    width: i32,
+    color: ffi::Color,
+) {
+    if entries.is_empty() || width <= 0 {
+        return;
+    }
+
+    let max_count = entries.iter().map(|(_, count)| *count).max().unwrap_or(1) as f32;
+    for (index, (label, count)) in entries.iter().enumerate() {
+        let top = y + index as i32 * 24;
+        draw_text_direct(&truncate_text(label, 18), x, top, 16, rgb(235, 235, 235));
+        let bar_width = ((*count as f32 / max_count) * (width - 140) as f32).round() as i32;
+        draw_rect_direct(x + 124, top + 2, bar_width.max(2), 14, color);
+        draw_text_direct(
+            &count.to_string(),
+            x + width - 32,
+            top,
+            16,
+            rgb(235, 235, 235),
+        );
+    }
+}
+
+fn render_stats_card(
+    label: &str,
+    stats: &TapLabelStats,
+    x: i32,
+    y: i32,
+    width: i32,
+    height: i32,
+    highlight: bool,
+) {
+    let title = label_metric(label);
+    let scope = label_scope(label);
+
+    draw_rect_direct(
+        x,
+        y,
+        width,
+        height,
+        if highlight {
+            rgb(46, 67, 108)
+        } else {
+            rgb(28, 34, 46)
+        },
+    );
+
+    draw_text_direct(
+        &truncate_text(&title, 30),
+        x + 12,
+        y + 10,
+        18,
+        rgb(255, 255, 255),
+    );
+    if let Some(scope) = scope {
+        draw_text_direct(
+            &truncate_text(&scope, 32),
+            x + 12,
+            y + 32,
+            14,
+            rgb(170, 170, 170),
+        );
+    }
+    draw_text_direct(
+        &truncate_text(&stats.location, 40),
+        x + 12,
+        y + 50,
+        13,
+        rgb(165, 165, 165),
+    );
+    draw_text_direct(
+        &format!("samples {}", stats.sample_count),
+        x + 12,
+        y + 68,
+        14,
+        rgb(210, 210, 210),
+    );
+
+    if !stats.int_values.is_empty() {
+        let mut sorted = stats.int_values.clone();
+        sorted.sort_unstable();
+        let min = *sorted.first().unwrap();
+        let max = *sorted.last().unwrap();
+        let p90 = percentile_i64(&sorted, 0.9);
+        let avg = average_i64(stats.int_sum, stats.int_values.len());
+        draw_text_direct(
+            &format!("min {min}  avg {avg:.2}  p90 {p90}  max {max}"),
+            x + 12,
+            y + 88,
+            15,
+            rgb(255, 255, 255),
+        );
+        render_vertical_bars(
+            &numeric_bars(stats, 8),
+            x + 12,
+            y + 108,
+            width - 24,
+            height - 120,
+            rgb(0, 121, 241),
+        );
+        return;
+    }
+
+    let entries = categorical_bars(stats);
+    let distinct = if stats.bool_true + stats.bool_false > 0 {
+        usize::from(stats.bool_true > 0) + usize::from(stats.bool_false > 0)
+    } else if !stats.string_counts.is_empty() {
+        stats.string_counts.len()
+    } else {
+        stats.other_counts.len()
+    };
+    draw_text_direct(
+        &format!("distinct values {distinct}"),
+        x + 12,
+        y + 88,
+        15,
+        rgb(255, 255, 255),
+    );
+    render_horizontal_bars(&entries, x + 12, y + 108, width - 24, rgb(0, 200, 120));
+}
+
 fn render_tap_portal(portal: &TapPortalState) {
-    let Some(current) = portal.events.last() else {
+    let Some(current) = portal.latest_event.as_ref() else {
         return;
     };
 
-    draw_text_direct("Quint q::tap native listener", 20, 20, 28, rgb(255, 255, 255));
+    if looks_like_bank_tap(&current.value) {
+        render_bank_tap(portal, current);
+    } else {
+        render_generic_tap(portal);
+    }
+}
+
+fn render_generic_tap(portal: &TapPortalState) {
+    draw_text_direct("Quint live statistics", 20, 20, 30, rgb(255, 255, 255));
     draw_text_direct(
-        "Rust raylib host rendering direct FFI tap events",
+        "Stable cumulative summaries rendered by the native raylib listener",
         20,
-        54,
+        56,
         16,
         rgb(180, 180, 180),
     );
     draw_text_direct(
-        &format!("events {}", portal.events.len()),
+        &format!(
+            "tap samples {}  metrics {}",
+            portal.total_events,
+            portal.stats_by_label.len(),
+        ),
         20,
-        82,
+        84,
         18,
         rgb(255, 255, 255),
     );
-
-    draw_rect_direct(18, 112, 430, 330, rgb(28, 34, 46));
-    draw_text_direct("recent taps", 28, 122, 22, rgb(255, 255, 255));
-
-    let recent = portal.events.iter().rev().take(14).collect::<Vec<_>>();
-    for (index, event) in recent.iter().rev().enumerate() {
-        let y = 156 + index as i32 * 20;
-        if event.sequence == current.sequence {
-            draw_rect_direct(24, y - 2, 416, 18, rgb(56, 107, 214));
-        }
-        draw_text_direct(&truncate_text(&event.summary, 40), 30, y, 16, rgb(255, 255, 255));
-    }
-
-    if looks_like_bank_tap(&current.value) {
-        render_bank_tap(current);
-    } else {
-        render_generic_tap(current);
-    }
-}
-
-fn render_generic_tap(current: &TapPortalEvent) {
-    draw_rect_direct(470, 112, 500, 330, rgb(28, 34, 46));
-    draw_text_direct("latest tap", 480, 122, 22, rgb(255, 255, 255));
-    draw_text_direct(&current.label, 480, 154, 20, rgb(255, 255, 255));
-    draw_text_direct(&current.location, 480, 182, 14, rgb(180, 180, 180));
     draw_text_direct(
-        &format!("backend {}  sequence {}", current.backend, current.sequence),
-        480,
-        206,
-        16,
-        rgb(200, 200, 200),
+        "Text stays fixed while the cumulative distributions fill in over time.",
+        20,
+        102,
+        15,
+        rgb(190, 190, 190),
     );
 
-    for (index, stat) in current.stats.iter().take(4).enumerate() {
-        draw_text_direct(stat, 480, 236 + index as i32 * 22, 18, rgb(255, 255, 255));
+    draw_rect_direct(18, 132, 320, 604, rgb(28, 34, 46));
+    draw_text_direct("tracked metrics", 30, 144, 22, rgb(255, 255, 255));
+
+    let mut metric_rows = portal
+        .stats_by_label
+        .iter()
+        .map(|(label, stats)| (label.as_str(), stats))
+        .collect::<Vec<_>>();
+    metric_rows.sort_by(|left, right| left.0.cmp(right.0));
+
+    for (index, (label, stats)) in metric_rows.iter().take(12).enumerate() {
+        let line_y = 180 + index as i32 * 44;
+        let metric = humanize_identifier(&label.replace('.', " / "));
+        draw_text_direct(
+            &truncate_text(&metric, 22),
+            30,
+            line_y,
+            17,
+            rgb(255, 255, 255),
+        );
+        draw_text_direct(
+            &truncate_text(&stats.location, 28),
+            30,
+            line_y + 18,
+            13,
+            rgb(165, 165, 165),
+        );
+        draw_text_direct(
+            &format!("samples {}", stats.sample_count),
+            220,
+            line_y,
+            14,
+            rgb(210, 210, 210),
+        );
+        draw_text_direct(
+            &truncate_text(&label_overview_text(stats), 16),
+            220,
+            line_y + 18,
+            13,
+            rgb(165, 165, 165),
+        );
     }
 
-    let detail_start = 236 + (current.stats.len().min(4) as i32) * 22 + 16;
-    for (index, line) in current.detail_lines.iter().take(8).enumerate() {
-        draw_text_direct(line, 480, detail_start + index as i32 * 18, 16, rgb(220, 220, 220));
+    if portal.stats_by_label.len() > 12 {
+        draw_text_direct(
+            &format!("showing first 12 of {} metrics", portal.stats_by_label.len()),
+            30,
+            712,
+            14,
+            rgb(165, 165, 165),
+        );
+    }
+
+    draw_rect_direct(356, 132, 900, 76, rgb(28, 34, 46));
+    draw_text_direct("running summaries", 368, 144, 22, rgb(255, 255, 255));
+    draw_text_direct(
+        "Cards stay alphabetized and only show cumulative summaries, not the latest event payload.",
+        368,
+        174,
+        15,
+        rgb(185, 185, 185),
+    );
+
+    let mut labels = portal
+        .stats_by_label
+        .iter()
+        .map(|(label, stats)| (label.as_str(), stats))
+        .collect::<Vec<_>>();
+    labels.sort_by(|left, right| left.0.cmp(right.0));
+
+    for (index, (label, stats)) in labels.into_iter().take(6).enumerate() {
+        let column = index % 2;
+        let row = index / 2;
+        let card_x = 356 + column as i32 * 450;
+        let card_y = 228 + row as i32 * 158;
+        render_stats_card(label, stats, card_x, card_y, 430, 146, false);
     }
 }
 
-fn render_bank_tap(current: &TapPortalEvent) {
+fn render_bank_tap(portal: &TapPortalState, current: &TapPortalEvent) {
     let Value::Object(record) = &current.value else {
-        render_generic_tap(current);
+        render_generic_tap(portal);
         return;
     };
     let Some(last) = record.get("last").and_then(Value::as_object) else {
-        render_generic_tap(current);
+        render_generic_tap(portal);
         return;
     };
 
@@ -520,7 +883,11 @@ fn render_bank_tap(current: &TapPortalEvent) {
 
     let max_balance = addresses
         .iter()
-        .flat_map(|addr| denoms.iter().map(move |denom| balance_amount(balances, addr, denom)))
+        .flat_map(|addr| {
+            denoms
+                .iter()
+                .map(move |denom| balance_amount(balances, addr, denom))
+        })
         .max()
         .unwrap_or(1)
         .max(1);
@@ -530,22 +897,49 @@ fn render_bank_tap(current: &TapPortalEvent) {
         ((max_balance as f64) / 140.0).ceil() as i64
     };
 
-    draw_text_direct(&format!("tap #{}", current.sequence), 320, 20, 28, rgb(255, 255, 255));
+    draw_text_direct(
+        &format!("tap #{}", current.sequence),
+        320,
+        20,
+        28,
+        rgb(255, 255, 255),
+    );
     draw_text_direct(&current.label, 320, 48, 18, rgb(200, 200, 200));
     draw_text_direct(&current.location, 320, 68, 14, rgb(180, 180, 180));
     if let Some(tick) = itf_int_text(record.get("tick")) {
         draw_text_direct(&format!("tick {tick}"), 320, 88, 22, rgb(255, 255, 255));
     }
     if let Some(successes) = itf_int_text(record.get("successes")) {
-        draw_text_direct(&format!("successes {successes}"), 320, 120, 18, rgb(0, 228, 48));
+        draw_text_direct(
+            &format!("successes {successes}"),
+            320,
+            120,
+            18,
+            rgb(0, 228, 48),
+        );
     }
     if let Some(failures) = itf_int_text(record.get("failures")) {
-        draw_text_direct(&format!("failures {failures}"), 320, 144, 18, rgb(230, 41, 55));
+        draw_text_direct(
+            &format!("failures {failures}"),
+            320,
+            144,
+            18,
+            rgb(230, 41, 55),
+        );
     }
 
-    let from = last.get("from").map(value_text).unwrap_or_else(|| "?".to_string());
-    let to = last.get("to").map(value_text).unwrap_or_else(|| "?".to_string());
-    let denom = last.get("denom").map(value_text).unwrap_or_else(|| "?".to_string());
+    let from = last
+        .get("from")
+        .map(value_text)
+        .unwrap_or_else(|| "?".to_string());
+    let to = last
+        .get("to")
+        .map(value_text)
+        .unwrap_or_else(|| "?".to_string());
+    let denom = last
+        .get("denom")
+        .map(value_text)
+        .unwrap_or_else(|| "?".to_string());
     let amount = itf_int_text(last.get("amount")).unwrap_or_else(|| "0".to_string());
     let ok = last.get("ok").and_then(Value::as_bool).unwrap_or(false);
     let error = last.get("error").and_then(Value::as_str).unwrap_or("");
@@ -555,8 +949,20 @@ fn render_bank_tap(current: &TapPortalEvent) {
         format!("last error: {}", truncate_text(error, 30))
     };
 
-    draw_text_direct(&format!("last {from} -> {to}"), 320, 176, 20, rgb(255, 255, 255));
-    draw_text_direct(&format!("amount {amount} {denom}"), 320, 202, 18, rgb(255, 255, 255));
+    draw_text_direct(
+        &format!("last {from} -> {to}"),
+        320,
+        176,
+        20,
+        rgb(255, 255, 255),
+    );
+    draw_text_direct(
+        &format!("amount {amount} {denom}"),
+        320,
+        202,
+        18,
+        rgb(255, 255, 255),
+    );
     draw_text_direct(
         if ok {
             "last transfer succeeded"
@@ -566,13 +972,22 @@ fn render_bank_tap(current: &TapPortalEvent) {
         320,
         226,
         18,
-        if ok { rgb(0, 228, 48) } else { rgb(230, 41, 55) },
+        if ok {
+            rgb(0, 228, 48)
+        } else {
+            rgb(230, 41, 55)
+        },
     );
     draw_text_direct(&error_text, 320, 250, 16, rgb(200, 200, 200));
 
     for (index, denom_name) in denoms.iter().take(2).enumerate() {
-        let color = if index == 0 { rgb(253, 249, 0) } else { rgb(230, 41, 55) };
-        let supply_text = itf_int_text(map_get(supply, denom_name)).unwrap_or_else(|| "0".to_string());
+        let color = if index == 0 {
+            rgb(253, 249, 0)
+        } else {
+            rgb(230, 41, 55)
+        };
+        let supply_text =
+            itf_int_text(map_get(supply, denom_name)).unwrap_or_else(|| "0".to_string());
         draw_text_direct(
             &format!("{denom_name} supply {supply_text}"),
             620,
@@ -591,7 +1006,11 @@ fn render_bank_tap(current: &TapPortalEvent) {
             let amount = balance_amount(balances, addr, denom_name);
             let height = ((amount as f64) / (scale as f64)).floor().clamp(0.0, 140.0) as i32;
             let x = left + denom_index as i32 * 44;
-            let color = if denom_index == 0 { rgb(253, 249, 0) } else { rgb(230, 41, 55) };
+            let color = if denom_index == 0 {
+                rgb(253, 249, 0)
+            } else {
+                rgb(230, 41, 55)
+            };
             draw_rect_direct(x, 450 - height, 28, height, color);
             draw_text_direct(
                 &truncate_text(&format!("{denom_name}: {amount}"), 14),
@@ -613,6 +1032,18 @@ fn render_bank_tap(current: &TapPortalEvent) {
 fn maybe_render(state: &mut HostState) {
     if !state.batching {
         render_scene(state);
+    }
+}
+
+fn maybe_render_tap(state: &mut HostState, timestamp: u64) {
+    if state.batching {
+        return;
+    }
+    if state.last_tap_render_ms == 0
+        || timestamp.saturating_sub(state.last_tap_render_ms) >= state.tap_render_interval_ms
+    {
+        render_scene(state);
+        state.last_tap_render_ms = timestamp;
     }
 }
 
@@ -834,15 +1265,29 @@ pub unsafe extern "C" fn rl_tap_portal_listener_host(event_json: *const c_char) 
     };
 
     let mut state = host_state().lock().unwrap();
-    let portal = state
-        .tap_portal
-        .get_or_insert_with(|| TapPortalState { events: Vec::new() });
-    portal.events.push(convert_tap_event(event));
-    if portal.events.len() > 200 {
-        let excess = portal.events.len() - 200;
-        portal.events.drain(0..excess);
+    let converted = convert_tap_event(event);
+    let event_count = {
+        let portal = state.tap_portal.get_or_insert_with(|| TapPortalState {
+            latest_event: None,
+            total_events: 0,
+            stats_by_label: BTreeMap::new(),
+        });
+        portal.total_events += 1;
+        let stats = portal
+            .stats_by_label
+            .entry(converted.label.clone())
+            .or_insert_with(TapLabelStats::default);
+        update_label_stats(stats, &converted);
+        portal.latest_event = Some(converted.clone());
+        portal.total_events
+    };
+    let delay_ms = state.tap_delay_ms;
+    let timestamp = converted.timestamp;
+    state.counter = event_count as i64;
+    maybe_render_tap(&mut state, timestamp);
+    drop(state);
+    if delay_ms > 0 {
+        thread::sleep(Duration::from_millis(delay_ms));
     }
-    state.counter = portal.events.len() as i64;
-    maybe_render(&mut state);
     true
 }
