@@ -9,6 +9,8 @@ It includes:
 2. `native-rust/`: a Rust `cdylib` shim that exposes those operators as C ABI symbols
 3. `run-raylib-demo.sh`: a helper that builds the Quint CLI, the Rust evaluator,
    and the raylib shim, then launches either a canned demo or a preloaded REPL
+4. `bouncing-ball.qnt`: a real Quint state machine that uses the raylib surface
+5. `run-bouncing-ball.sh`: a helper that animates the state machine through the REPL
 
 ## What this demonstrates
 
@@ -64,3 +66,34 @@ rlCloseWindow
 The first draw or counter call opens the window automatically. `rlSetCounter(n)`
 updates a persistent `Counter: n` label in the top-left corner, and each draw
 or counter call repaints the retained scene immediately on the native side.
+
+## Visualize a real spec
+
+`bouncing-ball.qnt` is a proper state machine with:
+
+1. `init`
+2. `step`
+3. `scene`
+4. `drawCurrentState`
+
+Run the animated version:
+
+```sh
+bash ./examples/foreign/raylib/run-bouncing-ball.sh
+```
+
+Or open the state machine in a preloaded REPL:
+
+```sh
+bash ./examples/foreign/raylib/run-bouncing-ball.sh repl
+```
+
+Then drive it like this:
+
+```quint
+init
+drawCurrentState
+step
+drawCurrentState
+scene
+```
