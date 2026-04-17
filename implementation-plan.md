@@ -68,6 +68,7 @@ So the project plan is now Bun-first and in-process-first.
 8. **Done:** native-vs-pure stress benchmark script for operator-call timing
 9. **Done:** repo fixtures and user-facing documentation for the Bun-first slice
 10. **Done:** Rust backend `ffi` support through the same `--foreign-bindings` API
+11. **Done:** checked-in raylib example showing a native GUI shim driven from Quint
 
 ## Target architecture
 

@@ -150,3 +150,5 @@ For non-trivial Wasm toolchains, that usually means using JS-visible glue genera
 4. Invalid bindings and invalid host return values fail explicitly.
 5. `module` and `wasm` bindings are currently TypeScript-backend-only.
 6. A checked-in stress script is available via `npm run bun-foreign-stress` to compare native-override timing against an equivalent pure Quint operator.
+
+For an intentionally stateful native example, see `examples/foreign/raylib`.
