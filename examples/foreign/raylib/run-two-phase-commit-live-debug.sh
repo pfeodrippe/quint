@@ -7,7 +7,7 @@ repo_dir="$(cd "$example_dir/../../.." && pwd)"
 quint_dir="$repo_dir/quint"
 evaluator_dir="$repo_dir/evaluator"
 native_dir="$example_dir/native-rust"
-spec_path="$example_dir/raylib.qnt"
+spec_path="$example_dir/two-phase-commit-live-debug.qnt"
 
 npm --prefix "$quint_dir" run compile >/dev/null
 cargo build --manifest-path "$evaluator_dir/Cargo.toml" >/dev/null
@@ -112,20 +112,17 @@ EOF
 
 export QUINT_RUST_EVALUATOR_PATH="$evaluator_dir/target/debug/quint_evaluator"
 
-mode="${1:-demo}"
-if [[ "$mode" == "repl" ]]; then
-  exec node "$quint_dir/dist/src/cli.js" repl \
-    --backend=rust \
-    -r "$spec_path::raylibDemo" \
-    --foreign-bindings "$bindings"
-fi
+steps="${1:-120}"
+seed="${2:-1}"
 
-frames=240
-if [[ "$mode" != "demo" ]]; then
-  frames="$mode"
-fi
-exec node "$quint_dir/dist/src/cli.js" \
+exec node "$quint_dir/dist/src/cli.js" run "$spec_path" \
   --backend=rust \
-  -r "$spec_path::raylibDemo" \
-  --foreign-bindings "$bindings" \
-  "runHelloDemo($frames)"
+  --main=twoPhaseCommitLiveDebug \
+  --init=liveInit \
+  --step=liveStep \
+  --invariant=T::consistencyInv \
+  --max-samples=1 \
+  --max-steps="$steps" \
+  --seed="$seed" \
+  --verbosity=0 \
+  --foreign-bindings "$bindings"

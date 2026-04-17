@@ -1,4 +1,5 @@
 use raylib::ffi;
+use std::env;
 use std::ffi::{c_char, CStr, CString};
 use std::sync::{Mutex, OnceLock};
 use std::thread;
@@ -21,11 +22,23 @@ struct TextCommand {
     color: ffi::Color,
 }
 
+#[derive(Clone)]
+struct RectCommand {
+    x: i32,
+    y: i32,
+    width: i32,
+    height: i32,
+    color: ffi::Color,
+}
+
 struct HostState {
     window_open: bool,
     closed_by_user: bool,
     counter: i64,
     circles: Vec<CircleCommand>,
+    rects: Vec<RectCommand>,
+    screenshot_path: Option<String>,
+    screenshot_taken: bool,
     texts: Vec<TextCommand>,
 }
 
@@ -36,6 +49,9 @@ impl Default for HostState {
             closed_by_user: false,
             counter: 0,
             circles: Vec::new(),
+            rects: Vec::new(),
+            screenshot_path: env::var("QUINT_RAYLIB_SCREENSHOT_PATH").ok(),
+            screenshot_taken: false,
             texts: Vec::new(),
         }
     }
@@ -65,6 +81,13 @@ fn close_window_if_open(state: &mut HostState) {
     }
     state.window_open = false;
     state.circles.clear();
+    state.rects.clear();
+    state.texts.clear();
+}
+
+fn clear_scene(state: &mut HostState) {
+    state.circles.clear();
+    state.rects.clear();
     state.texts.clear();
 }
 
@@ -74,6 +97,7 @@ fn sync_window_state(state: &mut HostState) {
         state.window_open = false;
         state.closed_by_user = true;
         state.circles.clear();
+        state.rects.clear();
         state.texts.clear();
     }
 }
@@ -107,6 +131,11 @@ fn render_scene(state: &mut HostState) {
         ffi::DrawText(counter_text.as_ptr(), 20, 20, 28, rgb(253, 249, 0));
     }
 
+    for rect in &state.rects {
+        unsafe {
+            ffi::DrawRectangle(rect.x, rect.y, rect.width, rect.height, rect.color);
+        }
+    }
     for text in &state.texts {
         let value = CString::new(text.text.as_str()).unwrap();
         unsafe {
@@ -120,6 +149,17 @@ fn render_scene(state: &mut HostState) {
     }
 
     unsafe { ffi::EndDrawing() };
+
+    if !state.screenshot_taken {
+        if let Some(path) = &state.screenshot_path {
+            if let Ok(path_text) = CString::new(path.as_str()) {
+                unsafe {
+                    ffi::TakeScreenshot(path_text.as_ptr());
+                }
+                state.screenshot_taken = true;
+            }
+        }
+    }
 }
 
 #[unsafe(no_mangle)]
@@ -171,6 +211,14 @@ pub unsafe extern "C" fn rl_set_counter_host(value: i64) -> i64 {
 }
 
 #[unsafe(no_mangle)]
+pub unsafe extern "C" fn rl_clear_scene_host() -> i64 {
+    let mut state = host_state().lock().unwrap();
+    clear_scene(&mut state);
+    render_scene(&mut state);
+    0
+}
+
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn rl_draw_text_host(
     text: *const c_char,
     x: i64,
@@ -200,6 +248,36 @@ pub unsafe extern "C" fn rl_draw_text_host(
 }
 
 #[unsafe(no_mangle)]
+pub unsafe extern "C" fn rl_draw_text_int_host(
+    prefix: *const c_char,
+    value: i64,
+    x: i64,
+    y: i64,
+    font_size: i64,
+    r: i64,
+    g: i64,
+    b: i64,
+) -> i64 {
+    if prefix.is_null() {
+        return -1;
+    }
+
+    let mut state = host_state().lock().unwrap();
+    let prefix = unsafe { CStr::from_ptr(prefix) }
+        .to_string_lossy()
+        .into_owned();
+    state.texts.push(TextCommand {
+        text: format!("{prefix}{value}"),
+        x: x as i32,
+        y: y as i32,
+        font_size: font_size.max(1).min(i64::from(i32::MAX)) as i32,
+        color: rgb(r, g, b),
+    });
+    render_scene(&mut state);
+    0
+}
+
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn rl_draw_circle_host(
     x: i64,
     y: i64,
@@ -216,6 +294,34 @@ pub unsafe extern "C" fn rl_draw_circle_host(
         color: rgb(r, g, b),
     });
     render_scene(&mut state);
+    0
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rl_draw_rect_host(
+    x: i64,
+    y: i64,
+    width: i64,
+    height: i64,
+    r: i64,
+    g: i64,
+    b: i64,
+) -> i64 {
+    let mut state = host_state().lock().unwrap();
+    state.rects.push(RectCommand {
+        x: x as i32,
+        y: y as i32,
+        width: width.max(0).min(i64::from(i32::MAX)) as i32,
+        height: height.max(0).min(i64::from(i32::MAX)) as i32,
+        color: rgb(r, g, b),
+    });
+    render_scene(&mut state);
+    0
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rl_sleep_millis_host(milliseconds: i64) -> i64 {
+    thread::sleep(Duration::from_millis(milliseconds.max(0) as u64));
     0
 }
 

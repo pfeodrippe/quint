@@ -31,7 +31,10 @@ struct ForeignFreeFunction {
 enum OwnedArg {
     Int(i64),
     Bool(u8),
-    Str(CString),
+    Str {
+        _storage: CString,
+        ptr: *const c_char,
+    },
 }
 
 impl OwnedArg {
@@ -39,10 +42,7 @@ impl OwnedArg {
         match self {
             OwnedArg::Int(value) => arg(value),
             OwnedArg::Bool(value) => arg(value),
-            OwnedArg::Str(value) => {
-                let ptr = value.as_ptr();
-                arg(&ptr)
-            }
+            OwnedArg::Str { ptr, .. } => arg(ptr),
         }
     }
 }
@@ -101,7 +101,10 @@ impl ForeignBinding {
             ForeignAbi::Int => Ok(OwnedArg::Int(value.as_int())),
             ForeignAbi::Bool => Ok(OwnedArg::Bool(if value.as_bool() { 1 } else { 0 })),
             ForeignAbi::Str => CString::new(value.as_str().as_str())
-                .map(OwnedArg::Str)
+                .map(|text| {
+                    let ptr = text.as_ptr();
+                    OwnedArg::Str { _storage: text, ptr }
+                })
                 .map_err(|_| {
                     QuintError::new(
                         "QNT527",

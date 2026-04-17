@@ -49,6 +49,13 @@ cat >"$bindings" <<EOF
     {
       "kind": "ffi",
       "module": "raylibDemo",
+      "name": "rlClearScene",
+      "library": "$library",
+      "symbol": "rl_clear_scene_host"
+    },
+    {
+      "kind": "ffi",
+      "module": "raylibDemo",
       "name": "rlSetCounter",
       "library": "$library",
       "symbol": "rl_set_counter_host"
@@ -63,9 +70,30 @@ cat >"$bindings" <<EOF
     {
       "kind": "ffi",
       "module": "raylibDemo",
+      "name": "rlDrawTextInt",
+      "library": "$library",
+      "symbol": "rl_draw_text_int_host"
+    },
+    {
+      "kind": "ffi",
+      "module": "raylibDemo",
       "name": "rlDrawCircle",
       "library": "$library",
       "symbol": "rl_draw_circle_host"
+    },
+    {
+      "kind": "ffi",
+      "module": "raylibDemo",
+      "name": "rlDrawRect",
+      "library": "$library",
+      "symbol": "rl_draw_rect_host"
+    },
+    {
+      "kind": "ffi",
+      "module": "raylibDemo",
+      "name": "rlSleepMillis",
+      "library": "$library",
+      "symbol": "rl_sleep_millis_host"
     },
     {
       "kind": "ffi",

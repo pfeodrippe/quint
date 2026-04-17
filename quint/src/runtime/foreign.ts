@@ -253,7 +253,7 @@ function buildFfiCodec(
         returnsCString: true,
         encode(value: RuntimeValue): Either<QuintError, unknown> {
           try {
-            return right(value.toStr())
+            return right(Buffer.from(`${value.toStr()}\0`, 'utf8'))
           } catch (error) {
             return left(
               foreignError(

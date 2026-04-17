@@ -1,8 +1,12 @@
 module raylibDemo {
   pure def showHelloWindow(frames: int): int
 
+  pure def rlClearScene(): int
   pure def rlDrawText(text: str, x: int, y: int, fontSize: int, r: int, g: int, b: int): int
+  pure def rlDrawTextInt(prefix: str, value: int, x: int, y: int, fontSize: int, r: int, g: int, b: int): int
   pure def rlDrawCircle(x: int, y: int, radius: int, r: int, g: int, b: int): int
+  pure def rlDrawRect(x: int, y: int, width: int, height: int, r: int, g: int, b: int): int
+  pure def rlSleepMillis(milliseconds: int): int
   pure def rlSetCounter(value: int): int
   pure def rlWindowShouldClose(): bool
   pure def rlCloseWindow(): int
@@ -47,6 +51,7 @@ module bouncingBallLive {
   }
 
   pure def drawState(ballX: int, ballY: int, currentTick: int): bool = all {
+    rlClearScene == 0,
     rlSetCounter(currentTick) == 0,
     rlDrawText("Bouncing ball spec", 20, 60, 24, 255, 255, 255) == 0,
     rlDrawText("Run init, step, drawCurrentState in the REPL", 20, 92, 20, 200, 200, 200) == 0,

@@ -5,12 +5,20 @@ set -euo pipefail
 example_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo_dir="$(cd "$example_dir/../../.." && pwd)"
 quint_dir="$repo_dir/quint"
-evaluator_dir="$repo_dir/evaluator"
 native_dir="$example_dir/native-rust"
-spec_path="$example_dir/raylib.qnt"
+spec_path="$example_dir/bank-live-debug.qnt"
+bun_bin="${BUN_BIN:-}"
+
+if [[ -z "$bun_bin" ]]; then
+  bun_bin="$(command -v bun || true)"
+fi
+
+if [[ -z "$bun_bin" ]]; then
+  echo "Bun is required for the TypeScript foreign-binding backend. Install bun or set BUN_BIN." >&2
+  exit 1
+fi
 
 npm --prefix "$quint_dir" run compile >/dev/null
-cargo build --manifest-path "$evaluator_dir/Cargo.toml" >/dev/null
 cargo build --manifest-path "$native_dir/Cargo.toml" >/dev/null
 
 case "$(uname -s)" in
@@ -110,22 +118,17 @@ cat >"$bindings" <<EOF
 }
 EOF
 
-export QUINT_RUST_EVALUATOR_PATH="$evaluator_dir/target/debug/quint_evaluator"
+steps="${1:-120}"
+seed="${2:-1}"
 
-mode="${1:-demo}"
-if [[ "$mode" == "repl" ]]; then
-  exec node "$quint_dir/dist/src/cli.js" repl \
-    --backend=rust \
-    -r "$spec_path::raylibDemo" \
-    --foreign-bindings "$bindings"
-fi
-
-frames=240
-if [[ "$mode" != "demo" ]]; then
-  frames="$mode"
-fi
-exec node "$quint_dir/dist/src/cli.js" \
-  --backend=rust \
-  -r "$spec_path::raylibDemo" \
-  --foreign-bindings "$bindings" \
-  "runHelloDemo($frames)"
+exec "$bun_bin" "$quint_dir/dist/src/cli.js" run "$spec_path" \
+  --backend=typescript \
+  --main=bankLiveDebug \
+  --init=liveInit \
+  --step=liveStep \
+  --invariant=totalSupplyInv \
+  --max-samples=1 \
+  --max-steps="$steps" \
+  --seed="$seed" \
+  --verbosity=0 \
+  --foreign-bindings "$bindings"
