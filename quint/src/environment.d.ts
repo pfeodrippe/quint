@@ -6,4 +6,16 @@ declare global {
   }
 }
 
+declare module 'bun:ffi' {
+  export const FFIType: Record<string, number>
+
+  export const dlopen: (
+    path: string,
+    symbols: Record<string, { args: number[]; returns: number }>
+  ) => {
+    symbols: Record<string, (...args: unknown[]) => unknown>
+    close?: () => void
+  }
+}
+
 export {}

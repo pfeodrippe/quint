@@ -91,12 +91,13 @@ export class NameCollector implements IRVisitor {
   }
 
   enterOpDef(def: QuintOpDef): void {
-    // FIXME (#1013): This should collect the type annotation, but something
-    // breaks in the type checker if we do. We should fix that and then ensure
-    // that we collect type annotations here.
     if (this.definitionDepth === 0) {
       // collect only top-level definitions
-      this.collectDefinition({ ...def, typeAnnotation: undefined, depth: this.definitionDepth })
+      this.collectDefinition({
+        ...def,
+        typeAnnotation: def.declarationOnly ? def.typeAnnotation : undefined,
+        depth: this.definitionDepth,
+      })
     }
   }
 

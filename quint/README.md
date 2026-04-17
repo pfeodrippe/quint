@@ -65,7 +65,7 @@ For alternative installation methods or advanced setup, see the full [Getting St
 Quint also has an experimental **Bun-only** foreign binding path for declaration-only `pure def` / `pure val` operators. It lets the TypeScript evaluator call:
 
 1. in-process JS/TS modules
-2. native shared libraries through `Bun.ffi`
+2. native shared libraries through Bun's `bun:ffi` support
 3. Bun-loaded Wasm exports
 
 See [Foreign bindings](https://quint-lang.org/docs/foreign-bindings) for the binding format, CLI usage, and ABI details.

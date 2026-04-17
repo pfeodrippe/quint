@@ -4,6 +4,7 @@ import { dirname, resolve } from 'path'
 import { Either, left, right } from '@sweet-monads/either'
 
 import { QuintOpDef, isDeclarationOnly } from '../ir/quintIr'
+import { QuintType } from '../ir/quintTypes'
 import { zerog } from '../idGenerator'
 import { ItfValue, ofItfValue, toItfValue } from '../itf'
 import { NameResolver } from '../names/resolver'
@@ -56,11 +57,61 @@ function foreignError(code: QuintError['code'], message: string): QuintError {
 
 function getBunRuntime():
   | {
-      ffi?: (args: unknown) => { symbols: Record<string, (...args: unknown[]) => unknown> }
-      CString?: unknown
+      __ffiModule?: {
+        FFIType: Record<string, number>
+        dlopen: (
+          path: string,
+          symbols: Record<string, { args: number[]; returns: number }>
+        ) => {
+          symbols: Record<string, (...args: unknown[]) => unknown>
+          close?: () => void
+        }
+      }
     }
   | undefined {
   return (globalThis as typeof globalThis & { Bun?: any }).Bun
+}
+
+async function loadBunFfiModule(): Promise<
+  Either<
+    QuintError,
+    {
+      FFIType: Record<string, number>
+      dlopen: (
+        path: string,
+        symbols: Record<string, { args: number[]; returns: number }>
+      ) => {
+        symbols: Record<string, (...args: unknown[]) => unknown>
+        close?: () => void
+      }
+    }
+  >
+> {
+  const bun = getBunRuntime()
+  if (bun?.__ffiModule) {
+    return right(bun.__ffiModule)
+  }
+
+  try {
+    const loadBunFfi = new Function('return import("bun:ffi")') as () => Promise<{
+      FFIType: Record<string, number>
+      dlopen: (
+        path: string,
+        symbols: Record<string, { args: number[]; returns: number }>
+      ) => {
+        symbols: Record<string, (...args: unknown[]) => unknown>
+        close?: () => void
+      }
+    }>
+    return right(await loadBunFfi())
+  } catch (error) {
+    return left(
+      foreignError(
+        'QNT518',
+        `Foreign FFI bindings require Bun's bun:ffi module: ${error instanceof Error ? error.message : String(error)}`
+      )
+    )
+  }
 }
 
 function runtimeValueToItfValue(value: RuntimeValue): Either<QuintError, ItfValue> {
@@ -80,37 +131,172 @@ function itfValueToRuntimeValue(value: unknown): Either<QuintError, RuntimeValue
   }
 }
 
-function runtimeArgsToJson(args: RuntimeValue[]): Either<QuintError, string> {
-  const values: ItfValue[] = []
-  for (const arg of args) {
-    const converted = runtimeValueToItfValue(arg)
-    if (converted.isLeft()) {
-      return left(converted.value)
-    }
-    values.push(converted.value)
-  }
-  return right(JSON.stringify(values))
-}
-
-function parseJsonResult(raw: string): Either<QuintError, RuntimeValue> {
-  try {
-    return itfValueToRuntimeValue(JSON.parse(raw))
-  } catch (error) {
-    return left(
-      foreignError(
-        'QNT523',
-        `Foreign binding returned invalid JSON: ${error instanceof Error ? error.message : String(error)}`
-      )
-    )
-  }
-}
-
 function parseModuleResult(value: unknown): Either<QuintError, RuntimeValue> {
   if (value !== null && typeof value === 'object' && 'then' in value) {
     return left(foreignError('QNT525', 'Foreign module bindings must be synchronous'))
   }
 
   return itfValueToRuntimeValue(value)
+}
+
+const I64_MIN = -(1n << 63n)
+const I64_MAX = (1n << 63n) - 1n
+
+type FfiCodec = {
+  ffiType: number
+  decode(value: unknown): Either<QuintError, RuntimeValue>
+  encode(value: RuntimeValue): Either<QuintError, unknown>
+  returnsCString?: boolean
+}
+
+function buildFfiCodec(
+  type: QuintType,
+  spec: FfiBindingSpec,
+  ffiTypes: Record<string, number>
+): Either<QuintError, FfiCodec> {
+  switch (type.kind) {
+    case 'int':
+      return right({
+        ffiType: ffiTypes.i64,
+        encode(value: RuntimeValue): Either<QuintError, unknown> {
+          try {
+            const intValue = value.toInt()
+            if (intValue < I64_MIN || intValue > I64_MAX) {
+              return left(
+                foreignError(
+                  'QNT527',
+                  `FFI binding ${spec.module}.${spec.name} only supports Quint ints within the native i64 range`
+                )
+              )
+            }
+            return right(intValue)
+          } catch (error) {
+            return left(
+              foreignError(
+                'QNT527',
+                `FFI binding ${spec.module}.${spec.name} expected an int argument: ${
+                  error instanceof Error ? error.message : String(error)
+                }`
+              )
+            )
+          }
+        },
+        decode(value: unknown): Either<QuintError, RuntimeValue> {
+          if (typeof value === 'bigint' || typeof value === 'number') {
+            return right(rv.mkInt(BigInt(value)))
+          }
+          return left(
+            foreignError('QNT523', `FFI binding ${spec.module}.${spec.name} returned a non-integer native value`)
+          )
+        },
+      })
+
+    case 'bool':
+      return right({
+        ffiType: ffiTypes.bool,
+        encode(value: RuntimeValue): Either<QuintError, unknown> {
+          try {
+            return right(value.toBool())
+          } catch (error) {
+            return left(
+              foreignError(
+                'QNT527',
+                `FFI binding ${spec.module}.${spec.name} expected a bool argument: ${
+                  error instanceof Error ? error.message : String(error)
+                }`
+              )
+            )
+          }
+        },
+        decode(value: unknown): Either<QuintError, RuntimeValue> {
+          if (typeof value === 'boolean') {
+            return right(rv.mkBool(value))
+          }
+          return left(
+            foreignError('QNT523', `FFI binding ${spec.module}.${spec.name} returned a non-boolean native value`)
+          )
+        },
+      })
+
+    case 'str':
+      return right({
+        ffiType: ffiTypes.cstring,
+        returnsCString: true,
+        encode(value: RuntimeValue): Either<QuintError, unknown> {
+          try {
+            return right(value.toStr())
+          } catch (error) {
+            return left(
+              foreignError(
+                'QNT527',
+                `FFI binding ${spec.module}.${spec.name} expected a string argument: ${
+                  error instanceof Error ? error.message : String(error)
+                }`
+              )
+            )
+          }
+        },
+        decode(value: unknown): Either<QuintError, RuntimeValue> {
+          const text =
+            typeof value === 'string'
+              ? value
+              : value && typeof value === 'object' && 'toString' in value && typeof value.toString === 'function'
+              ? value.toString()
+              : undefined
+
+          if (typeof text === 'string') {
+            return right(rv.mkStr(text))
+          }
+
+          return left(
+            foreignError('QNT523', `FFI binding ${spec.module}.${spec.name} returned a non-string native value`)
+          )
+        },
+      })
+
+    default:
+      return left(
+        foreignError(
+          'QNT527',
+          `FFI binding ${spec.module}.${spec.name} only supports primitive Quint types (int, bool, str) in the native ABI`
+        )
+      )
+  }
+}
+
+function buildFfiSignature(
+  def: QuintOpDef,
+  spec: FfiBindingSpec,
+  ffiTypes: Record<string, number>
+): Either<QuintError, { args: FfiCodec[]; result: FfiCodec }> {
+  if (!def.typeAnnotation) {
+    return left(foreignError('QNT527', `FFI binding ${spec.module}.${spec.name} requires an explicit type annotation`))
+  }
+
+  const argTypes = def.typeAnnotation.kind === 'oper' ? def.typeAnnotation.args : []
+  const resultType = def.typeAnnotation.kind === 'oper' ? def.typeAnnotation.res : def.typeAnnotation
+
+  const args: FfiCodec[] = []
+  for (const type of argTypes) {
+    const codec = buildFfiCodec(type, spec, ffiTypes)
+    if (codec.isLeft()) {
+      return left(codec.value)
+    }
+    args.push(codec.value)
+  }
+
+  const result = buildFfiCodec(resultType, spec, ffiTypes)
+  if (result.isLeft()) {
+    return left(result.value)
+  }
+
+  if (spec.freeSymbol && !result.value.returnsCString) {
+    return left(
+      foreignError('QNT519', `FFI binding ${spec.module}.${spec.name} may only use freeSymbol with str results`)
+    )
+  }
+
+  return right({ args, result: result.value })
 }
 
 function parseBindingSpec(raw: unknown): Either<QuintError, BindingSpec> {
@@ -286,18 +472,36 @@ async function loadModuleBinding(
   }
 }
 
-async function loadFfiBinding(spec: FfiBindingSpec, baseDir: string): Promise<Either<QuintError, ForeignBinding>> {
-  const bun = getBunRuntime()
-  if (!bun?.ffi) {
+async function loadFfiBinding(
+  spec: FfiBindingSpec,
+  baseDir: string,
+  def: QuintOpDef
+): Promise<Either<QuintError, ForeignBinding>> {
+  if (!getBunRuntime()) {
     return left(foreignError('QNT518', 'Foreign FFI bindings require running Quint under Bun'))
   }
 
+  const ffiModule = await loadBunFfiModule()
+  if (ffiModule.isLeft()) {
+    return left(ffiModule.value)
+  }
+
   try {
-    const symbols = {
-      [spec.symbol]: { args: ['cstring'], returns: bun.CString ?? 'cstring' },
-      ...(spec.freeSymbol ? { [spec.freeSymbol]: { args: ['ptr'], returns: 'void' } } : {}),
+    const signature = buildFfiSignature(def, spec, ffiModule.value.FFIType)
+    if (signature.isLeft()) {
+      return left(signature.value)
     }
-    const library = bun.ffi({ path: resolve(baseDir, spec.library), symbols }) as {
+
+    const symbols = {
+      [spec.symbol]: {
+        args: signature.value.args.map(codec => codec.ffiType),
+        returns: signature.value.result.ffiType,
+      },
+      ...(spec.freeSymbol
+        ? { [spec.freeSymbol]: { args: [ffiModule.value.FFIType.ptr], returns: ffiModule.value.FFIType.void } }
+        : {}),
+    }
+    const library = ffiModule.value.dlopen(resolve(baseDir, spec.library), symbols) as {
       symbols: Record<string, (...args: unknown[]) => unknown>
     }
     const callSymbol = library.symbols[spec.symbol]
@@ -310,23 +514,26 @@ async function loadFfiBinding(spec: FfiBindingSpec, baseDir: string): Promise<Ei
     return right({
       kind: 'ffi',
       invoke(args: RuntimeValue[]): Either<QuintError, RuntimeValue> {
-        const payload = runtimeArgsToJson(args)
-        if (payload.isLeft()) {
-          return left(payload.value)
+        const nativeArgs: unknown[] = []
+        for (const [index, codec] of signature.value.args.entries()) {
+          const encoded = codec.encode(args[index])
+          if (encoded.isLeft()) {
+            return left(encoded.value)
+          }
+          nativeArgs.push(encoded.value)
         }
 
         try {
-          const result = callSymbol(payload.value) as { toString?: () => string; ptr?: unknown } | string
-          const text = typeof result === 'string' ? result : result?.toString?.()
-          if (typeof text !== 'string') {
-            return left(
-              foreignError('QNT523', `FFI binding ${spec.module}.${spec.name} did not return a C string result`)
-            )
-          }
+          const result = callSymbol(...nativeArgs)
+          const parsed = signature.value.result.decode(result)
 
-          const parsed = parseJsonResult(text)
-
-          if (freeSymbol && result && typeof result === 'object' && 'ptr' in result) {
+          if (
+            freeSymbol &&
+            signature.value.result.returnsCString &&
+            result &&
+            typeof result === 'object' &&
+            'ptr' in result
+          ) {
             freeSymbol(result.ptr)
           }
 
@@ -413,12 +620,16 @@ async function loadWasmBinding(spec: WasmBindingSpec, baseDir: string): Promise<
   }
 }
 
-async function loadBinding(spec: BindingSpec, baseDir: string): Promise<Either<QuintError, ForeignBinding>> {
+async function loadBinding(
+  spec: BindingSpec,
+  baseDir: string,
+  def: QuintOpDef
+): Promise<Either<QuintError, ForeignBinding>> {
   switch (spec.kind) {
     case 'module':
       return loadModuleBinding(spec, baseDir)
     case 'ffi':
-      return loadFfiBinding(spec, baseDir)
+      return loadFfiBinding(spec, baseDir, def)
     case 'wasm':
       return loadWasmBinding(spec, baseDir)
   }
@@ -455,7 +666,7 @@ export async function loadForeignBindings(
       return left(foreignError('QNT519', `Duplicate foreign binding for ${spec.module}.${spec.name}`))
     }
 
-    const loaded = await loadBinding(spec, baseDir)
+    const loaded = await loadBinding(spec, baseDir, def.value)
     if (loaded.isLeft()) {
       return left(loaded.value)
     }

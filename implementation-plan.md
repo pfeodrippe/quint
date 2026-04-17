@@ -5,7 +5,7 @@
 Add **fast, in-process** operator overrides to Quint so a Quint specification can declare an operator in Quint and execute it through:
 
 1. **TypeScript/JavaScript** host code loaded directly in-process
-2. **Rust/Zig/native** host code exposed as shared libraries and called through **Bun.ffi**
+2. **Rust/Zig/native** host code exposed as shared libraries and called through Bun's **`bun:ffi`** support
 3. **Wasm** host code loaded directly in-process through Bun's runtime facilities
 
 The implemented sequence was:
@@ -51,7 +51,7 @@ So the project plan is now Bun-first and in-process-first.
 4. Quint now compiles under Bun and the existing test suite passes under Bun and Node.
 5. A first Bun-only foreign binding slice is now implemented for declaration-only pure defs/vals through:
    - `module` bindings
-   - `ffi` bindings via `Bun.ffi`
+   - `ffi` bindings via Bun's `bun:ffi` module
    - `wasm` bindings via Bun module loading
 6. CLI plumbing for `run`, `test`, and REPL now accepts a foreign bindings config.
 7. Runtime dispatch now fails explicitly when declaration-only defs are evaluated without a binding.
@@ -64,7 +64,9 @@ So the project plan is now Bun-first and in-process-first.
 4. **Done:** config validation, runtime guardrails, and explicit error codes
 5. **Done:** unit coverage for `module`, `ffi`, and `wasm` adapters
 6. **Done:** Bun CLI integration coverage for `run`, `test`, and REPL
-7. **Done:** repo fixtures and user-facing documentation for the Bun-first slice
+7. **Done:** real Rust `cdylib` fixture coverage for native overrides
+8. **Done:** native-vs-pure stress benchmark script for operator-call timing
+9. **Done:** repo fixtures and user-facing documentation for the Bun-first slice
 
 ## Target architecture
 
@@ -93,7 +95,7 @@ The binding model is now entirely **in-process**.
 | kind | target | execution model |
 | --- | --- | --- |
 | `module` | TS/JS | Bun loads a module and calls the exported function directly |
-| `ffi` | Rust/Zig/native | Bun calls a shared-library symbol through `Bun.ffi` |
+| `ffi` | Rust/Zig/native | Bun calls a shared-library symbol through `bun:ffi` |
 | `wasm` | Wasm | Bun loads a Wasm module directly and invokes its exported function |
 
 There is **no `command` binding** in this plan.
@@ -114,7 +116,7 @@ There is **no `command` binding** in this plan.
 2. Declaration-only operator stabilization.
 3. Bun runtime plumbing for foreign operator dispatch.
 4. JS/TS module bindings.
-5. Bun.ffi bindings for native shared libraries.
+5. Bun `bun:ffi` bindings for native shared libraries.
 6. Direct Wasm bindings.
 7. Tests and docs for the Bun-first path.
 
@@ -309,33 +311,35 @@ Provide the fastest and simplest in-process path for TypeScript/JavaScript imple
 
 1. A declaration-only Quint operator can be implemented by an in-process JS/TS function.
 
-## Phase 6: implement Bun.ffi native bindings
+## Phase 6: implement Bun native FFI bindings
 
 ### Goal
 
-Provide a high-performance path for Rust/Zig/native code through shared libraries and `Bun.ffi`.
+Provide a high-performance path for Rust/Zig/native code through shared libraries and Bun's `bun:ffi` support.
 
 ### Design note
 
-Bun.ffi is appropriate for **shared libraries with C-compatible ABIs**. In practice, Rust/Zig implementations use a small exported shim layer instead of calling arbitrary binaries directly.
+Bun's native FFI is appropriate for **shared libraries with C-compatible ABIs**. In practice, Rust/Zig implementations use a small exported shim layer instead of calling arbitrary binaries directly.
 
 ### Tasks
 
-1. Define the native ABI contract for Quint foreign operators.
-2. Decide the first-slice marshaling approach for native FFI:
-   - simplest acceptable ABI for arguments/results
-   - likely string/buffer-based or pointer-based encoding boundary
-3. Build an `ffi` binding adapter using `Bun.ffi`.
+1. Define the native ABI contract from the declaration's Quint type annotation.
+2. Restrict the first native slice to primitive Quint types:
+   - `int` -> `i64`
+   - `bool` -> `bool`
+   - `str` -> `cstring`
+3. Build an `ffi` binding adapter on top of `bun:ffi`.
 4. Load the shared library.
 5. Resolve and validate the symbol.
-6. Marshal arguments into the native ABI.
+6. Marshal primitive arguments directly into the native ABI.
 7. Invoke the symbol.
-8. Convert the return value back into Quint values.
-9. Add strict validation around ABI mismatches.
+8. Convert the primitive result back into Quint values.
+9. Allow `freeSymbol` only for string-returning symbols.
+10. Add strict validation around ABI mismatches and unsupported signatures.
 
 ### Acceptance criteria
 
-1. A declaration-only Quint operator can be implemented by a Rust/Zig/shared-library symbol via Bun.ffi.
+1. A declaration-only Quint operator can be implemented by a Rust/Zig/shared-library symbol via `bun:ffi`.
 
 ## Phase 7: implement Wasm bindings
 
@@ -345,7 +349,7 @@ Support Wasm directly without using the discarded subprocess path.
 
 ### Design note
 
-Wasm is **not** the same as Bun.ffi. The implemented path uses Bun's Wasm/runtime support directly rather than pretending Wasm is a native shared-library ABI.
+Wasm is **not** the same as Bun native FFI. The implemented path uses Bun's Wasm/runtime support directly rather than pretending Wasm is a native shared-library ABI.
 
 ### Tasks
 
@@ -503,7 +507,7 @@ Add explicit failures for:
 | Bun is not fully drop-in for this repo | Build/runtime parity may need real fixes | Prove compile/test/runtime parity before adding foreign dispatch |
 | FFI ABI design becomes too complex | Rust/Zig/native interop can explode in scope | Start with a narrow ABI and pure functions only |
 | Wasm value marshaling is awkward | Wasm is not the same as native FFI | Use a dedicated Wasm adapter, not the FFI adapter |
-| Native code can crash the process | Bun.ffi is in-process native execution | Keep first slice narrow and validate aggressively |
+| Native code can crash the process | Bun native FFI is in-process execution | Keep first slice narrow and validate aggressively |
 | Existing evaluator behavior regresses under Bun | Migration risk affects the whole CLI/runtime path | Preserve parity first, then add foreign operator dispatch |
 
 ## Acceptance criteria for the overall feature
@@ -512,7 +516,7 @@ The Bun-first foreign operator slice is complete when:
 
 1. Quint compiles and runs correctly under Bun for the target workflows.
 2. A declaration-only pure operator can be implemented by a TS/JS module.
-3. A declaration-only pure operator can be implemented by a Rust/Zig/native shared library via Bun.ffi.
+3. A declaration-only pure operator can be implemented by a Rust/Zig/native shared library via `bun:ffi`.
 4. A declaration-only pure operator can be implemented by a Wasm module loaded directly in Bun.
 5. `run`, `test`, and the REPL can all execute those operators under Bun.
 6. Unsupported cases fail explicitly and clearly.
@@ -526,7 +530,7 @@ There are no remaining in-scope implementation tasks in this plan.
 The following are intentionally **out of scope**, not incomplete:
 
 1. future expansion beyond the current pure/synchronous slice
-2. richer platform-specific native/Wasm example artifacts checked into the repo
+2. richer platform-specific native/Wasm example artifacts beyond the current Rust fixture checked into the repo
 3. any discarded subprocess/command path work
 
 ## Current status snapshot
@@ -538,6 +542,8 @@ The following are intentionally **out of scope**, not incomplete:
 | Bun installation | done | Local Bun installation used to validate compile/test/integration flows |
 | Bun build parity | done | Quint compiles and tests successfully under Bun |
 | Bun runtime parity | done | TypeScript evaluator, `run`, `test`, and REPL work under Bun |
-| Bun FFI/native bindings | done | `ffi` bindings load Bun FFI symbols with explicit error handling and tests |
+| Bun FFI/native bindings | done | `ffi` bindings infer primitive native signatures and load `bun:ffi` symbols with explicit error handling |
 | Wasm bindings | done | `wasm` bindings load Bun-resolved exports with explicit error handling and tests |
+| Native Rust fixture | done | Real `cdylib` override fixture is exercised through `run`, `test`, and REPL |
+| Stress benchmark | done | `npm run bun-foreign-stress` checks native override timing against an equivalent pure Quint operator |
 | Docs/tests | done | Unit coverage, Bun CLI integration coverage, repo fixtures, and user docs are in place |

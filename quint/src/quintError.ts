@@ -147,6 +147,8 @@ export type ErrorCode =
   | 'QNT525'
   /* QNT526: Rust backend does not support foreign bindings */
   | 'QNT526'
+  /* QNT527: Foreign FFI signature or value is not supported by the native ABI */
+  | 'QNT527'
   /* QNT600: Integer literal is outside the supported range for the Rust evaluator */
   | 'QNT600'
   /* QNT601: Integer overflow in the rust evaluator */

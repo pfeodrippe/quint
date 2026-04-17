@@ -273,21 +273,14 @@ describe('foreign bindings', () => {
 
   it('invokes ffi bindings through Bun.ffi', async () => {
     withMockBun({
-      CString: 'cstring',
-      ffi: ({ symbols }: { symbols: Record<string, unknown> }) => ({
-        symbols: Object.fromEntries(
-          Object.keys(symbols).map(name => [
-            name,
-            (payload: string) => {
-              if (name === 'free_result') {
-                return undefined
-              }
-              const args = JSON.parse(payload)
-              return JSON.stringify({ '#bigint': (BigInt(args[0]['#bigint']) + 1n).toString() })
-            },
-          ])
-        ),
-      }),
+      __ffiModule: {
+        FFIType: { i64: 1, bool: 2, cstring: 3, ptr: 4, void: 5 },
+        dlopen: (_path: string, symbols: Record<string, unknown>) => ({
+          symbols: Object.fromEntries(
+            Object.keys(symbols).map(name => [name, (value: bigint | number) => BigInt(value) + 1n])
+          ),
+        }),
+      },
     })
 
     const configPath = makeTempBindings(
@@ -300,7 +293,6 @@ describe('foreign bindings', () => {
             name: 'add1',
             library: './libforeign.dylib',
             symbol: 'add1_host',
-            freeSymbol: 'free_result',
           },
         ],
       }
@@ -321,8 +313,10 @@ describe('foreign bindings', () => {
 
   it('reports missing ffi symbols', async () => {
     withMockBun({
-      CString: 'cstring',
-      ffi: () => ({ symbols: {} }),
+      __ffiModule: {
+        FFIType: { i64: 1, bool: 2, cstring: 3, ptr: 4, void: 5 },
+        dlopen: () => ({ symbols: {} }),
+      },
     })
 
     const configPath = makeTempBindings(
@@ -342,10 +336,12 @@ describe('foreign bindings', () => {
 
   it('reports invalid ffi results', async () => {
     withMockBun({
-      CString: 'cstring',
-      ffi: ({ symbols }: { symbols: Record<string, unknown> }) => ({
-        symbols: Object.fromEntries(Object.keys(symbols).map(name => [name, () => '{not-json'])),
-      }),
+      __ffiModule: {
+        FFIType: { i64: 1, bool: 2, cstring: 3, ptr: 4, void: 5 },
+        dlopen: (_path: string, symbols: Record<string, unknown>) => ({
+          symbols: Object.fromEntries(Object.keys(symbols).map(name => [name, () => ({ nope: true })])),
+        }),
+      },
     })
 
     const configPath = makeTempBindings(
@@ -366,7 +362,7 @@ describe('foreign bindings', () => {
 
     assert.isTrue(result.isLeft())
     if (result.isRight()) {
-      assert.fail('Expected invalid ffi JSON to fail')
+      assert.fail('Expected invalid ffi result to fail')
     }
     assert.equal(result.value.code, 'QNT523')
   })

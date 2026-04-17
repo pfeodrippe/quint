@@ -81,7 +81,7 @@ Arguments and results use the same ITF-shaped JSON values that Quint already use
 
 ## `ffi` bindings
 
-`ffi` bindings use `Bun.ffi` to call a symbol from a native shared library.
+`ffi` bindings use Bun's `bun:ffi` support to call a symbol from a native shared library.
 
 ```json
 {
@@ -89,24 +89,30 @@ Arguments and results use the same ITF-shaped JSON values that Quint already use
   "module": "foreignModule",
   "name": "add1",
   "library": "./libforeign.dylib",
-  "symbol": "add1_host",
-  "freeSymbol": "free_result"
+  "symbol": "add1_host"
 }
 ```
 
-Current ABI contract:
+Current fast native ABI contract:
 
-1. Quint serializes the operator arguments as a JSON array of ITF values.
-2. The native symbol receives that JSON payload as a C string.
-3. The native symbol returns a C string containing one JSON-encoded ITF value.
-4. If `freeSymbol` is provided, Quint calls it with the returned pointer after decoding the result.
+1. Quint infers the native signature from the declaration's type annotation.
+2. The native ABI currently supports only primitive Quint types:
+   - `int` -> `i64`
+   - `bool` -> `bool`
+   - `str` -> `cstring`
+3. Non-primitive FFI signatures are rejected explicitly.
+4. `freeSymbol` is optional and only valid when the result type is `str`.
 
 That makes the native side straightforward for Rust, Zig, or C shims:
 
-```c
-char* add1_host(const char* args_json);
-void free_result(void* ptr);
+```rust
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn add1_host(value: i64) -> i64 {
+  value + 1
+}
 ```
+
+If a string-returning symbol allocates a C string, you may also provide `freeSymbol` so Quint can release the returned pointer after decoding it.
 
 ## `wasm` bindings
 
@@ -137,3 +143,4 @@ For non-trivial Wasm toolchains, that usually means using JS-visible glue genera
 3. Only declaration-only `pure def` and `pure val` targets are supported.
 4. There is no subprocess fallback path.
 5. Invalid bindings and invalid host return values fail explicitly.
+6. A checked-in stress script is available via `npm run bun-foreign-stress` to compare native-override timing against an equivalent pure Quint operator.
