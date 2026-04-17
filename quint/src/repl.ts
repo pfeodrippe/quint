@@ -231,6 +231,7 @@ export interface ReplOptions {
   backend?: 'typescript' | 'rust'
   foreignBindings?: string
   tapListeners?: string[]
+  tapListenerOps?: string[]
 }
 
 // the entry point to the REPL
@@ -246,6 +247,9 @@ export function quintRepl(
   const out = (text: string) => output.write(text)
   const prompt = (text: string) => {
     return verbosity.hasReplPrompt(options.verbosity) ? text : ''
+  }
+  if ((options.tapListenerOps?.length ?? 0) > 0) {
+    throw new Error('Tap listener operators are not supported in the REPL yet. Use `quint run` with the TypeScript backend under Bun.')
   }
   // Check if we should use the Rust evaluator
   const useRustEvaluator = options.backend === 'rust'

@@ -458,7 +458,7 @@ function readBindingConfig(configPath: string): Either<QuintError, BindingConfig
   }
 }
 
-function findBoundDefinition(resolver: NameResolver, moduleName: string, name: string): Either<QuintError, QuintOpDef> {
+export function findBoundDefinition(resolver: NameResolver, moduleName: string, name: string): Either<QuintError, QuintOpDef> {
   const candidates = Array.from(resolver.collector.definitionsByModule.get(moduleName)?.values() ?? []).flat()
   const found = candidates.find(def => def.kind === 'def' && def.name === name)
 

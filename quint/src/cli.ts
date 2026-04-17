@@ -45,12 +45,19 @@ const defaultOpts = (yargs: any) =>
     })
 
 const tapOpts = (yargs: any) =>
-  yargs.option('tapListener', {
-    alias: ['tap-listener'],
-    desc: 'comma-separated tap listeners for q::tap. Supported: stdout, jsonl:/path/to/file.jsonl',
-    type: 'string',
-    array: true,
-  })
+  yargs
+    .option('tapListener', {
+      alias: ['tap-listener'],
+      desc: 'comma-separated tap listeners for q::tap. Supported: stdout, jsonl:/path/to/file.jsonl',
+      type: 'string',
+      array: true,
+    })
+    .option('tapListenerOp', {
+      alias: ['tap-listener-op'],
+      desc: 'qualified foreign operator listener for q::tap, e.g. MyModule.tapListener',
+      type: 'string',
+      array: true,
+    })
 
 // Arguments used by routines that pass thru the `compile` stage
 const compileOpts = (yargs: any) =>

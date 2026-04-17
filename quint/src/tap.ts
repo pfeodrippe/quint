@@ -7,8 +7,11 @@ import { prettyQuintEx, terminalWidth } from './graphics'
 import { QuintEx } from './ir/quintIr'
 import { ItfValue, ofItfValue, toItfValue } from './itf'
 import { zerog } from './idGenerator'
+import { NameResolver } from './names/resolver'
 import { QuintError } from './quintError'
 import { format } from './prettierimp'
+import { findBoundDefinition, ForeignBindingRegistry } from './runtime/foreign'
+import { rv } from './runtime/impl/runtimeValue'
 
 export type TapBackend = 'typescript' | 'rust'
 
@@ -23,7 +26,7 @@ export interface TapEvent {
   itfValue: ItfValue
 }
 
-interface TapListener {
+export interface TapListener {
   spec: string
   onTap(event: TapEvent): void
   close?(): void
@@ -65,16 +68,7 @@ function parseListenerSpec(spec: string, out: (text: string) => void): Either<Qu
       onTap(event) {
         appendFileSync(
           path,
-          `${JSON.stringify({
-            type: 'tap',
-            sequence: event.sequence,
-            backend: event.backend,
-            timestamp: event.timestamp,
-            reference: event.reference?.toString(),
-            location: event.location,
-            label: event.label,
-            value: event.itfValue,
-          })}\n`,
+          `${tapEventToJson(event)}\n`,
           { encoding: 'utf8' }
         )
       },
@@ -112,6 +106,10 @@ export class TapManager {
 
   get enabled(): boolean {
     return this.listeners.length > 0
+  }
+
+  addListener(listener: TapListener) {
+    this.listeners.push(listener)
   }
 
   emitQuint(reference: bigint | undefined, label: string, value: QuintEx, backend: TapBackend) {
@@ -188,6 +186,97 @@ export class TapManager {
       }
     }
   }
+}
+
+function parseTapListenerOpTarget(spec: string): Either<QuintError, { moduleName: string; name: string }> {
+  const separator = spec.includes('::') ? '::' : '.'
+  const index = spec.lastIndexOf(separator)
+  if (index <= 0 || index >= spec.length - separator.length) {
+    return left(
+      tapError(
+        'QNT528',
+        `Invalid tap listener operator '${spec}'. Use a qualified name like Module.listener or Module::listener`
+      )
+    )
+  }
+
+  const moduleName = spec.slice(0, index).trim()
+  const name = spec.slice(index + separator.length).trim()
+  if (moduleName === '' || name === '') {
+    return left(
+      tapError(
+        'QNT528',
+        `Invalid tap listener operator '${spec}'. Use a qualified name like Module.listener or Module::listener`
+      )
+    )
+  }
+
+  return right({ moduleName, name })
+}
+
+export function tapEventToJson(event: TapEvent): string {
+  return JSON.stringify({
+    type: 'tap',
+    sequence: event.sequence,
+    backend: event.backend,
+    timestamp: event.timestamp,
+    reference: event.reference?.toString(),
+    location: event.location,
+    label: event.label,
+    value: event.itfValue,
+  })
+}
+
+export function createTapOperatorListener(
+  spec: string,
+  resolver: NameResolver,
+  foreignBindings: ForeignBindingRegistry
+): Either<QuintError, TapListener> {
+  const target = parseTapListenerOpTarget(spec)
+  if (target.isLeft()) {
+    return left(target.value)
+  }
+
+  const definition = findBoundDefinition(resolver, target.value.moduleName, target.value.name)
+  if (definition.isLeft()) {
+    return left({
+      ...definition.value,
+      code: 'QNT528',
+      message: definition.value.message.replace(
+        `Foreign binding target ${target.value.moduleName}.${target.value.name}`,
+        `Tap listener operator ${target.value.moduleName}.${target.value.name}`
+      ),
+    })
+  }
+
+  if (definition.value.expr.kind !== 'lambda' || definition.value.expr.params.length !== 1) {
+    return left(
+      tapError(
+        'QNT528',
+        `Tap listener operator ${target.value.moduleName}.${target.value.name} must be declared as pure def listener(eventJson: str): bool`
+      )
+    )
+  }
+
+  const binding = foreignBindings.get(definition.value.id)
+  if (!binding) {
+    return left(
+      tapError(
+        'QNT528',
+        `Tap listener operator ${target.value.moduleName}.${target.value.name} requires a foreign binding`
+      )
+    )
+  }
+
+  return right({
+    spec: `op:${target.value.moduleName}.${target.value.name}`,
+    onTap(event) {
+      const result = binding.invoke([rv.mkStr(tapEventToJson(event))])
+      if (result.isLeft()) {
+        throw new Error(result.value.message)
+      }
+    },
+  })
 }
 
 export function createTapManager(

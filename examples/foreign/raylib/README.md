@@ -19,8 +19,9 @@ It includes:
 11. `run-bank-trace-debugger.sh`: fast trace capture + viewer for the bank spec
 12. `run-two-phase-commit-trace-debugger.sh`: fast trace capture + viewer for the two-phase commit spec
 13. `bank-tap-debug.qnt`: a real-spec wrapper that emits structured `q::tap` snapshots
-14. `tap-portal.ts`: a raylib viewer for `q::tap` streams, inspired by Clojure's Portal
-15. `run-bank-tap-portal.sh`: runs the bank tap wrapper and opens the raylib tap portal
+14. `tap-portal.ts`: a standalone raylib viewer for JSONL `q::tap` streams
+15. `tap-portal-listener.ts`: a direct operator-backed raylib listener for `q::tap`
+16. `run-bank-tap-portal.sh`: runs the bank tap wrapper with a direct tap-listener operator (no middleman file)
 
 ## What this demonstrates
 
@@ -236,20 +237,30 @@ Quint now has `q::tap(message, value)` plus the `q::tap(expr)` shorthand, matchi
 it emits the label, value, and source location metadata to every configured listener
 and then returns the value unchanged.
 
-From the CLI you can attach listeners such as:
+From the CLI you can attach sink listeners such as:
 
 ```sh
 quint run spec.qnt --tap-listener stdout
 quint run spec.qnt --tap-listener jsonl:/tmp/quint-taps.jsonl
 ```
 
-The raylib tap portal reads that JSONL stream and renders it however it wants,
-similar to how Clojure's Portal subscribes to `tap>`.
+You can also attach a **direct operator listener** under the TypeScript backend:
+
+```sh
+bun quint/dist/src/cli.js run spec.qnt \
+  --foreign-bindings ./bindings.json \
+  --tap-listener-op MyModule.tapListener
+```
+
+That operator is invoked directly for every tap event, so it can talk to Bun
+modules, WASM, or raylib FFI without a middleman file. The JSONL route is still
+useful for generic post-processing or external consumers.
 
 ### Bank tap portal
 
-This uses the real Cosmos bank spec, but instead of drawing during execution it
-emits structured snapshots with `q::tap`.
+This uses the real Cosmos bank spec and attaches a **direct raylib tap listener
+operator** through `--tap-listener-op`, so the UI is updated directly from each
+`q::tap` event during execution.
 
 ```sh
 bash ./examples/foreign/raylib/run-bank-tap-portal.sh
@@ -261,10 +272,6 @@ Optional arguments:
 bash ./examples/foreign/raylib/run-bank-tap-portal.sh <max-steps> <seed>
 ```
 
-Controls:
-
-1. **Up/Down** to move through tapped values
-2. **Home/End** to jump to the beginning or latest tap
-
-The viewer renders bank snapshots specially (balances, supply, last transfer),
-and falls back to a generic structured view for anything else.
+The direct listener is intentionally more `q::debug`-like than the JSONL portal:
+it keeps a live list of recent taps on the left and the latest tapped value on
+the right.

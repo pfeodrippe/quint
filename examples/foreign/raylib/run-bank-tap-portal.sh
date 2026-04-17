@@ -7,6 +7,7 @@ repo_dir="$(cd "$example_dir/../../.." && pwd)"
 quint_dir="$repo_dir/quint"
 native_dir="$example_dir/native-rust"
 spec_path="$example_dir/bank-tap-debug.qnt"
+bindings_path="$example_dir/tap-portal-bindings.json"
 bun_bin="${BUN_BIN:-}"
 
 if [[ -z "$bun_bin" ]]; then
@@ -24,34 +25,7 @@ seed="${2:-1}"
 npm --prefix "$quint_dir" run compile >/dev/null
 cargo build --manifest-path "$native_dir/Cargo.toml" >/dev/null
 
-case "$(uname -s)" in
-  Darwin)
-    library="$native_dir/target/debug/libquint_raylib_demo.dylib"
-    ;;
-  Linux)
-    library="$native_dir/target/debug/libquint_raylib_demo.so"
-    ;;
-  MINGW*|MSYS*|CYGWIN*)
-    library="$native_dir/target/debug/quint_raylib_demo.dll"
-    ;;
-  *)
-    echo "Unsupported OS for raylib example: $(uname -s)" >&2
-    exit 1
-    ;;
-esac
-
-tap_file="$(mktemp "${TMPDIR:-/tmp}/quint-bank-taps.XXXXXX.jsonl")"
-cleanup() {
-  rm -f "$tap_file"
-}
-trap cleanup EXIT
-
-"$bun_bin" "$example_dir/tap-portal.ts" "$tap_file" "$library" "Cosmos bank tap portal" &
-viewer_pid=$!
-
-sleep 1
-
-node "$quint_dir/dist/src/cli.js" run "$spec_path" \
+"$bun_bin" "$quint_dir/dist/src/cli.js" run "$spec_path" \
   --backend=typescript \
   --main=bankTapDebug \
   --init=init \
@@ -61,6 +35,5 @@ node "$quint_dir/dist/src/cli.js" run "$spec_path" \
   --max-steps="$steps" \
   --seed="$seed" \
   --verbosity=0 \
-  --tap-listener "jsonl:$tap_file"
-
-wait "$viewer_pid"
+  --foreign-bindings "$bindings_path" \
+  --tap-listener-op bankTapDebug.tapPortalListener

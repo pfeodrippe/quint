@@ -1,0 +1,10 @@
+{
+  "bindings": [
+    {
+      "kind": "module",
+      "module": "bankTapDebug",
+      "name": "tapPortalListener",
+      "path": "./tap-portal-listener.ts"
+    }
+  ]
+}

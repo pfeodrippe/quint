@@ -13,6 +13,8 @@ module bankTapDebug {
   var lastDenom: Denom
   var lastWasSuccess: bool
 
+  pure def tapPortalListener(eventJson: str): bool
+
   pure val ADDR = Set("king", "donkeykong", "peaches", "mario")
   pure val DENOM = Set("banana", "burger")
   pure val MAX_AMOUNT = 10_000

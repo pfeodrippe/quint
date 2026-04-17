@@ -67,8 +67,9 @@ import { deriveVerbosity, getInvariants, guessMainModule, isMatchingTest, mkErro
 import { fail } from 'assert'
 import { newRng } from './rng'
 import { TestOptions, TestResult } from './runtime/testing'
-import { loadForeignBindings, loadRustForeignBindings } from './runtime/foreign'
-import { createTapManager, normalizeTapListenerSpecs } from './tap'
+import { ForeignBindingRegistry, loadForeignBindings, loadRustForeignBindings } from './runtime/foreign'
+import { createTapManager, createTapOperatorListener, normalizeTapListenerSpecs, TapManager } from './tap'
+import { QuintError } from './quintError'
 
 export type stage =
   | 'loading'
@@ -167,6 +168,35 @@ function getForeignBindingsPath(args: any): string | undefined {
 
 function getTapListenerSpecs(args: any): string[] {
   return normalizeTapListenerSpecs(args.tapListener ?? args['tap-listener'])
+}
+
+function getTapListenerOpSpecs(args: any): string[] {
+  return normalizeTapListenerSpecs(args.tapListenerOp ?? args['tap-listener-op'])
+}
+
+function attachTapListenerOperators(
+  tapManager: TapManager,
+  specs: string[],
+  resolver: NameResolver,
+  foreignBindingsPath: string | undefined,
+  foreignBindings: ForeignBindingRegistry
+): Either<QuintError, void> {
+  if (specs.length > 0 && !foreignBindingsPath) {
+    return left({
+      code: 'QNT528',
+      message: 'Tap listener operators require --foreign-bindings so Quint can load their host implementations',
+    })
+  }
+
+  for (const spec of specs) {
+    const listener = createTapOperatorListener(spec, resolver, foreignBindings)
+    if (listener.isLeft()) {
+      return left(listener.value)
+    }
+    tapManager.addListener(listener.value)
+  }
+
+  return right(undefined)
 }
 
 export type CLIProcedure<Stage> = Either<ErrResult, Stage>
@@ -286,6 +316,7 @@ export async function runRepl(argv: any) {
     backend: argv.backend,
     foreignBindings,
     tapListeners: getTapListenerSpecs(argv),
+    tapListenerOps: getTapListenerOpSpecs(argv),
   }
   quintRepl(process.stdin, process.stdout, options)
 }
@@ -304,6 +335,7 @@ export async function runTests(prev: TypecheckedStage): Promise<CLIProcedure<Tes
   const mainName = guessMainModule(prev)
   const main = findMainModule(prev, mainName)
   const foreignBindingsPath = getForeignBindingsPath(prev.args)
+  const tapListenerOps = getTapListenerOpSpecs(prev.args)
 
   if (!main) {
     return handleMainModuleError(prev, mainName)
@@ -343,6 +375,18 @@ export async function runTests(prev: TypecheckedStage): Promise<CLIProcedure<Tes
     let results: TestResult[]
 
     if (prev.args.backend === 'rust') {
+      if (tapListenerOps.length > 0) {
+        return cliErr('Argument error', {
+          ...testing,
+          errors: [
+            mkErrorMessage(new Map())({
+              code: 'QNT528',
+              message: 'Tap listener operators are currently only supported with the TypeScript backend under Bun',
+            }),
+          ],
+        })
+      }
+
       const foreignBindings = await loadRustForeignBindings(foreignBindingsPath, prev.resolver)
       if (foreignBindings.isLeft()) {
         return cliErr('Argument error', {
@@ -371,6 +415,20 @@ export async function runTests(prev: TypecheckedStage): Promise<CLIProcedure<Tes
         return cliErr('Argument error', {
           ...testing,
           errors: [mkErrorMessage(prev.sourceMap)(foreignBindings.value)],
+        })
+      }
+
+      const tapListeners = attachTapListenerOperators(
+        tapManager,
+        tapListenerOps,
+        prev.resolver,
+        foreignBindingsPath,
+        foreignBindings.value
+      )
+      if (tapListeners.isLeft()) {
+        return cliErr('Argument error', {
+          ...testing,
+          errors: [mkErrorMessage(prev.sourceMap)(tapListeners.value)],
         })
       }
 
@@ -425,6 +483,7 @@ export async function runSimulator(prev: TypecheckedStage): Promise<CLIProcedure
   const mainName = guessMainModule(prev)
   const main = prev.modules.find(m => m.name === mainName)
   const foreignBindingsPath = getForeignBindingsPath(prev.args)
+  const tapListenerOps = getTapListenerOpSpecs(prev.args)
   if (!main) {
     return handleMainModuleError(prev, mainName)
   }
@@ -482,6 +541,18 @@ export async function runSimulator(prev: TypecheckedStage): Promise<CLIProcedure
   let outcome: Outcome
   try {
     if (prev.args.backend == 'rust') {
+      if (tapListenerOps.length > 0) {
+        return cliErr('Argument error', {
+          ...simulator,
+          errors: [
+            mkErrorMessage(new Map())({
+              code: 'QNT528',
+              message: 'Tap listener operators are currently only supported with the TypeScript backend under Bun',
+            }),
+          ],
+        })
+      }
+
       const foreignBindings = await loadRustForeignBindings(foreignBindingsPath, prev.resolver)
       if (foreignBindings.isLeft()) {
         return cliErr('Argument error', {
@@ -526,6 +597,20 @@ export async function runSimulator(prev: TypecheckedStage): Promise<CLIProcedure
         return cliErr('Argument error', {
           ...simulator,
           errors: [mkErrorMessage(prev.sourceMap)(foreignBindings.value)],
+        })
+      }
+
+      const tapListeners = attachTapListenerOperators(
+        tapManager,
+        tapListenerOps,
+        prev.resolver,
+        foreignBindingsPath,
+        foreignBindings.value
+      )
+      if (tapListeners.isLeft()) {
+        return cliErr('Argument error', {
+          ...simulator,
+          errors: [mkErrorMessage(prev.sourceMap)(tapListeners.value)],
         })
       }
 

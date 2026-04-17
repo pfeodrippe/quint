@@ -926,7 +926,8 @@ module builtin {
   /// expressions and actions.
   ///
   /// Tap listeners are configured by the CLI, for example with
-  /// `--tap-listener stdout` or `--tap-listener jsonl:/tmp/quint-taps.jsonl`.
+  /// `--tap-listener stdout`, `--tap-listener jsonl:/tmp/quint-taps.jsonl`, or
+  /// `--tap-listener-op MyModule.tapListener`.
   ///
   /// When called with a single argument as `q::tap(expr)`, it taps the
   /// expression itself as the message, followed by its value.
