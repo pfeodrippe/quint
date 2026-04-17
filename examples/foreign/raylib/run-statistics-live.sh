@@ -53,6 +53,30 @@ case "$target" in
     invariant="safetyInv"
     max_steps=41
     ;;
+  bank)
+    spec_path="$example_dir/statistics-live-bank.qnt"
+    main="bankStats"
+    invariant="totalSupplyInv"
+    max_steps=41
+    ;;
+  paxos)
+    spec_path="$example_dir/statistics-live-paxos.qnt"
+    main="paxosStats"
+    invariant="inv"
+    max_steps=25
+    ;;
+  tendermint)
+    spec_path="$example_dir/statistics-live-tendermint.qnt"
+    main="tendermintStats"
+    invariant="accountabilityInv"
+    max_steps=81
+    ;;
+  lightclient)
+    spec_path="$example_dir/statistics-live-lightclient.qnt"
+    main="lightclientStats"
+    invariant="inv"
+    max_steps=12
+    ;;
   queue-v1)
     spec_path="$example_dir/statistics-live-queue-v1.qnt"
     main="queuePerfV1Stats"
@@ -66,7 +90,7 @@ case "$target" in
     max_steps=61
     ;;
   *)
-    echo "Usage: $(basename "$0") [random-walk|die-hard|two-phase-commit|lamport-mutex|dining-philosophers|queue-v1|queue-v2] [samples] [seed] [max-steps]" >&2
+    echo "Usage: $(basename "$0") [random-walk|die-hard|two-phase-commit|lamport-mutex|dining-philosophers|bank|paxos|tendermint|lightclient|queue-v1|queue-v2] [samples] [seed] [max-steps]" >&2
     exit 1
     ;;
 esac

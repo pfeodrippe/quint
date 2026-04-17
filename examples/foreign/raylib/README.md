@@ -21,7 +21,7 @@ It includes:
 13. `bank-tap-debug.qnt`: a real-spec wrapper that emits structured `q::tap` snapshots
 14. `tap-portal.ts`: a standalone raylib viewer for JSONL `q::tap` streams
 15. `run-bank-tap-portal.sh`: runs the bank tap wrapper with a direct tap-listener operator that calls into the native Rust raylib shim (no middleman file)
-16. `statistics-live-*.qnt` + `run-statistics-live.sh`: wrapper specs plus a generic live statistics dashboard for the simulation examples in `examples/statistics/`
+16. `statistics-live-*.qnt` + `run-statistics-live.sh`: wrapper specs plus a generic live statistics dashboard for the simulation examples in `examples/statistics/`, including Bank, Paxos, Tendermint, and Lightclient
 
 ## What this demonstrates
 
@@ -293,6 +293,7 @@ Or point it at another statistical example:
 
 ```sh
 bash ./examples/foreign/raylib/run-statistics-live.sh two-phase-commit 200 1
+bash ./examples/foreign/raylib/run-statistics-live.sh lightclient 200 1
 bash ./examples/foreign/raylib/run-statistics-live.sh queue-v1 200 1
 bash ./examples/foreign/raylib/run-statistics-live.sh queue-v2 200 1
 ```

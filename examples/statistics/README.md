@@ -38,8 +38,12 @@ Common uses:
 3. `two_phase_commit_stats.qnt` - statistical wrapper around Quint's Two-Phase Commit example
 4. `lamport_mutex_stats.qnt` - statistical wrapper around Quint's Lamport mutex example
 5. `dining_philosophers_stats.qnt` - statistical wrapper around Quint's Dining Philosophers example
-6. `queue_perf_v1_stats.qnt` - queue-drain workload baseline for v1/v2 performance comparison
-7. `queue_perf_v2_stats.qnt` - higher-throughput queue-drain revision using the same metrics as v1
+6. `bank_stats.qnt` - transfer-outcome and balance-distribution measurements for the Cosmos bank state machine
+7. `paxos_stats.qnt` - bounded-ballot message, vote, and chosen-value summaries for a small Paxos model
+8. `tendermint_stats.qnt` - decision, round, evidence, and accountability summaries for a small Tendermint model
+9. `lightclient_stats.qnt` - bounded executable light-client verification stats with verdict, probe, and trust-chain summaries
+10. `queue_perf_v1_stats.qnt` - queue-drain workload baseline for v1/v2 performance comparison
+11. `queue_perf_v2_stats.qnt` - higher-throughput queue-drain revision using the same metrics as v1
 
 Each wrapper emits one measurement set per simulated trace, so the listener
 output can be interpreted as a distribution over runs rather than a raw event
@@ -47,7 +51,7 @@ log.
 
 ## Human-readable summaries
 
-Run all five examples:
+Run all examples:
 
 ```bash
 examples/statistics/run-stats.sh all 200 1
@@ -162,6 +166,10 @@ dashboard:
 
 ```bash
 examples/foreign/raylib/run-statistics-live.sh random-walk 200 1
+examples/foreign/raylib/run-statistics-live.sh bank 200 1
+examples/foreign/raylib/run-statistics-live.sh paxos 200 1
+examples/foreign/raylib/run-statistics-live.sh tendermint 200 1
+examples/foreign/raylib/run-statistics-live.sh lightclient 200 1
 examples/foreign/raylib/run-statistics-live.sh queue-v1 200 1
 examples/foreign/raylib/run-statistics-live.sh queue-v2 200 1
 ```
@@ -182,5 +190,17 @@ The live dashboard shows:
 - `two_phase_commit_stats.qnt`, `lamport_mutex_stats.qnt`, and
   `dining_philosophers_stats.qnt` show the same technique on real distributed
   protocol examples already present in the Quint repository.
+- `bank_stats.qnt` is the best application-flavored target: it lets you compare
+  transfer success/failure mix, state spread across accounts, and workload
+  pressure under randomized traffic.
+- `paxos_stats.qnt` uses a bounded ballot window so the abstract Paxos model can
+  be simulated; it exposes message growth, vote accumulation, and whether a value
+  becomes chosen within the budget.
+- `tendermint_stats.qnt` focuses on consensus cost proxies: rounds, evidence
+  growth, and whether a run reaches decision or stalls at the configured round cap.
+- `lightclient_stats.qnt` is a bounded executable approximation of the
+  light-client verification model. It reports final outcome and probe count per
+  trace, plus step-level verdict frequencies so you can see how often runs hit
+  `NOT_ENOUGH_TRUST` before bridging through an intermediate verified header.
 - `queue_perf_v1_stats.qnt` vs `queue_perf_v2_stats.qnt` shows how to compare a
   baseline spec revision against an improved revision using the same metrics.
