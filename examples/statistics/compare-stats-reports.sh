@@ -9,6 +9,7 @@ left_report="${2:?Usage: $(basename "$0") <left-name> <left-report.json> <right-
 right_name="${3:?Usage: $(basename "$0") <left-name> <left-report.json> <right-name> <right-report.json> }"
 right_report="${4:?Usage: $(basename "$0") <left-name> <left-report.json> <right-name> <right-report.json> }"
 
+declare -a compare_command
 compare_args=()
 if [[ -n "${LABELS:-}" ]]; then
   compare_args+=("--labels=$LABELS")
@@ -20,4 +21,12 @@ if [[ -n "${CATEGORY_LIMIT:-}" ]]; then
   compare_args+=("--category-limit=$CATEGORY_LIMIT")
 fi
 
-node "$example_dir/stats-tools.js" compare "$left_name" "$left_report" "$right_name" "$right_report" "${compare_args[@]}"
+compare_command=(
+  node "$example_dir/stats-tools.js" compare
+  "$left_name" "$left_report"
+  "$right_name" "$right_report"
+)
+if ((${#compare_args[@]} > 0)); then
+  compare_command+=("${compare_args[@]}")
+fi
+"${compare_command[@]}"

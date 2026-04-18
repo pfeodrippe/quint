@@ -139,6 +139,22 @@ case "$target" in
       "accountabilityInv" \
       81
     ;;
+  tendermint-baseline)
+    run_example \
+      "tendermint-baseline" \
+      "$example_dir/tendermint_baseline_stats.qnt" \
+      "tendermintBaselineStats" \
+      "accountabilityInv" \
+      81
+    ;;
+  tendermint-fast)
+    run_example \
+      "tendermint-fast" \
+      "$example_dir/tendermint_fast_path_stats.qnt" \
+      "tendermintFastPathStats" \
+      "accountabilityInv" \
+      41
+    ;;
   lightclient)
     run_example \
       "lightclient" \
@@ -176,12 +192,14 @@ case "$target" in
     fi
     run_example "paxos" "$example_dir/paxos_stats.qnt" "paxosStats" "inv" 25
     run_example "tendermint" "$example_dir/tendermint_stats.qnt" "tendermintStats" "accountabilityInv" 81
+    run_example "tendermint-baseline" "$example_dir/tendermint_baseline_stats.qnt" "tendermintBaselineStats" "accountabilityInv" 81
+    run_example "tendermint-fast" "$example_dir/tendermint_fast_path_stats.qnt" "tendermintFastPathStats" "accountabilityInv" 41
     run_example "lightclient" "$example_dir/lightclient_stats.qnt" "lightclientStats" "inv" 12
     run_example "queue-v1" "$example_dir/queue_perf_v1_stats.qnt" "queuePerfV1Stats" "boundsInv" 61
     run_example "queue-v2" "$example_dir/queue_perf_v2_stats.qnt" "queuePerfV2Stats" "boundsInv" 61
     ;;
   *)
-    echo "Usage: $(basename "$0") [all|random-walk|die-hard|two-phase-commit|lamport-mutex|dining-philosophers|bank|paxos|tendermint|lightclient|queue-v1|queue-v2] [samples] [seed] [max-steps]" >&2
+    echo "Usage: $(basename "$0") [all|random-walk|die-hard|two-phase-commit|lamport-mutex|dining-philosophers|bank|paxos|tendermint|tendermint-baseline|tendermint-fast|lightclient|queue-v1|queue-v2] [samples] [seed] [max-steps]" >&2
     exit 1
     ;;
 esac

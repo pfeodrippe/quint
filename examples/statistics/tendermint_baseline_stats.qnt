@@ -1,7 +1,7 @@
-module tendermintStats {
+module tendermintBaselineStats {
   pure val REPORT_LIMIT = 80
 
-  import TendermintImprovedTest(
+  import TendermintTest(
     Corr = Set("p1", "p2", "p3"),
     Faulty = Set("p4"),
     N = 4,
@@ -10,7 +10,7 @@ module tendermintStats {
     InvalidValues = Set("v2"),
     MaxRound = 4,
     Proposer = Map(0 -> "p1", 1 -> "p2", 2 -> "p3", 3 -> "p4", 4 -> "p1")
-  ) as T from "../cosmos/tendermint/TendermintImprovedTest"
+  ) as T from "../cosmos/tendermint/TendermintTest"
 
   var ticks: int
   var reported: bool
@@ -79,7 +79,7 @@ module tendermintStats {
       T::Faulty.filter(p => T::AmnesiaBy(p)).size(),
     q::tap("tendermint.last_action", T::fired_action) == T::fired_action,
     q::tap("tendermint.accountability_holds", T::Accountability) == T::Accountability,
-    q::tap("tendermint.profile", "improved_variant") == "improved_variant",
+    q::tap("tendermint.profile", "canonical_baseline") == "canonical_baseline",
     T::round' = T::round,
     T::step' = T::step,
     T::decision' = T::decision,
@@ -94,7 +94,6 @@ module tendermintStats {
     T::evidencePrevote' = T::evidencePrevote,
     T::evidencePrecommit' = T::evidencePrecommit,
     T::fired_action' = T::fired_action,
-    T::proposeTimeoutElapsed' = T::proposeTimeoutElapsed,
     ticks' = ticks,
     reported' = true,
   }

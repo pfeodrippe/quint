@@ -71,6 +71,18 @@ case "$target" in
     invariant="accountabilityInv"
     max_steps=81
     ;;
+  tendermint-baseline)
+    spec_path="$example_dir/statistics-live-tendermint-baseline.qnt"
+    main="tendermintBaselineStats"
+    invariant="accountabilityInv"
+    max_steps=81
+    ;;
+  tendermint-fast)
+    spec_path="$example_dir/statistics-live-tendermint-fast.qnt"
+    main="tendermintFastPathStats"
+    invariant="accountabilityInv"
+    max_steps=41
+    ;;
   lightclient)
     spec_path="$example_dir/statistics-live-lightclient.qnt"
     main="lightclientStats"
@@ -90,7 +102,7 @@ case "$target" in
     max_steps=61
     ;;
   *)
-    echo "Usage: $(basename "$0") [random-walk|die-hard|two-phase-commit|lamport-mutex|dining-philosophers|bank|paxos|tendermint|lightclient|queue-v1|queue-v2] [samples] [seed] [max-steps]" >&2
+    echo "Usage: $(basename "$0") [random-walk|die-hard|two-phase-commit|lamport-mutex|dining-philosophers|bank|paxos|tendermint|tendermint-baseline|tendermint-fast|lightclient|queue-v1|queue-v2] [samples] [seed] [max-steps]" >&2
     exit 1
     ;;
 esac

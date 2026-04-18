@@ -293,10 +293,18 @@ Or point it at another statistical example:
 
 ```sh
 bash ./examples/foreign/raylib/run-statistics-live.sh two-phase-commit 200 1
+bash ./examples/foreign/raylib/run-statistics-live.sh tendermint 200 1
+bash ./examples/foreign/raylib/run-statistics-live.sh tendermint-baseline 200 1
+bash ./examples/foreign/raylib/run-statistics-live.sh tendermint-fast 200 1
 bash ./examples/foreign/raylib/run-statistics-live.sh lightclient 200 1
 bash ./examples/foreign/raylib/run-statistics-live.sh queue-v1 200 1
 bash ./examples/foreign/raylib/run-statistics-live.sh queue-v2 200 1
 ```
+
+The default `tendermint` target now uses the explicit
+`examples/cosmos/tendermint/TendermintImproved.qnt` variant, so it is the main
+live view to use when iterating on the real Tendermint model.
+`tendermint-fast` remains only as an optimistic contrast view.
 
 What it shows live:
 

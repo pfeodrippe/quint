@@ -29,6 +29,7 @@ if ! LISTENER="stats:json:$right_json" bash "$example_dir/run-stats.sh" "$right_
   exit 1
 fi
 
+declare -a compare_command
 compare_args=()
 if [[ -n "${LABELS:-}" ]]; then
   compare_args+=("--labels=$LABELS")
@@ -40,4 +41,12 @@ if [[ -n "${CATEGORY_LIMIT:-}" ]]; then
   compare_args+=("--category-limit=$CATEGORY_LIMIT")
 fi
 
-node "$example_dir/stats-tools.js" compare "$left_target" "$left_json" "$right_target" "$right_json" "${compare_args[@]}"
+compare_command=(
+  node "$example_dir/stats-tools.js" compare
+  "$left_target" "$left_json"
+  "$right_target" "$right_json"
+)
+if ((${#compare_args[@]} > 0)); then
+  compare_command+=("${compare_args[@]}")
+fi
+"${compare_command[@]}"

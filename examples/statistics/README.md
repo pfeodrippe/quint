@@ -40,10 +40,12 @@ Common uses:
 5. `dining_philosophers_stats.qnt` - statistical wrapper around Quint's Dining Philosophers example
 6. `bank_stats.qnt` - transfer-outcome and balance-distribution measurements for the Cosmos bank state machine
 7. `paxos_stats.qnt` - bounded-ballot message, vote, and chosen-value summaries for a small Paxos model
-8. `tendermint_stats.qnt` - decision, round, evidence, and accountability summaries for a small Tendermint model
-9. `lightclient_stats.qnt` - bounded executable light-client verification stats with verdict, probe, and trust-chain summaries
-10. `queue_perf_v1_stats.qnt` - queue-drain workload baseline for v1/v2 performance comparison
-11. `queue_perf_v2_stats.qnt` - higher-throughput queue-drain revision using the same metrics as v1
+8. `tendermint_stats.qnt` - decision, round, evidence, and accountability summaries for the explicit `TendermintImproved.qnt` variant with CometBFT-aligned `timeoutPropose` and round-skip behavior
+9. `tendermint_baseline_stats.qnt` - the same Tendermint metrics over the canonical baseline `Tendermint.qnt`
+10. `tendermint_fast_path_stats.qnt` - optimistic Tendermint fast-path stats with clean startup and decision-path scheduling
+11. `lightclient_stats.qnt` - bounded executable light-client verification stats with verdict, probe, and trust-chain summaries
+12. `queue_perf_v1_stats.qnt` - queue-drain workload baseline for v1/v2 performance comparison
+13. `queue_perf_v2_stats.qnt` - higher-throughput queue-drain revision using the same metrics as v1
 
 Each wrapper emits one measurement set per simulated trace, so the listener
 output can be interpreted as a distribution over runs rather than a raw event
@@ -153,6 +155,81 @@ Useful environment variables:
 Categorical comparisons include **95% Wilson confidence intervals** for outcome
 rates, so the result is more meaningful than raw percentages alone.
 
+This is also the easiest way to use the stats tooling to improve a spec profile.
+The default `tendermint` target now measures the explicit improved variant
+`examples/cosmos/tendermint/TendermintImproved.qnt`, while the canonical
+baseline remains `examples/cosmos/tendermint/Tendermint.qnt`.
+
+The improved variant currently includes these real model changes:
+
+1. `timeoutPropose` is modeled as its own event, and the nil-prevote path is
+   blocked once the expected proposer's proposal is already present.
+2. round catch-up is only allowed on future **2/3 prevotes or precommits**,
+   instead of the older loose signal that mixed proposals with a much smaller
+   threshold.
+3. the generic `HasTwoThirdsAny` fallback branches only fire when the current
+   round does **not** already have a proposal-backed `2/3` majority for a valid
+   value, mirroring CometBFT's `TwoThirdsMajority()` vs `HasTwoThirdsAny()`
+   split in `addVote` / `handleCompleteProposal`.
+4. if a process is still in `propose` when the proposal is already present and a
+   current-round proposal-backed polka has formed, it collapses directly to
+   precommit instead of spending an extra `prevote` transition, mirroring
+   CometBFT's `handleCompleteProposal()` fast path.
+5. if a process catches up into a future round that already has the expected
+   proposer proposal and a proposal-backed current-round polka, it collapses
+   directly to precommit instead of spending an extra `propose`/`prevote`
+   transition, and the same fast path is now implemented in
+   `vendor/cometbft/consensus/state.go` via `enterPropose()`.
+6. the real CometBFT slice now also buffers future-round proposal messages and
+   their block parts instead of dropping them, so that the accepted
+   round-catchup fast path can actually fire when proposal data arrives before
+   the local round skip, including skips beyond just the next round.
+
+That mirrors CometBFT's `enterPropose` / `scheduleTimeout` path, its
+round-skip handling, and its stronger-majority vote handling in
+`consensus/state.go`.
+
+Measured on the same `2024`-sample, seed `40` run:
+
+1. previous snapshot: `decided=10.72%`, `max_round_reached avg=3.79`, `report_steps avg=38.13`
+2. current `tendermint`: `decided=84.12%`, `max_round_reached avg=1.38`, `report_steps avg=25.81`
+3. evidence cost drops materially (`proposal 12.71 -> 2.39`, `prevote 16.00 -> 7.92`, `precommit 15.27 -> 7.44`)
+4. `UponQuorumOfPrecommitsAny` as the terminal action drops from `54.74%` in the old run to `13.02%`
+5. `OnRoundCatchup` as the terminal action drops from `34.54%` in the old run to `2.51%`
+
+On the real implementation side, the same catch-up gain now has two concrete
+runtime hooks in `vendor/cometbft/consensus/state.go`:
+
+1. `enterPropose()` jumps directly to precommit when the round already has a
+   proposal-backed polka.
+2. future-round proposal messages and block parts are buffered across local
+   round skips instead of being discarded.
+
+The buffered round-skip path is now pinned by
+`TestRoundSkipBufferedProposalPolkaSkipsPrevoteStep`, which fails on the clean
+baseline, and its benchmark
+`BenchmarkStateRoundSkipBufferedProposalPolkaFastPath` improves from about
+`132-173 us/op`, `24.1-24.6 KB/op`, `383 allocs/op` on the clean baseline to
+about `134-150 us/op`, `17.6-18.2 KB/op`, `278 allocs/op` in the patched tree.
+
+The generalized future-round path is now also pinned by
+`TestFutureRoundBufferedProposalPolkaSkipsPrevoteStep`, which fails on the
+clean baseline, and its benchmark
+`BenchmarkStateFutureRoundBufferedProposalPolkaFastPath` improves from about
+`137-157 us/op`, `24.7-25.3 KB/op`, `395 allocs/op` on the clean baseline to
+about `112-117 us/op`, `18.3 KB/op`, `290 allocs/op` in the patched tree.
+
+`tendermint-fast` still exists as an optimistic upper bound, but the default
+`tendermint` path is now the explicit implementation-aligned improved variant
+rather than the canonical baseline model.
+
+To compare them directly:
+
+```bash
+LABELS='tendermint.outcome,tendermint.report_steps,tendermint.decided_processes,tendermint.max_round_reached,tendermint.proposal_evidence,tendermint.prevote_evidence,tendermint.precommit_evidence' \
+examples/statistics/compare-stats-targets.sh tendermint-baseline tendermint 200 40
+```
+
 ## Comparing spec v2 against v1
 
 The important pattern is: **instrument both versions with the same labels** and
@@ -247,6 +324,7 @@ examples/foreign/raylib/run-statistics-live.sh random-walk 200 1
 examples/foreign/raylib/run-statistics-live.sh bank 200 1
 examples/foreign/raylib/run-statistics-live.sh paxos 200 1
 examples/foreign/raylib/run-statistics-live.sh tendermint 200 1
+examples/foreign/raylib/run-statistics-live.sh tendermint-fast 200 1
 examples/foreign/raylib/run-statistics-live.sh lightclient 200 1
 examples/foreign/raylib/run-statistics-live.sh queue-v1 200 1
 examples/foreign/raylib/run-statistics-live.sh queue-v2 200 1
@@ -275,7 +353,15 @@ The live dashboard shows:
   be simulated; it exposes message growth, vote accumulation, and whether a value
   becomes chosen within the budget.
 - `tendermint_stats.qnt` focuses on consensus cost proxies: rounds, evidence
-  growth, and whether a run reaches decision or stalls at the configured round cap.
+  growth, and whether a run reaches decision or stalls at the configured round
+  cap, using the `TendermintImproved.qnt` variant.
+- `tendermint_baseline_stats.qnt` emits the same labels for the canonical
+  `Tendermint.qnt` baseline, so you can compare the original and improved
+  variants directly.
+- `tendermint_fast_path_stats.qnt` is the optimistic contrast case for the same
+  small model: it keeps faulty validators in the model, but starts from a clean
+  message slate and only schedules the proposal/prevote/precommit decision path,
+  so you can quantify how much of the cost is protocol work vs adversarial scheduling.
 - `lightclient_stats.qnt` is a bounded executable approximation of the
   light-client verification model. It reports final outcome and probe count per
   trace, plus step-level verdict frequencies so you can see how often runs hit

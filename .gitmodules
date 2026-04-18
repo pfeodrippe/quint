@@ -1,0 +1,4 @@
+[submodule "vendor/cometbft"]
+	path = vendor/cometbft
+	url = https://github.com/cometbft/cometbft.git
+	branch = main
