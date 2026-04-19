@@ -4,9 +4,45 @@ use serde_json::Value;
 use std::collections::BTreeMap;
 use std::env;
 use std::ffi::{c_char, CStr, CString};
-use std::sync::{Mutex, OnceLock};
+use std::fs;
+use std::sync::{Mutex, Once, OnceLock};
 use std::thread;
 use std::time::Duration;
+
+#[cfg(target_os = "macos")]
+#[repr(C)]
+struct ProcessSerialNumber {
+    high_long_of_psn: u32,
+    low_long_of_psn: u32,
+}
+
+#[cfg(target_os = "macos")]
+#[link(name = "ApplicationServices", kind = "framework")]
+unsafe extern "C" {
+    fn GetCurrentProcess(psn: *mut ProcessSerialNumber) -> i32;
+    fn TransformProcessType(psn: *mut ProcessSerialNumber, transform_state: u32) -> i32;
+    fn SetFrontProcess(psn: *mut ProcessSerialNumber) -> i32;
+}
+
+#[cfg(target_os = "macos")]
+fn ensure_foreground_app() {
+    static FOREGROUND_ONCE: Once = Once::new();
+    const K_PROCESS_TRANSFORM_TO_FOREGROUND_APPLICATION: u32 = 1;
+
+    FOREGROUND_ONCE.call_once(|| unsafe {
+        let mut psn = ProcessSerialNumber {
+            high_long_of_psn: 0,
+            low_long_of_psn: 0,
+        };
+        if GetCurrentProcess(&mut psn) == 0 {
+            let _ = TransformProcessType(&mut psn, K_PROCESS_TRANSFORM_TO_FOREGROUND_APPLICATION);
+            let _ = SetFrontProcess(&mut psn);
+        }
+    });
+}
+
+#[cfg(not(target_os = "macos"))]
+fn ensure_foreground_app() {}
 
 #[derive(Clone)]
 struct CircleCommand {
@@ -43,6 +79,10 @@ struct HostState {
     rects: Vec<RectCommand>,
     screenshot_path: Option<String>,
     screenshot_taken: bool,
+    frame_capture_dir: Option<String>,
+    frame_capture_index: u32,
+    frame_capture_interval_ms: u64,
+    last_frame_capture_ms: u64,
     tap_delay_ms: u64,
     tap_render_interval_ms: u64,
     last_tap_render_ms: u64,
@@ -61,6 +101,13 @@ impl Default for HostState {
             rects: Vec::new(),
             screenshot_path: env::var("QUINT_RAYLIB_SCREENSHOT_PATH").ok(),
             screenshot_taken: false,
+            frame_capture_dir: env::var("QUINT_RAYLIB_CAPTURE_FRAMES_DIR").ok(),
+            frame_capture_index: 0,
+            frame_capture_interval_ms: env::var("QUINT_RAYLIB_CAPTURE_INTERVAL_MS")
+                .ok()
+                .and_then(|value| value.parse::<u64>().ok())
+                .unwrap_or(0),
+            last_frame_capture_ms: 0,
             tap_delay_ms: env::var("QUINT_RAYLIB_TAP_DELAY_MS")
                 .ok()
                 .and_then(|value| value.parse::<u64>().ok())
@@ -152,6 +199,7 @@ fn close_window_if_open(state: &mut HostState) {
     state.circles.clear();
     state.rects.clear();
     state.last_tap_render_ms = 0;
+    state.last_frame_capture_ms = 0;
     state.tap_portal = None;
     state.texts.clear();
 }
@@ -187,8 +235,18 @@ fn ensure_window(state: &mut HostState) {
     };
 
     unsafe {
+        ensure_foreground_app();
         ffi::SetTraceLogLevel(ffi::TraceLogLevel::LOG_NONE as i32);
         ffi::InitWindow(width, height, title.as_ptr());
+        let maybe_x = env::var("QUINT_RAYLIB_WINDOW_X")
+            .ok()
+            .and_then(|value| value.parse::<i32>().ok());
+        let maybe_y = env::var("QUINT_RAYLIB_WINDOW_Y")
+            .ok()
+            .and_then(|value| value.parse::<i32>().ok());
+        if let (Some(x), Some(y)) = (maybe_x, maybe_y) {
+            ffi::SetWindowPosition(x, y);
+        }
         ffi::SetTargetFPS(60);
     }
     state.window_open = true;
@@ -206,6 +264,7 @@ fn render_scene(state: &mut HostState) {
     if let Some(portal) = &state.tap_portal {
         render_tap_portal(portal);
         unsafe { ffi::EndDrawing() };
+        maybe_capture_frame(state);
         maybe_take_screenshot(state);
         return;
     }
@@ -233,7 +292,40 @@ fn render_scene(state: &mut HostState) {
     }
 
     unsafe { ffi::EndDrawing() };
+    maybe_capture_frame(state);
     maybe_take_screenshot(state);
+}
+
+fn maybe_capture_frame(state: &mut HostState) {
+    let Some(dir) = &state.frame_capture_dir else {
+        return;
+    };
+
+    let now_ms = unsafe { (ffi::GetTime() * 1000.0) as u64 };
+    if state.frame_capture_index > 0
+        && state.frame_capture_interval_ms > 0
+        && now_ms < state.last_frame_capture_ms.saturating_add(state.frame_capture_interval_ms)
+    {
+        return;
+    }
+
+    if fs::create_dir_all(dir).is_err() {
+        return;
+    }
+
+    let path = format!("{dir}/frame-{:06}.png", state.frame_capture_index);
+    let Ok(path_text) = CString::new(path.as_str()) else {
+        return;
+    };
+
+    unsafe {
+        let image = ffi::LoadImageFromScreen();
+        ffi::ExportImage(image, path_text.as_ptr());
+        ffi::UnloadImage(image);
+    }
+
+    state.frame_capture_index += 1;
+    state.last_frame_capture_ms = now_ms;
 }
 
 fn maybe_take_screenshot(state: &mut HostState) {

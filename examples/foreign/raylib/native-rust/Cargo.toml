@@ -7,6 +7,9 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-raylib = "5"
+raylib = { version = "5", features = ["sdl"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+
+[patch.crates-io]
+raylib-sys = { path = "vendor/raylib-sys" }

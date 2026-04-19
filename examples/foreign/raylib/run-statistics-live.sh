@@ -111,8 +111,10 @@ if [[ -n "$custom_max_steps" ]]; then
   max_steps="$custom_max_steps"
 fi
 
-npm --prefix "$quint_dir" run compile >/dev/null
-cargo build --manifest-path "$native_dir/Cargo.toml" >/dev/null
+if [[ "${QUINT_RAYLIB_SKIP_BUILD:-0}" != "1" ]]; then
+  npm --prefix "$quint_dir" run compile >/dev/null
+  cargo build --manifest-path "$native_dir/Cargo.toml" >/dev/null
+fi
 
 case "$(uname -s)" in
   Darwin)
